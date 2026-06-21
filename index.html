@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COCOA TOOLS - 無敵の作業効率化ツール一覧</title>
+  <style>
+    /* ココアさん標準：PC真ん中寄せ・スマホ完全フィット・極上の黒モード */
+    body {
+      background-color: #0d0f12;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 20px 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 480px;
+      width: 100%;
+      background: #1a1f26;
+      padding: 30px 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      border: 1px solid #2d3748;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    .profile-img {
+      font-size: 3.5rem;
+      margin-bottom: 10px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      color: #fff;
+      margin: 0 0 5px 0;
+      letter-spacing: 1px;
+    }
+    .bio {
+      font-size: 0.85rem;
+      color: #a0aec0;
+      margin: 0 0 25px 0;
+      line-height: 1.5;
+    }
+    .highlight {
+      color: #3182ce;
+      font-weight: bold;
+    }
+
+    /* ツール選択ボタン（客が迷わない直感デザイン） */
+    .tool-card {
+      display: block;
+      text-decoration: none;
+      background: #2d3748;
+      border: 1px solid #4a5568;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      text-align: left;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .tool-card:hover {
+      transform: translateY(-2px);
+      border-color: #3182ce;
+      background: #2b364a;
+    }
+    .tool-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .tool-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #fff;
+    }
+    .tool-badge {
+      font-size: 0.7rem;
+      background: #3182ce;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+    .tool-badge.seo { background: #38a169; }
+    .tool-badge.todo { background: #805ad5; }
+    .tool-badge.money { background: #dd6b20; }
+    
+    .tool-desc {
+      font-size: 0.8rem;
+      color: #cbd5e0;
+      line-height: 1.4;
+    }
+
+    .info-banner {
+      font-size: 0.75rem;
+      color: #718096;
+      background: #11141a;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 25px;
+      border: 1px dashed #2d3748;
+    }
+
+    .footer-link {
+      margin-top: 25px;
+      font-size: 0.85rem;
+    }
+    .footer-link a {
+      color: #3182ce;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .footer-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="profile-img">🛠️</div>
+  <h1>COCOA TOOLS</h1>
+  <p class="bio">
+    「だるい作業」を3秒で終わらせる20歳開発者のツール集。<br>
+    アップデート後も<span class="highlight">【URLは一生変わりません】</span>。
+  </p>
+
+  <!-- 1. 生コンツール -->
+  <a href="[ここに生コンツールのURL]" target="_blank" class="tool-card">
+    <div class="tool-header">
+      <span class="tool-title">🚚 生コン＆外構資材一瞬計算 2.0</span>
+      <span class="tool-badge">建築・土木</span>
+    </div>
+    <div class="tool-desc">縦・横・厚みから生コン量（10%増）、ワイヤーメッシュ枚数、下地砕石のトン数を一瞬で算出。</div>
+  </a>
+
+  <!-- 2. CADツール -->
+  <a href="[ここにCADツールのURL]" target="_blank" class="tool-card">
+    <div class="tool-header">
+      <span class="tool-title">🏗️ CAD縮尺・寸法一瞬変換 2.0</span>
+      <span class="tool-badge">建築・設計</span>
+    </div>
+    <div class="tool-desc">中途半端な変態縮尺の計算や、図面の「本来の寸法」と「実測」からの縮尺の逆算に対応。</div>
+  </a>
+
+  <!-- 3. SEOカウンター -->
+  <a href="[ここにSEOツールのURL]" target="_blank" class="tool-card">
+    <div class="tool-header">
+      <span class="tool-title">🎯 SEO文字数＆キーワード一瞬監視</span>
+      <span class="tool-badge seo">マーケ・ブログ</span>
+    </div>
+    <div class="tool-desc">文字数・％のリアルタイム監視。タイトル（32字）とディスクリプション（120字）の超過警告バー完備。</div>
+  </a>
+
+  <!-- 4. ToDoリスト -->
+  <a href="[ここにToDoリストのURL]" target="_blank" class="tool-card">
+    <div class="tool-header">
+      <span class="tool-title">🧹 作戦集中ToDoリスト 3.0</span>
+      <span class="tool-badge todo">日常・効率化</span>
+    </div>
+    <div class="tool-desc">前夜からのタスク引っ越し機能 ＋ 画面を閉じてても時間になると「先に音が鳴る」自由指定タイマー。</div>
+  </a>
+
+  <!-- 5. 未来貯金シミュレーター -->
+  <a href="https://pages.dev" target="_blank" class="tool-card">
+    <div class="tool-header">
+      <span class="tool-title">💰 未来貯金シミュレーター</span>
+      <span class="tool-badge money">マネー</span>
+    </div>
+    <div class="tool-desc">スマホ対応、将来の広告枠完備。ココアがおくる人生設計の羅針盤アプリ。</div>
+  </a>
+
+  <div class="info-banner">
+    ※各ツールは現場や作業の利便性を最優先しているため、すべて完全無料で一生ご利用いただけます（将来広告枠あり）。
+  </div>
+
+  <div class="footer-link">
+    開発者：<a href="https://x.com" target="_blank">ココア (@cocoa_next7)</a>
+  </div>
+</div>
+
+</body>
+</html>
