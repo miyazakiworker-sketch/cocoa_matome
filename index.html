@@ -29,26 +29,10 @@
       box-sizing: border-box;
       text-align: center;
     }
-    .profile-img {
-      font-size: 3.5rem;
-      margin-bottom: 10px;
-    }
-    h1 {
-      font-size: 1.5rem;
-      color: #fff;
-      margin: 0 0 5px 0;
-      letter-spacing: 1px;
-    }
-    .bio {
-      font-size: 0.85rem;
-      color: #a0aec0;
-      margin: 0 0 25px 0;
-      line-height: 1.5;
-    }
-    .highlight {
-      color: #3182ce;
-      font-weight: bold;
-    }
+    .profile-img { font-size: 3.5rem; margin-bottom: 10px; }
+    h1 { font-size: 1.5rem; color: #fff; margin: 0 0 5px 0; letter-spacing: 1px; }
+    .bio { font-size: 0.85rem; color: #a0aec0; margin: 0 0 25px 0; line-height: 1.5; }
+    .highlight { color: #3182ce; font-weight: bold; }
 
     /* ツール選択ボタン（客が迷わない直感デザイン） */
     .tool-card {
@@ -67,58 +51,22 @@
       border-color: #3182ce;
       background: #2b364a;
     }
-    .tool-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-    }
-    .tool-title {
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #fff;
-    }
-    .tool-badge {
-      font-size: 0.7rem;
-      background: #3182ce;
-      color: white;
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-weight: bold;
-    }
+    .tool-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .tool-title { font-size: 1.1rem; font-weight: bold; color: #fff; }
+    .tool-badge { font-size: 0.7rem; background: #3182ce; color: white; padding: 2px 8px; border-radius: 20px; font-weight: bold; }
+    
+    /* ジャンル別の色分け */
     .tool-badge.seo { background: #38a169; }
     .tool-badge.todo { background: #805ad5; }
     .tool-badge.money { background: #dd6b20; }
     .tool-badge.sns { background: #e53e3e; }
+    .tool-badge.alert { background: #e67e22; }
     
-    .tool-desc {
-      font-size: 0.8rem;
-      color: #cbd5e0;
-      line-height: 1.4;
-    }
-
-    .info-banner {
-      font-size: 0.75rem;
-      color: #718096;
-      background: #11141a;
-      padding: 10px;
-      border-radius: 8px;
-      margin-top: 25px;
-      border: 1px dashed #2d3748;
-    }
-
-    .footer-link {
-      margin-top: 25px;
-      font-size: 0.85rem;
-    }
-    .footer-link a {
-      color: #3182ce;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .footer-link a:hover {
-      text-decoration: underline;
-    }
+    .tool-desc { font-size: 0.8rem; color: #cbd5e0; line-height: 1.4; }
+    .info-banner { font-size: 0.75rem; color: #718096; background: #11141a; padding: 10px; border-radius: 8px; margin-top: 25px; border: 1px dashed #2d3748; }
+    .footer-link { margin-top: 25px; font-size: 0.85rem; }
+    .footer-link a { color: #3182ce; text-decoration: none; font-weight: bold; }
+    .footer-link a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -131,35 +79,17 @@
     アップデート後も<span class="highlight">【URLは一生変わりません】</span>。
   </p>
 
-  <!-- 1. SNS＆タイトル画面シミュレーター（新追加！） -->
-  <a href="https://sns-preview-10.pages.dev/" target="_blank" class="tool-card">
+  <!-- 1. 36協定・残業一瞬判定タイマー（11作目：最上部に配置してアクセスを集中！） -->
+  <a href="[ここに残業タイマーのURL]" target="cocoa_x_tab" rel="noopener noreferrer" class="tool-card">
     <div class="tool-header">
-      <span class="tool-title">📱 SNS＆タイトル画面シミュレーター</span>
-      <span class="tool-badge sns">マーケ・SNS</span>
+      <span class="tool-title">⏱️ 36協定・残業一瞬判定タイマー</span>
+      <span class="tool-badge alert">建築・労務</span>
     </div>
-    <div class="tool-desc">スマホ版Xの黒モード画面を完全再現。打った文字が綺麗に「3行に収まるか」を視覚化してバズを狙う。</div>
+    <div class="tool-desc">今月のこれまでの残業時間と残り日数から、法律違反（月45時間）ラインまでの「1日の許容残業時間」をメーターで秒速判定。</div>
   </a>
 
-  <!-- 2. SEOカウンター -->
-  <a href="https://wordcounter-8.pages.dev/" target="_blank" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">🎯 SEO文字数＆キーワード一瞬監視</span>
-      <span class="tool-badge seo">マーケ・ブログ</span>
-    </div>
-    <div class="tool-desc">文字数・％のリアルタイム監視。タイトル（32字）とディスクリプション（120字）の超過警告バー完備。</div>
-  </a>
-
-  <!-- 3. ToDoリスト -->
-  <a href="https://todo-app-5.pages.dev/" target="_blank" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">🧹 作戦集中ToDoリスト 3.0</span>
-      <span class="tool-badge todo">日常・効率化</span>
-    </div>
-    <div class="tool-desc">前夜からのタスク引っ越し機能 ＋ 画面を閉じてても時間になると「先に音が鳴る」自由指定タイマー。</div>
-  </a>
-
-  <!-- 4. 生コンツール -->
-  <a href="https://namacon-9.pages.dev/" target="_blank" class="tool-card">
+  <!-- 2. 生コンツール -->
+  <a href="[ここに生コンツールのURL]" target="cocoa_x_tab" rel="noopener noreferrer" class="tool-card">
     <div class="tool-header">
       <span class="tool-title">🚚 生コン＆外構資材一瞬計算 2.0</span>
       <span class="tool-badge">建築・土木</span>
@@ -167,8 +97,8 @@
     <div class="tool-desc">縦・横・厚みから生コン量（10%増）、ワイヤーメッシュ枚数、下地砕石のトン数を一瞬で算出。</div>
   </a>
 
-  <!-- 5. CADツール -->
-  <a href="https://kentiku-syukusyaku--7.pages.dev/" target="_blank" class="tool-card">
+  <!-- 3. CADツール -->
+  <a href="[ここにCADツールのURL]" target="cocoa_x_tab" rel="noopener noreferrer" class="tool-card">
     <div class="tool-header">
       <span class="tool-title">🏗️ CAD縮尺・寸法一瞬変換 2.0</span>
       <span class="tool-badge">建築・設計</span>
@@ -176,13 +106,40 @@
     <div class="tool-desc">中途半端な変態縮尺の計算や、図面の「本来の寸法」と「実測」からの縮尺の逆算に対応。</div>
   </a>
 
-  <!-- 6. 未来貯金シミュレーター -->
-  <a href="https://tyokinsimulater-4.pages.dev/" target="_blank" class="tool-card">
+  <!-- 4. SEOカウンター -->
+  <a href="[ここにSEOツールのURL]" target="cocoa_x_tab" rel="noopener noreferrer" class="tool-card">
     <div class="tool-header">
-      <span class="tool-title">💰 未来貯金シミュレーター</span>
+      <span class="tool-title">🎯 SEO文字数＆キーワード一瞬監視</span>
+      <span class="tool-badge seo">マーケ・ブログ</span>
+    </div>
+    <div class="tool-desc">文字数・％のリアルタイム監視。タイトル（32字）とディスクリプション（120字）の超過警告バー完備。</div>
+  </a>
+
+  <!-- 5. ToDoリスト -->
+  <a href="[ここにToDoリストのURL]" target="cocoa_x_tab" rel="noopener noreferrer" class="tool-card">
+    <div class="tool-header">
+      <span class="tool-title">🧹 作戦集中ToDoリスト 3.0</span>
+      <span class="tool-badge todo">日常・効率化</span>
+    </div>
+    <div class="tool-desc">前夜からのタスク引っ越し機能 ＋ 画面を閉じてても時間になると「先に音が鳴る」自由指定タイマー。</div>
+  </a>
+
+  <!-- 6. 未来貯金シミュレーター -->
+  <a href="[ここに貯金シミュレーターのURL]" target="cocoa_x_tab" rel="noopener noreferrer" class="tool-card">
+    <div class="tool-header">
+      <span class="tool-title">💰 未来貯金シミュレーター 2.0</span>
       <span class="tool-badge money">マネー</span>
     </div>
-    <div class="tool-desc">スマホ対応、将来の広告枠完備。ココアがおくる人生設計の羅針盤アプリ。</div>
+    <div class="tool-desc">毎月の手取りから「生活費」や「趣味の消費」を引いて、リアルに浮いたお金での複利運用・不労所得を自動計算。</div>
+  </a>
+
+  <!-- 7. SNS＆タイトル画面シミュレーター -->
+  <a href="[ここにSNSシミュレーターのURL]" target="cocoa_x_tab" rel="noopener noreferrer" class="tool-card">
+    <div class="tool-header">
+      <span class="tool-title">📱 SNS＆タイトル画面シミュレーター</span>
+      <span class="tool-badge sns">マーケ・SNS</span>
+    </div>
+    <div class="tool-desc">スマホ版Xの黒モード画面を完全再現。打った文字が綺麗に「3行に収まるか」を視覚化してバズを狙う。</div>
   </a>
 
   <div class="info-banner">
@@ -190,7 +147,7 @@
   </div>
 
   <div class="footer-link">
-    開発者：<a href="https://x.com/cocoa_next7" target="_blank">ココア (@cocoa_next7)</a>
+    開発者：<a href="https://x.com/cocoa_next7" target="cocoa_x_tab" rel="noopener noreferrer">ココア (@cocoa_next7)</a>
   </div>
 </div>
 
