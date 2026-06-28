@@ -6,120 +6,206 @@
   <title>COCOA TOOLS - 無敵の作業効率化ツール一覧</title>
   <style>
     /* ココアさん標準：PC真ん中寄せ・スマホ完全フィット・極上の黒モード */
-    body { background-color: #0d0f12; font-family: 'Helvetica Neue', Arial, sans-serif; color: #e2e8f0; margin: 0; padding: 20px 15px; display: flex; justify-content: center; min-height: 100vh; }
-    .container { max-width: 480px; width: 100%; background: #1a1f26; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); border: 1px solid #2d3748; }
+    body {
+      background-color: #0d0f12;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 20px 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 480px;
+      width: 100%;
+      background: #1a1f26;
+      padding: 30px 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      border: 1px solid #2d3748;
+      box-sizing: border-box;
+    }
     .profile-img { font-size: 3.5rem; margin-bottom: 10px; text-align: center; }
-    h1 { font-size: 1.5rem; color: #fff; margin: 0 0 5px 0; text-align: center; }
-    .bio { font-size: 0.85rem; color: #a0aec0; margin: 0 0 25px 0; text-align: center; }
+    h1 { font-size: 1.5rem; color: #fff; margin: 0 0 5px 0; letter-spacing: 1px; text-align: center; }
+    .bio { font-size: 0.85rem; color: #a0aec0; margin: 0 0 25px 0; line-height: 1.5; text-align: center; }
     .highlight { color: #3182ce; font-weight: bold; }
-    .category-title { font-size: 1.1rem; font-weight: bold; color: #fff; margin: 30px 0 15px 0; padding-bottom: 6px; border-bottom: 2px solid #2d3748; }
-    .tool-card { display: block; text-decoration: none; background: #2d3748; border: 1px solid #4a5568; padding: 16px; border-radius: 12px; margin-bottom: 15px; transition: transform 0.2s, border-color 0.2s; }
-    .tool-card:hover { transform: translateY(-2px); border-color: #3182ce; background: #2b364a; }
+
+    /* 索引・カテゴリ見出しデザイン（横並び崩れを絶対に起こさない仕様） */
+    .category-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #fff;
+      margin: 30px 0 15px 0;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #2d3748;
+      text-align: left;
+    }
+
+    /* ツール選択ボタン（客が迷わない直感デザイン） */
+    .tool-card {
+      display: block;
+      text-decoration: none;
+      background: #2d3748;
+      border: 1px solid #4a5568;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      text-align: left;
+      transition: transform 0.2s, border-color 0.2s;
+      box-sizing: border-box;
+    }
+    .tool-card:hover {
+      transform: translateY(-2px);
+      border-color: #3182ce;
+      background: #2b364a;
+    }
     .tool-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 10px; }
-    .tool-title { font-size: 1rem; font-weight: bold; color: #fff; }
+    .tool-title { font-size: 0.95rem; font-weight: bold; color: #fff; line-height: 1.3; }
     .tool-badge { font-size: 0.7rem; color: white; padding: 2px 8px; border-radius: 20px; font-weight: bold; flex-shrink: 0; }
+    
+    /* バッジカラーの最適化 */
     .badge-build { background: #e67e22; }
     .badge-life { background: #805ad5; }
+    .badge-seo { background: #38a169; }
+    .badge-money { background: #2ecc71; }
+    .badge-other { background: #3182ce; }
+    
     .tool-desc { font-size: 0.8rem; color: #cbd5e0; line-height: 1.4; }
+    .info-banner { font-size: 0.75rem; color: #718096; background: #11141a; padding: 10px; border-radius: 8px; margin-top: 30px; border: 1px dashed #2d3748; text-align: center; }
+    .footer-link { margin-top: 25px; font-size: 0.85rem; text-align: center; }
+    .footer-link a { color: #3182ce; text-decoration: none; font-weight: bold; }
+    .footer-link a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
+
 <div class="container">
   <div class="profile-img">🛠️</div>
   <h1>COCOA TOOLS</h1>
-  <p class="bio">「だるい作業」を3秒で終わらせる20歳開発者のツール集。<br><span class="highlight">【URLは一生変わりません】</span>。</p>
+  <p class="bio">
+    「だるい作業」を3秒で終わらせる20歳開発者のツール集。<br>
+    アップデート後も<span class="highlight">【URLは一生変わりません】</span>。
+  </p>
   
-  <!-- 🏗️ 建築・現場系 -->
+  <!-- ==================== 🏗️ 建築・現場系 ==================== -->
   <div class="category-title">🏗️ 建築・現場系</div>
-  <a href="https://invoice-pdf-generator-15.pages.dev/" class="tool-card">
-    <div class="tool-header"><span class="tool-title">📋 だるい見積書・請求書一瞬ジェネレーター</span><span class="tool-badge badge-build">実務</span></div>
-    <div class="tool-desc">マナー100点満点のPDF出力。</div>
-  </a>
-  <a href="#" class="tool-card" style="opacity: 0.7; border-style: dashed;">
-    <div class="tool-header"><span class="tool-title">📐 平米・坪・畳 一瞬相互変換</span><span class="tool-badge badge-build">開発中</span></div>
-    <div class="tool-desc">現場用単位変換＆現調メモ。</div>
-  </a>
-  <a href="https://cocoa-matome.pages.dev/" class="tool-card">
-    <div class="tool-header"><span class="tool-title">⏱️ 36協定・残業一瞬判定</span><span class="tool-badge badge-build">労務</span></div>
-    <div class="tool-desc">法律違反ラインを秒速判定。</div>
-  </a>
-  <a href="https://cocoa-matome.pages.dev/" class="tool-card">
-    <div class="tool-header"><span class="tool-title">🚚 生コン＆外構資材一瞬計算 2.0</span><span class="tool-badge badge-build">土木</span></div>
-    <div class="tool-desc">コンクリ、メッシュ、砕石計算。</div>
-  </a>
-  <a href="https://cocoa-matome.pages.dev/" class="tool-card">
-    <div class="tool-header"><span class="tool-title">🏗️ CAD縮尺・寸法一瞬変換 2.0</span><span class="tool-badge badge-build">設計</span></div>
-    <div class="tool-desc">図面の実測値から縮尺を逆算。</div>
+
+  <a href="https://pages.dev" class="tool-card">
+    <div class="tool-header">
+      <span class="tool-title">📋 だるい見積書・請求書一瞬ジェネレーター</span>
+      <span class="tool-badge badge-build">実務</span>
+    </div>
+    <div class="tool-desc">一度入力すればLocalStorageが一生記憶。次回から3秒でマナー100点満点のPDF出力が可能。通常画面の無駄なプレビューも排除し、1タップで完璧なA4書類を出力。</div>
   </a>
 
-  <!-- ☕ 日常・生活系 -->
+  <a href="#" class="tool-card" style="opacity: 0.8; border-style: dashed;">
+    <div class="tool-header">
+      <span class="tool-title">📐 現場直行！【平米・坪・畳】一瞬相互変換 ＆ 現調メモ</span>
+      <span class="tool-badge badge-build" style="background: #3182ce;">爆速開発中</span>
+    </div>
+    <div class="tool-desc">現場で飛び交う単位を1ヶ所入力で全自動トリプル変換！江戸間/京間のサイズ切り替えトグルや、ココア式大成功コピーボタン付き現調メモ枠を搭載。</div>
+  </a>
+
+  <a href="https://pages.dev" class="tool-card">
+    <div class="tool-header">
+      <span class="tool-title">⏱️ 36協定・残業一瞬判定タイマー</span>
+      <span class="tool-badge badge-build">労務</span>
+    </div>
+    <div class="tool-desc">今月のこれまでの残業時間と残り日数から、法律違反（月45時間）ラインまでの「1日の許容残業時間」をメーターで秒速判定。</div>
+  </a>
+
+  <a href="https://pages.dev" class="tool-card">
+    <div class="tool-header">
+      <span class="tool-title">🚚 生コン＆外構資材一瞬計算 2.0</span>
+      <span class="tool-badge badge-build">土木</span>
+    </div>
+    <div class="tool-desc">縦・横・厚みから生コン量（10%増）、ワイヤーメッシュ枚数、下地砕石のトン数を一瞬で算出。</div>
+  </a>
+
+  <a href="https://pages.dev" class="tool-card">
+    <div class="tool-header">
+      <span class="tool-title">🏗️ CAD縮尺・寸法一瞬変換 2.0</span>
+      <span class="tool-badge badge-build">設計</span>
+    </div>
+    <div class="tool-desc">中途半端な変態縮尺の計算や、図面の「本来の寸法」と「実測」からの縮尺の逆算に対応。</div>
+  </a>
+  <!-- ==================== ☕ 日常・生活系 ==================== -->
   <div class="category-title">☕ 日常・生活系</div>
-  <a href="https://cocoa-matome.pages.dev/" class="tool-card">
-    <div class="tool-header"><span class="tool-title">📱 だるい連絡一瞬テンプレ</span><span class="tool-badge badge-life">マナー</span></div>
-    <div class="tool-desc">ビジネス敬語を自動生成。</div>
+
+  <a href="https://pages.dev" class="tool-card">
+    <div class="tool-header">
+      <span class="tool-title">📱 だるい連絡一瞬テンプレ作成器</span>
+      <span class="tool-badge badge-life">マナー</span>
+    </div>
+    <div class="tool-desc">会社や学校へのだるい欠勤・遅刻連絡を3タップで終わらせる！上司に失礼のない完璧なビジネス敬語の文章を秒速生成＆自動保存。</div>
   </a>
-  <a href="https://cocoa-matome.pages.dev/" class="tool-card">
-    <div class="tool-header"><span class="tool-title">🧹 作戦集中ToDoリスト 3.0</span><span class="tool-badge badge-life">効率化</span></div>
-    <div class="tool-desc">音付き自由指定タイマー。</div>
+
+  <a href="https://pages.dev" class="tool-card">
+    <div class="tool-header">
+      <span class="tool-title">🧹 作戦集中ToDoリスト 3.0</span>
+      <span class="tool-badge badge-life">効率化</span>
+    </div>
+    <div class="tool-desc">前夜からのタスク引っ越し機能 ＋ 画面を閉じてても時間になると「先に音が鳴る」自由指定タイマー。</div>
   </a>
-</div>
-</body>
-</html>
+
+
   <!-- ==================== 🔍 マーケ・SEO・SNS系 ==================== -->
   <div class="category-title">🔍 マーケ・SEO・SNS系</div>
-  
+
   <a href="https://pages.dev" class="tool-card">
     <div class="tool-header">
       <span class="tool-title">📱 SNS＆タイトル画面シミュレーター</span>
-      <span class="tool-badge" style="background: #e53e3e;">マーケ・SNS</span>
+      <span class="tool-badge badge-seo" style="background: #e53e3e;">マーケ・SNS</span>
     </div>
-    <div class="tool-desc">X（旧Twitter）投稿・検索画面のプレビューと文字数計算ツール。</div>
+    <div class="tool-desc">バズる前の必須チェック！本家Xのダークモードを完全再現し、3行見切れ線や文字数、Google検索用タイトルのSEO自動アドバイス判定を1画面に完全統合。</div>
   </a>
 
   <a href="https://pages.dev" class="tool-card">
     <div class="tool-header">
       <span class="tool-title">📱 LPファーストビュー・完全フィット検証ミラー</span>
-      <span class="tool-badge" style="background: #38a169;">実務・効率化</span>
+      <span class="tool-badge badge-seo">実務・効率化</span>
     </div>
-    <div class="tool-desc">LPの表示・見切れリスクを実機サイズで検証するツール。</div>
+    <div class="tool-desc">打った文字の「折り返し」や「見切れリスク」を実機サイズで3秒検証。スクロール不要限界線を一瞬で視覚化し、大中小のサイズ変更やフォント切り替えにも完全対応。</div>
   </a>
 
   <a href="https://pages.dev" class="tool-card">
     <div class="tool-header">
       <span class="tool-title">🎯 SEO文字数＆キーワード一瞬監視</span>
-      <span class="tool-badge" style="background: #38a169;">マーケ・ブログ</span>
+      <span class="tool-badge badge-seo">マーケ・ブログ</span>
     </div>
-    <div class="tool-desc">文字数・キーワードをリアルタイム監視するツール。</div>
+    <div class="tool-desc">文字数・％のリアルタイム監視。タイトル（32字）とディスクリプション（120字）の超過警告バー完備。</div>
   </a>
-
   <!-- ==================== 💰 その他（マネー・副業）系 ==================== -->
   <div class="category-title">💰 その他（マネー・副業）系</div>
 
   <a href="https://pages.dev" class="tool-card">
     <div class="tool-header">
       <span class="tool-title">💰 確定申告・手取り一瞬シミュレーター</span>
-      <span class="tool-badge" style="background: #2ecc71;">マネー・副業</span>
+      <span class="tool-badge badge-money">マネー・副業</span>
     </div>
-    <div class="tool-desc">売上・経費から税額・手取りを秒速で逆算するツール。</div>
+    <div class="tool-desc">だるい税金計算を秒で終了！年間の総売上と経費を入力するだけで、青色申告による節税メリット、住民税、国保、そして本当の「手取り」を一瞬で逆算。</div>
   </a>
 
   <a href="https://pages.dev" class="tool-card">
     <div class="tool-header">
       <span class="tool-title">⏱️ インボイス・消費税一瞬判定</span>
-      <span class="tool-badge" style="background: #3182ce;">労務・副業</span>
+      <span class="tool-badge badge-other">労務・副業</span>
     </div>
-    <div class="tool-desc">インボイス制度による税額への影響を比較・算出するツール。</div>
+    <div class="tool-desc">いくら損するのか秒速で視覚化！2年前の売上と現在の収支を選ぶだけで、「2割特例」と「簡易課税」の納税額を0秒でガチ比較し、手取りの目減り額を自動判定。</div>
   </a>
 
   <a href="https://pages.dev" class="tool-card">
     <div class="tool-header">
       <span class="tool-title">💰 未来貯金シミュレーター 2.0</span>
-      <span class="tool-badge" style="background: #3182ce;">マネー</span>
+      <span class="tool-badge badge-other" style="background: #3182ce;">マネー</span>
     </div>
-    <div class="tool-desc">収支から将来の貯蓄・運用額をシミュレーションするツール。</div>
+    <div class="tool-desc">毎月の手取りから「生活費」や「趣味の消費」を引いて、リアルに浮いたお金での複利運用・不労所得を自動計算。</div>
   </a>
 
-  <!-- 下部バナー ＆ フッター要素 -->
+  <!-- 【重要】ここで黒いメイン枠（.container）を確実に閉鎖します -->
   <div class="info-banner">
     ※各ツールは現場や作業の利便性を最優先しているため、すべて完全無料で一生ご利用いただけます（将来広告枠あり）。
   </div>
@@ -127,3 +213,7 @@
   <div class="footer-link">
     開発者：<a href="https://x.com/cocoa_next7" target="_blank">ココア＠プログラミング奮闘中 (@cocoa_next7)</a>
   </div>
+</div> <!-- /.container -->
+
+</body>
+</html>
