@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ja" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>現場の相棒！コンクリート・生コン必要量一瞬計算ツール 2.0</title>
+    <style>
+        body {
+            background-color: #34495e;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: white;
+            padding: 25px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            width: 100%;       
+            max-width: 440px;  
+            box-sizing: border-box;
+            text-align: center;
+            margin: 0 auto 20px auto;
+        }
+
+        h1 {
+            color: #2980b9; 
+            font-size: 19px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #2980b9;
+            padding-bottom: 10px;
+        }
+
+        .result-title {
+            font-size: 14px;
+            color: #2c3e50;
+            text-align: left;
+            border-left: 4px solid #2980b9;
+            padding-left: 8px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #2c3e50;
+            width: 55%;
+        }
+
+        .input-group input, .input-group select {
+            width: 40%;
+            padding: 8px 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: right;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        #calc-btn {
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(41, 128, 185, 0.3);
+        }
+        #calc-btn:hover { background-color: #3498db; }
+
+        .result-box {
+            display: none; 
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .result-value {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .highlight {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        #copy-btn {
+            background-color: #1da1f2;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+        #copy-btn:hover { background-color: #4ab3f4; }
+
+        .ad-space-box {
+            width: 100%;
+            max-width: 440px;
+            box-sizing: border-box;
+            background-color: #2c3e50;
+            border: 2px dashed #bdc3c7;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            color: #bdc3c7;
+            margin-bottom: 20px;
+        }
+        .ad-label { font-size: 11px; font-weight: bold; color: #bdc3c7; margin-bottom: 5px; }
+        .ad-placeholder-text { font-size: 12px; color: #bdc3c7; line-height: 1.4; }
+
+        .disclaimer-box {
+            max-width: 440px;
+            width: 100%;
+            text-align: left;
+            padding: 0 10px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        .disclaimer-text {
+            font-size: 11px;
+            color: #bdc3c7;
+            line-height: 1.5;
+        }
+
+        .author-box {
+            max-width: 440px;
+            width: 100%;
+            text-align: center;
+            margin: 0 auto;
+        }
+        .author-link {
+            font-size: 12px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .author-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>生コンコンクリート必要量計算 2.0</h1>
+        
+        <div class="input-group">
+            <label>① 縦の長さ (m)</label>
+            <input type="number" id="length-m" value="5.0" step="0.1" min="0">
+        </div>
+
+        <div class="input-group">
+            <label>② 横の長さ (m)</label>
+            <input type="number" id="width-m" value="4.0" step="0.1" min="0">
+        </div>
+
+        <div class="input-group">
+            <label>③ 厚み・深さ (cm)</label>
+            <input type="number" id="depth-cm" value="10" min="0">
+        </div>
+
+        <div class="input-group">
+            <label>④ ミキサー車のサイズ</label>
+            <select id="truck-size">
+                <option value="4.5">大型 (4.5立米)</option>
+                <option value="3.0">中型 (3.0立米)</option>
+                <option value="1.5" selected>小型/2t (1.5立米)</option>
+            </select>
+        </div>
+
+        <button id="calc-btn">必要量を一瞬で計算する！</button>
+
+        <div id="result-box" class="result-box">
+            <!-- 1. 生コン結果 -->
+            <div class="result-title">🧱 生コンクリート計算結果</div>
+            <div class="result-value">必要な体積: <span id="res-volume" style="font-weight:bold; color:#2ecc71;">0</span> ㎥</div>
+            <div class="result-value">10%割増（推奨の注文量）: <span id="res-total" class="highlight">0</span> ㎥</div>
+            <div class="result-value" style="border-bottom: 1px dashed #bdc3c7; padding-bottom: 10px; margin-bottom: 10px;">
+                🚚 ミキサー車（配車）の目安: <span id="res-trucks" style="font-weight:bold; color:#e67e22;">0</span> 台
+            </div>
+            
+            <!-- 2. ワイヤーメッシュ結果 -->
+            <div class="result-title" style="border-left-color: #9b59b6; color: #9b59b6;">🕸️ ワイヤーメッシュ（鉄網）</div>
+            <div class="result-value">施工面積: <span id="res-area" style="font-weight:bold;">0</span> ㎡</div>
+            <div class="result-value" style="border-bottom: 1px dashed #bdc3c7; padding-bottom: 10px; margin-bottom: 10px;">
+                必要枚数（1m×2m・重ね代考慮）: 約 <span id="res-mesh" class="highlight" style="color:#9b59b6;">0</span> 枚
+            </div>
+
+            <!-- 3. 下地砕石結果 -->
+            <div class="result-title" style="border-left-color: #f39c12; color: #f39c12;">🪨 下地用 砕石（厚み10cm想定）</div>
+            <div class="result-value">必要体積: <span id="res-stone-vol" style="font-weight:bold;">0</span> ㎥</div>
+            <div class="result-value" style="padding-bottom: 10px;">
+                必要重量の目安: 約 <span id="res-stone-weight" class="highlight" style="color:#f39c12;">0</span> ｔ（トン）
+            </div>
+
+            <div style="margin-top: 15px; font-size: 12px; color: #7f8c8d; line-height: 1.4; border-top: 1px solid #bdc3c7; padding-top: 10px;">
+                💡 現場での「足りない！」を防ぐ10%のゆとり（ロス分）や、重ね代を含めて全自動計算してあります。
+            </div>
+
+            <button id="copy-btn">この結果をコピーしてXで配車完了報告 📋</button>
+        </div>
+    </div>
+
+    <!-- 将来の広告枠 -->
+    <div class="ad-space-box">
+        <div class="ad-label">Sponsored</div>
+        <div class="ad-placeholder-text">
+            ※当サイトは開発費・サーバー維持費のために広告を掲載予定です。<br>
+            応援よろしくお願いいたします！
+        </div>
+    </div>
+
+    <!-- プロ仕様の免責お守り -->
+    <div class="disclaimer-box">
+        <div class="disclaimer-text">
+            【ご利用上の注意】<br>
+            本ツールは個人が開発した簡易計算用シミュレーターです。現場の地盤の凹凸や枠のたわみによるコンクリートのロス、砕石の転圧具合により、実際の必要量は前後します。本ツールの計算結果はあくまで配車の目安であり、実際の施工や発注によって生じた不足・余剰損害について、開発者は一切の責任を負いません。
+        </div>
+    </div>
+
+    <!-- 看板リンク -->
+    <div class="author-box">
+        <a class="author-link" href="https://x.com/cocoa_next7" target="_blank">
+            🛠️ 開発者：ココア (@cocoa_next7) プロのフリーランスへの成長記録はコチラ 🛠️
+        </a>
+    </div>
+
+   <script>
+    const calcBtn = document.getElementById("calc-btn");
+    const resultBox = document.getElementById("result-box");
+    const resVolume = document.getElementById("res-volume");
+    const resTotal = document.getElementById("res-total");
+    const resTrucks = document.getElementById("res-trucks");
+    const resArea = document.getElementById("res-area");
+    const resMesh = document.getElementById("res-mesh");
+    const resStoneVol = document.getElementById("res-stone-vol");
+    const resStoneWeight = document.getElementById("res-stone-weight");
+    const copyBtn = document.getElementById("copy-btn");
+
+    let shareText = "";
+
+    calcBtn.addEventListener("click", () => {
+        const length = parseFloat(document.getElementById("length-m").value) || 0;
+        const width = parseFloat(document.getElementById("width-m").value) || 0;
+        const depthCm = parseFloat(document.getElementById("depth-cm").value) || 0;
+        const truckCapacity = parseFloat(document.getElementById("truck-size").value) || 1.5;
+
+        if (length <= 0 || width <= 0 || depthCm <= 0) {
+            alert("⚠️ すべての項目に正しい数値を入力してください！");
+            return;
+        }
+
+        const depthM = depthCm / 100;
+        const volume = length * width * depthM;
+        const totalVolume = volume * 1.1; 
+        const trucksNeeded = Math.ceil(totalVolume / truckCapacity);
+        const area = length * width;
+        const meshNeeded = Math.ceil(area / 1.8);
+        const stoneVol = area * 0.1;
+        const stoneWeightTon = stoneVol * 2.0;
+
+        resVolume.innerText = volume.toFixed(2);
+        resTotal.innerText = totalVolume.toFixed(2);
+        resTrucks.innerText = trucksNeeded;
+        resArea.innerText = area.toFixed(2);
+        resMesh.innerText = meshNeeded;
+        resStoneVol.innerText = stoneVol.toFixed(2);
+        resStoneWeight.innerText = stoneWeightTon.toFixed(1);
+
+        shareText = `【生コン＆外構資材一瞬計算結果】\n縦横厚み: ${length}m × ${width}m × ${depthCm}cm\n・生コン推奨注文量: ${totalVolume.toFixed(2)}㎥ (目安: ${trucksNeeded}台)\n・ワイヤーメッシュ: 約${meshNeeded}枚\n・下地砕石: 約${stoneWeightTon.toFixed(1)}トン\n現場の相棒ツールで一瞬で配車積算完了！`;
+
+        resultBox.style.display = "block";
+    });
+
+    copyBtn.addEventListener("click", () => {
+        if (!shareText) return;
+        navigator.clipboard.writeText(shareText).then(() => {
+            alert("📋 X報告用の文章をコピーしました！");
+        }).catch(err => {
+            alert("⚠️ コピーに失敗しました。");
+        });
+    });
+</script>
+
+</body>
+</html>
