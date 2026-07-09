@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>現場直行！【平米・坪・畳】一瞬相互変換 ＆ 現調メモ - COCOA TOOLS</title>
+  <style>
+    /* ココアさん標準：PC真ん中寄せ・スマホ完全フィット・極上の黒モード */
+    body {
+      background-color: #0d0f12;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 20px 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 480px;
+      width: 100%;
+      background: #1a1f26;
+      padding: 30px 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      border: 1px solid #2d3748;
+      box-sizing: border-box;
+    }
+    h1 { font-size: 1.3rem; color: #fff; margin: 0 0 5px 0; text-align: center; font-weight: bold; }
+    .bio { font-size: 0.8rem; color: #a0aec0; margin: 0 0 25px 0; text-align: center; line-height: 1.4; }
+    
+    /* 建築現場用・3連入力フォーム群 */
+    .input-group { margin-bottom: 18px; text-align: left; }
+    .input-label { display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: #cbd5e0; }
+    .input-row { display: flex; align-items: center; background: #0d0f12; border: 2px solid #3182ce; border-radius: 12px; padding: 2px 12px; }
+    .input-row:focus-within { border-color: #63b3ed; }
+    
+    .num-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #fff;
+      padding: 12px 0;
+      font-size: 1.2rem;
+      font-weight: bold;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+    .num-input:focus { outline: none; }
+    .unit-text { font-size: 1rem; color: #718096; font-weight: bold; margin-left: 8px; }
+    /* 江戸間 / 京間 切り替えトグル */
+    .toggle-row { display: flex; gap: 10px; margin: 20px 0; }
+    .toggle-btn {
+      flex: 1;
+      background: #2d3748;
+      border: 1px solid #4a5568;
+      color: #a0aec0;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .toggle-btn.active {
+      background: #e67e22; /* 建築系・オレンジ */
+      border-color: #e67e22;
+      color: #fff;
+    }
+
+    /* 現調メモエリア */
+    .memo-area {
+      width: 100%;
+      height: 90px;
+      background: #0d0f12;
+      border: 1px solid #4a5568;
+      border-radius: 8px;
+      color: #fff;
+      padding: 12px;
+      box-sizing: border-box;
+      font-size: 0.9rem;
+      resize: none;
+      margin-top: 6px;
+    }
+    .memo-area:focus { border-color: #3182ce; outline: none; }
+
+    /* ココアさん標準：大成功コピーボタン */
+    .copy-btn {
+      width: 100%;
+      background: #3182ce;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 25px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 20px;
+    }
+
+    /* 追加パーツスタイル（将来の広告枠、免責など） */
+    .ad-space { margin-top: 25px; background: #0d0f12; border: 1px dashed #4a5568; border-radius: 8px; padding: 15px; font-size: 0.75rem; color: #718096; text-align: center; }
+    .ad-link { color: #3182ce; text-decoration: none; display: block; margin-top: 4px; font-weight: bold; }
+    .footer-x { margin-top: 20px; font-size: 0.8rem; color: #a0aec0; text-align: center; }
+    .footer-x a { color: #1d9bf0; text-decoration: none; font-weight: bold; }
+    .disclaimer { margin-top: 20px; font-size: 0.65rem; color: #4a5568; line-height: 1.4; text-align: left; border-top: 1px solid #2d3748; padding-top: 12px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>【平米・坪・畳】一瞬相互変換</h1>
+  <p class="bio">1箇所入力で3面連動逆算 ＆ ココア式現調メモ</p>
+
+  <!-- 3連入力フォーム群 -->
+  <div class="input-group">
+    <label class="input-label" for="valM2">平米数 (㎡)</label>
+    <div class="input-row">
+      <input type="number" id="valM2" class="num-input" placeholder="0" step="any">
+      <span class="unit-text">㎡</span>
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label class="input-label" for="valTsubo">坪数 (坪)</label>
+    <div class="input-row">
+      <input type="number" id="valTsubo" class="num-input" placeholder="0" step="any">
+      <span class="unit-text">坪</span>
+    </div>
+  </div>
+
+  <div class="input-group">
+    <label class="input-label" for="valTatami">畳数 (畳)</label>
+    <div class="input-row">
+      <input type="number" id="valTatami" class="num-input" placeholder="0" step="any">
+      <span class="unit-text">畳</span>
+    </div>
+  </div>
+
+  <!-- 江戸間 / 京間 切り替えトグル -->
+  <div class="toggle-row">
+    <button id="btnEdo" class="toggle-btn active">江戸間 (1.548㎡)</button>
+    <button id="btnKyo" class="toggle-btn">京間 (1.824㎡)</button>
+  </div>
+
+  <!-- 現調メモ -->
+  <div class="input-group">
+    <label class="input-label" for="genchoMemo">現地調査用メモ</label>
+    <textarea id="genchoMemo" class="memo-area" placeholder="現場の気付きや寸法メモなどを自由に打ち込んでね。計算結果と一緒にコピーできます。"></textarea>
+  </div>
+
+  <!-- 大成功コピーボタン -->
+  <button id="copyBtn" class="copy-btn">計算結果とメモをコピー 📋</button>
+
+  <!-- 将来の広告枠 ＆ フッター ＆ 免責 -->
+  <div class="ad-space">
+    【将来の広告枠】<br>
+    ここは将来的にスポンサー枠として活用予定のエリアです。
+    <a href="https://x.com/cocoa_next7" target="_blank" class="ad-link">お問い合わせはこちら ↗</a>
+  </div>
+  <div class="footer-x">
+    開発者：<a href="https://x.com/cocoa_next7" target="_blank">ココア＠プログラミング奮闘中 (@cocoa_next7) ↗</a>
+  </div>
+  <div class="disclaimer">
+    【免責事項】本ツールは、平米・坪・畳の一般的な基準値を基に簡易計算するものであり、実際の各建築会社・現場の畳規格や実測値と異なる場合があります。本ツールの計算によるいかなる損害について、当方は一切の責任を負いかねます。
+  </div>
+</div>
+<script>
+  const valM2 = document.getElementById('valM2');
+  const valTsubo = document.getElementById('valTsubo');
+  const valTatami = document.getElementById('valTatami');
+  const btnEdo = document.getElementById('btnEdo');
+  const btnKyo = document.getElementById('btnKyo');
+  const genchoMemo = document.getElementById('genchoMemo');
+  const copyBtn = document.getElementById('copyBtn');
+
+  // 建築基準値の定義
+  const M2_PER_TSUBO = 3.30578; // 1坪 ≒ 3.30578㎡
+  let m2PerTatami = 1.548;      // 初期値：江戸間 (1.548㎡)
+
+  // 小数点第3位までに綺麗に丸める関数（現場で数字が並びすぎない配慮）
+  function roundNum(num) {
+    return Math.round(num * 1000) / 1000;
+  }
+
+  // 1. 平米(㎡)から坪・畳を逆算
+  function calcFromM2() {
+    const m2 = parseFloat(valM2.value);
+    if (isNaN(m2) || m2 === 0) { clearAllInputs(); return; }
+    valTsubo.value = roundNum(m2 / M2_PER_TSUBO);
+    valTatami.value = roundNum(m2 / m2PerTatami);
+  }
+
+  // 2. 坪から平米・畳を逆算
+  function calcFromTsubo() {
+    const tsubo = parseFloat(valTsubo.value);
+    if (isNaN(tsubo) || tsubo === 0) { clearAllInputs(); return; }
+    const m2 = tsubo * M2_PER_TSUBO;
+    valM2.value = roundNum(m2);
+    valTatami.value = roundNum(m2 / m2PerTatami);
+  }
+
+  // 3. 畳から平米·坪を逆算
+  function calcFromTatami() {
+    const tatami = parseFloat(valTatami.value);
+    if (isNaN(tatami) || tatami === 0) { clearAllInputs(); return; }
+    const m2 = tatami * m2PerTatami;
+    valM2.value = roundNum(m2);
+    valTsubo.value = roundNum(m2 / M2_PER_TSUBO);
+  }
+
+  // 空欄時のクリア処理
+  function clearAllInputs() {
+    if (document.activeElement !== valM2) valM2.value = '';
+    if (document.activeElement !== valTsubo) valTsubo.value = '';
+    if (document.activeElement !== valTatami) valTatami.value = '';
+  }
+
+  // 入力イベントの紐付け（リアルタイム3面連動）
+  valM2.addEventListener('input', calcFromM2);
+  valTsubo.addEventListener('input', calcFromTsubo);
+  valTatami.addEventListener('input', calcFromTatami);
+
+  // 4. 畳サイズ切り替えトグル（江戸間 ⇔ 京間）
+  btnEdo.addEventListener('click', () => {
+    btnEdo.classList.add('active');
+    btnKyo.classList.remove('active');
+    m2PerTatami = 1.548;
+    // 基準が変わったので、現在アクティブな入力欄をベースに数値を再計算
+    recalculate();
+  });
+
+  btnKyo.addEventListener('click', () => {
+    btnKyo.classList.add('active');
+    btnEdo.classList.remove('active');
+    m2PerTatami = 1.824;
+    recalculate();
+  });
+
+  function recalculate() {
+    if (document.activeElement === valTsubo) calcFromTsubo();
+    else if (document.activeElement === valTatami) calcFromTatami();
+    else calcFromM2(); // デフォルトは平米ベース
+  }
+
+  // 5. 過去のコードベース：コピーして安全にX（または外部）を開く大成功ボタン（レモン緑最適化）
+  copyBtn.addEventListener("click", () => {
+    const m2 = valM2.value || "0";
+    const tsubo = valTsubo.value || "0";
+    const tatami = valTatami.value || "0";
+    const tatamiType = btnEdo.classList.contains('active') ? "江戸間" : "京間";
+    const memo = genchoMemo.value;
+
+    if (m2 === "0" && tsubo === "0" && tatami === "0" && memo === "") {
+      alert("数値を入力するか、メモを記入してからコピーしてください。");
+      return;
+    }
+
+    // 現場用の美しい報告テキストに成形
+    let textToCopy = `【現調寸法・面積一瞬変換結果】\n`;
+    textToCopy += `■ 平米数：${m2} ㎡\n`;
+    textToCopy += `■ 坪数　：${tsubo} 坪\n`;
+    textToCopy += `■ 畳数　：${tatami} 畳（${tatamiType}基準）\n`;
+    if (memo) {
+      textToCopy += `■ 現地メモ：\n${memo}\n`;
+    }
+    textToCopy += `--------\n#COCOATOOLS`;
+
+    // クリップボードに安全・確実に書き込み
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      // ユーザーが100%確信を持てる「鮮やかなレモン緑」に変身！
+      copyBtn.textContent = "コピー完了！Xへ移動します...💨";
+      copyBtn.style.backgroundColor = "#a3e635"; 
+      copyBtn.style.color = "#0d0f12"; 
+
+      // ココアさんオリジナルの1秒のタメタイマー（ポップアップブロックを完璧に回避）
+      setTimeout(() => {
+        window.open("https://x.com", "_blank");
+        
+        // 1秒後に元の美しいココアブルー仕様へ寸分狂わず復帰
+        copyBtn.textContent = "計算結果とメモをコピー 📋";
+        copyBtn.style.backgroundColor = "#3182ce"; 
+        copyBtn.style.color = "#ffffff";
+      }, 1000);
+    }).catch(err => {
+      alert("コピーに失敗しました。");
+    });
+  });
+</script>
+</body>
+</html>
