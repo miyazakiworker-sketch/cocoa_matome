@@ -1,176 +1,240 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>COCOA TOOLS - 無敵の作業効率化ツール一覧</title>
-  <style>
-    /* ココアさん標準：PC真ん中寄せ・スマホ完全フィット・極上の黒モード */
-    body { background-color: #0d0f12; font-family: 'Helvetica Neue', Arial, sans-serif; color: #e2e8f0; margin: 0; padding: 20px 15px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-    .container { max-width: 480px; width: 100%; background: #1a1f26; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); border: 1px solid #2d3748; box-sizing: border-box; }
-    .profile-img { font-size: 3.5rem; margin-bottom: 10px; text-align: center; }
-    h1 { font-size: 1.5rem; color: #fff; margin: 0 0 5px 0; letter-spacing: 1px; text-align: center; }
-    .bio { font-size: 0.85rem; color: #a0aec0; margin: 0 0 25px 0; line-height: 1.5; text-align: center; }
-    .highlight { color: #3182ce; font-weight: bold; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    /* カテゴリ索引タイトル（絶対に横並び崩れを起こさない縦並び仕様） */
-    .category-title { font-size: 1.1rem; font-weight: bold; color: #fff; margin: 30px 0 15px 0; padding-bottom: 6px; border-bottom: 2px solid #2d3748; text-align: left; }
+<title>COCOA TOOLS v2.0｜無料ツール・記事まとめサイト</title>
 
-    /* ツールカード */
-    .tool-card { display: block; text-decoration: none; background: #2d3748; border: 1px solid #4a5568; padding: 16px; border-radius: 12px; margin-bottom: 15px; text-align: left; transition: transform 0.2s, border-color 0.2s; box-sizing: border-box; }
-    .tool-card:hover { transform: translateY(-2px); border-color: #3182ce; background: #2b364a; }
-    .tool-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 10px; }
-    .tool-title { font-size: 0.95rem; font-weight: bold; color: #fff; line-height: 1.3; }
-    .tool-badge { font-size: 0.7rem; color: white; padding: 2px 8px; border-radius: 20px; font-weight: bold; flex-shrink: 0; }
-    
-    .badge-build { background: #e67e22; }
-    .badge-work { background: #3182ce; }
-    .badge-life { background: #805ad5; }
-    .badge-seo { background: #38a169; }
-    .badge-money { background: #2ecc71; }
-    
-    .tool-desc { font-size: 0.8rem; color: #cbd5e0; line-height: 1.4; }
-    .info-banner { font-size: 0.75rem; color: #718096; background: #11141a; padding: 10px; border-radius: 8px; margin-top: 30px; border: 1px dashed #2d3748; text-align: center; }
-    .footer-link { margin-top: 25px; font-size: 0.85rem; text-align: center; }
-    .footer-link a { color: #3182ce; text-decoration: none; font-weight: bold; }
-    .footer-link a:hover { text-decoration: underline; }
-  </style>
+<meta name="description"
+content="建築・仕事・生活・SEO・お金に役立つ無料ツールと実践記事をまとめたサイト。20歳開発者ココアが運営するCOCOA TOOLS v2.0">
+
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <div class="container">
-  <div class="profile-img">🛠️</div>
-  <h1>COCOA TOOLS</h1>
-  <p class="bio">「だるい作業」を3秒で終わらせる20歳開発者のツール集。<br>アップデート後も<span class="highlight">【URLは一生変わりません】</span>。</p>
-  
-  <!-- ==================== 🏗️ 建築・現場系 ==================== -->
-  <div class="category-title">🏗️ 建築・現場系</div>
-  
-  <!-- 2. だるい【内装クロス・床資材】一瞬必要数カウンター（完全公開版！） -->
-  <a href="https://cross-floor-calc-19.pages.dev/" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">📐 だるい【内装クロス・床資材】一瞬必要数カウンター</span>
-      <span class="tool-badge badge-build">実務・現場</span>
-    </div>
-    <div class="tool-desc">材料の発注ミスを現場レベルでゼロにするプロ用電卓！「寸法からの自動計算」と「平米数(㎡)の直接入力」を選べる親切設計。壁紙の必要m数や床材のケース・枚数を、5%〜15%の発注ロス自動上乗せ付きで3秒逆算。</div>
-  </a>
 
-    <!-- 1. 現場直行！【平米・坪・畳】一瞬相互変換（完全公開版！） -->
-  <a href="https://heibei-tsubo-calc-18.pages.dev/" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">📐 現場直行！【平米・坪・畳】一瞬相互変換 ＆ 現調メモ</span>
-      <span class="tool-badge badge-build">実務・現場</span>
-    </div>
-    <div class="tool-desc">現場で飛び交う単位を1箇所入力で全自動同時トリプル逆算！江戸間/京間のサイズ切り替えトグルや、現地調査に便利なメモ欄、さらにココアお家芸の「1秒タメの大成功コピーボタン」を完全搭載。</div>
-  </a>
+<div class="logo">
+🛠️
+</div>
 
-  <a href="https://namacon-9.pages.dev/" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">🚚 生コン＆外構資材一瞬計算 2.0</span>
-      <span class="tool-badge badge-build">土木</span>
-    </div>
-    <div class="tool-desc">縦・横・厚みから生コン量（10%増）、ワイヤーメッシュ枚数、下地砕石のトン数を一瞬で算出。</div>
-  </a>
+<h1>COCOA TOOLS v2.0</h1>
 
-  <a href="https://kentiku-syukusyaku--7.pages.dev/" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">🏗️ CAD縮尺・寸法一瞬変換 2.0</span>
-      <span class="tool-badge badge-build">設計</span>
-    </div>
-    <div class="tool-desc">中途半端な変態縮尺の計算や、図面の「本来の寸法」と「実測」からの縮尺の逆算に対応。</div>
-  </a>
+<p class="bio">
+「だるい」を3秒で終わらせる。<br>
+無料ツールと実践記事をまとめたサイトです。
+</p>
 
-  <!-- ==================== 💼 労務・仕事効率化系 ==================== -->
-  <div class="category-title">💼 労務・仕事効率化系</div>
+<!-- ========= カテゴリ ========= -->
 
-  <a href="https://invoice-pdf-generator-15.pages.dev/" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">📋 だるい見積書・請求書一瞬ジェネレーター</span>
-      <span class="tool-badge badge-work">実務</span>
-    </div>
-    <div class="tool-desc">一度入力すればLocalStorageが記憶。次回から3秒でマナー100点満点のPDF出力が可能。1タップで完璧なA4書類を出力。</div>
-  </a>
+<h2 class="section-title">
+📚 カテゴリから探す
+</h2>
 
-  <a href="https://36kyoutei-zangyoutimer-11.pages.dev/" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">⏱️ 36協定・残業一瞬判定タイマー</span>
-      <span class="tool-badge badge-work">労務</span>
-    </div>
-    <div class="tool-desc">今月の残業時間と残り日数から、法律違反（月45時間）ラインまでの「1日の許容残業時間」をメーター判定。</div>
-  </a>
+<a class="category-card" href="kenchiku/">
+<div class="card-left">
 
-  <a href="https://renraku-12.pages.dev/" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">📱 だるい連絡一瞬テンプレ作成器</span>
-      <span class="tool-badge badge-work">マナー</span>
-    </div>
-    <div class="tool-desc">会社や学校へのだるい欠勤・遅刻連絡を3タップで終了！上司に失礼のない完璧なビジネス敬語文章を秒速生成。</div>
-  </a>
-  <!-- ==================== ☕ 日常・生活系 ==================== -->
-  <div class="category-title">☕ 日常・生活系</div>
-  <a href="https://todo-app-5.pages.dev/" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">🧹 作戦集中ToDoリスト 3.0</span>
-      <span class="tool-badge badge-life">効率化</span>
-    </div>
-    <div class="tool-desc">前夜からのタスク引越・時間指定タイマー。</div>
-  </a>
+<div class="emoji">
+🏗️
+</div>
 
-  <!-- ==================== 🔍 マーケ・SEO・SNS系 ==================== -->
-  <div class="category-title">🔍 マーケ・SEO・SNS系</div>
-  <a href="https://sns-preview-x-17.pages.dev/" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">📱 SNS＆タイトル画面シミュレーター</span>
-      <span class="tool-badge badge-seo" style="background: #e53e3e;">マーケ・SNS</span>
-    </div>
-    <div class="tool-desc">X表示＆検索SEOのリアルタイムシミュレーション。</div>
-  </a>
-  <a href="https://lp-fit-checker-16.pages.dev/" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">📱 LPファーストビュー・完全フィット検証ミラー</span>
-      <span class="tool-badge badge-seo">実務・効率化</span>
-    </div>
-    <div class="tool-desc">LPの表示・折り返し・スクロール限界を検証。</div>
-  </a>
-  <a href="https://wordcounter-8.pages.dev/" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">🎯 SEO文字数＆キーワード一瞬監視</span>
-      <span class="tool-badge badge-seo">マーケ・ブログ</span>
-    </div>
-    <div class="tool-desc">タイトル・ディスクリプションの文字数・SEOリアルタイムチェック。</div>
-  </a>
+<div>
 
-  <!-- ==================== 💰 マネー・副業系 ==================== -->
-  <div class="category-title">💰 マネー・副業系</div>
-  <a href="https://tax-simulator-13.pages.dev/" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">💰 確定申告・手取り一瞬シミュレーター</span>
-      <span class="tool-badge badge-money">マネー・副業</span>
-    </div>
-    <div class="tool-desc">税金・手取りを秒速計算。</div>
-  </a>
-  <a href="https://invoice-counter-14.pages.dev/" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">⏱️ インボイス・消費税一瞬判定</span>
-      <span class="tool-badge" style="background: #2b6cb0;">労務・副業</span>
-    </div>
-    <div class="tool-desc">特例・簡易課税の納税額比較。</div>
-  </a>
-  <a href="https://tyokinsimulater-4.pages.dev/" class="tool-card">
-    <div class="tool-header">
-      <span class="tool-title">💰 未来貯金シミュレーター 2.0</span>
-      <span class="tool-badge" style="background: #2b6cb0;">マネー</span>
-    </div>
-    <div class="tool-desc">浮いたお金の不労所得シミュレーション。</div>
-  </a>
+<div class="card-title">
+建築・現場
+</div>
 
-  <!-- 下部バナー ＆ コンテナ完全閉鎖 -->
-  <div class="info-banner">
-    ※各ツールは現場や作業の利便性を最優先しているため、すべて完全無料で一生ご利用いただけます（将来広告枠あり）。
-  </div>
-  <div class="footer-link">
-    開発者：<a href="https://x.com/cocoa_next7" target="_blank">ココア＠プログラミング奮闘中 (@cocoa_next7)</a>
-  </div>
-</div> <!-- /.container -->
+<div class="card-desc">
+建築ツール・CAD・現場ノウハウ
+</div>
+
+</div>
+
+</div>
+
+<div class="arrow">
+▶
+</div>
+
+</a>
+
+<a class="category-card" href="work/">
+
+<div class="card-left">
+
+<div class="emoji">
+💼
+</div>
+
+<div>
+
+<div class="card-title">
+仕事効率化
+</div>
+
+<div class="card-desc">
+仕事をラクにするツール・記事
+</div>
+
+</div>
+
+</div>
+
+<div class="arrow">
+▶
+</div>
+
+</a>
+
+<a class="category-card" href="money/">
+
+<div class="card-left">
+
+<div class="emoji">
+💰
+</div>
+
+<div>
+
+<div class="card-title">
+お金・副業
+</div>
+
+<div class="card-desc">
+家計・税金・副業の情報
+</div>
+
+</div>
+
+</div>
+
+<div class="arrow">
+▶
+</div>
+
+</a>
+
+<a class="category-card" href="life/">
+
+<div class="card-left">
+
+<div class="emoji">
+☕
+</div>
+
+<div>
+
+<div class="card-title">
+生活
+</div>
+
+<div class="card-desc">
+毎日が便利になるツール
+</div>
+
+</div>
+
+</div>
+
+<div class="arrow">
+▶
+</div>
+
+</a>
+
+<a class="category-card" href="seo/">
+
+<div class="card-left">
+
+<div class="emoji">
+🔍
+</div>
+
+<div>
+
+<div class="card-title">
+SEO・SNS
+</div>
+
+<div class="card-desc">
+ブログ・SNS・マーケティング
+</div>
+
+</div>
+
+</div>
+
+<div class="arrow">
+▶
+</div>
+
+</a>
+
+<!-- ========= ツール一覧 ========= -->
+
+<h2 class="section-title">
+🛠️ ツール
+</h2>
+
+<a class="big-button" href="tools/">
+すべてのツールを見る
+</a>
+
+<!-- ========= 新着 ========= -->
+
+<h2 class="section-title">
+🆕 新着情報
+</h2>
+
+<div class="news-box">
+
+<p>
+現在COCOA TOOLS v2.0へアップデート中です。<br>
+順次ツール・記事を追加しています。
+</p>
+
+</div>
+
+<!-- ========= 広告 ========= -->
+
+<div class="ad-box">
+
+広告スペース
+
+</div>
+
+<!-- ========= 注意 ========= -->
+
+<div class="info-banner">
+  ※掲載しているツール・記事は、作業や学習の利便性向上を目的として無料で公開しています。内容には十分配慮していますが、正確性・完全性を保証するものではありません。重要な判断や業務で利用する際は、必ず公式情報や最新資料をご確認ください。今後もツール・記事を追加・改善しながら運営していきます。
+</div>
+
+<!-- ========= フッター ========= -->
+
+<footer>
+
+<p>
+
+開発者：
+<a href="https://x.com/cocoa_next7" target="_blank">
+ココア (@cocoa_next7)
+</a>
+
+</p>
+
+<p class="copyright">
+
+© COCOA TOOLS v2.0
+
+</p>
+
+</footer>
+
+</div>
+
+<script src="app.js"></script>
+
 </body>
 </html>
