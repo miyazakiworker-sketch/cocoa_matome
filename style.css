@@ -1,0 +1,305 @@
+/* ==========================
+   COCOA TOOLS v2.0
+   style.css
+========================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#0d0f12;
+    color:#e2e8f0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+    padding:20px 15px;
+    display:flex;
+    justify-content:center;
+}
+
+.container{
+    width:100%;
+    max-width:480px;
+    background:#1a1f26;
+    border:1px solid #2d3748;
+    border-radius:20px;
+    padding:30px 20px;
+    box-shadow:0 10px 40px rgba(0,0,0,.55);
+}
+
+.logo{
+    text-align:center;
+    font-size:56px;
+    margin-bottom:12px;
+}
+
+h1{
+    text-align:center;
+    color:#fff;
+    font-size:1.7rem;
+    margin-bottom:10px;
+}
+
+.bio{
+    text-align:center;
+    color:#a0aec0;
+    line-height:1.7;
+    font-size:.9rem;
+    margin-bottom:30px;
+}
+
+.section-title{
+    font-size:1.1rem;
+    color:#fff;
+    margin:28px 0 15px;
+    padding-bottom:8px;
+    border-bottom:2px solid #2d3748;
+}
+
+/* ==========================
+   カテゴリカード
+========================== */
+
+.category-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    text-decoration:none;
+    color:inherit;
+
+    background:#2d3748;
+    border:1px solid #4a5568;
+    border-radius:14px;
+
+    padding:16px;
+    margin-bottom:14px;
+
+    transition:.2s;
+}
+
+.category-card:hover{
+
+    background:#253140;
+
+    border-color:#3182ce;
+
+    transform:translateY(-2px);
+
+}
+
+.card-left{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+}
+
+.emoji{
+
+    font-size:30px;
+
+}
+
+.card-title{
+
+    font-size:1rem;
+
+    color:#fff;
+
+    font-weight:bold;
+
+    margin-bottom:4px;
+
+}
+
+.card-desc{
+
+    font-size:.82rem;
+
+    color:#cbd5e0;
+
+    line-height:1.5;
+
+}
+
+.arrow{
+
+    color:#a3e635;
+
+    font-size:1.2rem;
+
+    font-weight:bold;
+
+}
+
+/* ==========================
+   ボタン
+========================== */
+
+.big-button{
+
+    display:block;
+
+    width:100%;
+
+    text-align:center;
+
+    text-decoration:none;
+
+    background:#a3e635;
+
+    color:#111;
+
+    font-weight:bold;
+
+    padding:16px;
+
+    border-radius:12px;
+
+    margin-bottom:28px;
+
+    transition:.2s;
+
+}
+
+.big-button:hover{
+
+    transform:translateY(-2px);
+
+}
+
+/* ==========================
+   新着
+========================== */
+
+.news-box{
+
+    background:#11141a;
+
+    border:1px solid #2d3748;
+
+    border-radius:12px;
+
+    padding:16px;
+
+    color:#cbd5e0;
+
+    line-height:1.7;
+
+    margin-bottom:28px;
+
+}
+
+/* ==========================
+   広告
+========================== */
+
+.ad-box{
+
+    background:#11141a;
+
+    border:2px dashed #2d3748;
+
+    border-radius:12px;
+
+    padding:28px;
+
+    text-align:center;
+
+    color:#718096;
+
+    margin-bottom:28px;
+
+}
+
+/* ==========================
+   免責事項
+========================== */
+
+.info-banner{
+
+    background:#11141a;
+
+    border:1px dashed #2d3748;
+
+    border-radius:10px;
+
+    padding:14px;
+
+    color:#94a3b8;
+
+    font-size:.78rem;
+
+    line-height:1.7;
+
+    margin-top:10px;
+
+}
+
+/* ==========================
+   フッター
+========================== */
+
+footer{
+
+    margin-top:30px;
+
+    text-align:center;
+
+}
+
+footer a{
+
+    color:#3182ce;
+
+    text-decoration:none;
+
+    font-weight:bold;
+
+}
+
+footer a:hover{
+
+    text-decoration:underline;
+
+}
+
+.copyright{
+
+    margin-top:12px;
+
+    color:#718096;
+
+    font-size:.8rem;
+
+}
+
+/* ==========================
+   スマホ最適化
+========================== */
+
+@media (max-width:480px){
+
+.container{
+
+padding:25px 18px;
+
+}
+
+.logo{
+
+font-size:48px;
+
+}
+
+h1{
+
+font-size:1.5rem;
+
+}
+
+}
