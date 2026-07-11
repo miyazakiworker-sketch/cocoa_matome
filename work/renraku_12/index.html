@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>上司も納得！だるい連絡一瞬テンプレ作成器</title>
+  <style>
+    /* ココアさん標準：PC真ん中寄せ・スマホ完全フィット・集中できる黒モード */
+    body {
+      background-color: #12161a;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 20px 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 440px;
+      width: 100%;
+      background: #1a202c;
+      padding: 25px 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 1px solid #2d3748;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.25rem;
+      color: #9b59b6;
+      margin-top: 0;
+      margin-bottom: 20px;
+      border-bottom: 3px solid #9b59b6;
+      padding-bottom: 10px;
+    }
+    label {
+      font-weight: bold;
+      font-size: 13px;
+      color: #a0aec0;
+      display: block;
+      text-align: left;
+      margin-top: 15px;
+    }
+    select, input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      background-color: #12161a;
+      border: 2px solid #4a5568;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      box-sizing: border-box;
+      margin-top: 6px;
+    }
+    select:focus, input[type="text"]:focus { border-color: #9b59b6; }
+    
+    /* 綺麗に偽装した本物のXリンクボタン */
+    #copy-link-btn {
+      display: none;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 25px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      transition: background 0.2s;
+      box-sizing: border-box;
+      background-color: #1da1f2;
+      color: white;
+      text-decoration: none;
+      text-align: center;
+    }
+    #copy-link-btn:hover { background-color: #4ab3f4; }
+
+    .result-box {
+      background-color: #12161a;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 20px;
+      text-align: left;
+      border: 1px solid #2d3748;
+    }
+    .result-title { font-weight: bold; color: #fff; font-size: 14px; margin-bottom: 10px; border-left: 4px solid #9b59b6; padding-left: 8px; }
+    
+    #template-output {
+      width: 100%;
+      height: 120px;
+      background-color: #1a202c;
+      border: 1px dashed #4a5568;
+      color: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      resize: none;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .ad-space-box {
+      width: 100%; max-width: 440px; background-color: #1a202c; border: 2px dashed #2d3748; border-radius: 12px; padding: 15px; text-align: center; color: #718096; margin-top: 20px; box-sizing: border-box;
+    }
+    .ad-label { font-size: 10px; font-weight: bold; color: #4a5568; margin-bottom: 5px; }
+    .ad-text { font-size: 11px; color: #718096; line-height: 1.4; }
+
+    .footer-link { text-align: center; margin-top: 20px; font-size: 12px; }
+    .footer-link a { color: #9b59b6; text-decoration: none; font-weight: bold; }
+    .footer-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>📱 だるい連絡一瞬テンプレ作成器</h1>
+  
+  <label>① 連絡の目的</label>
+  <select id="action-select">
+    <option value="absent">本日はお休みします（欠勤）</option>
+    <option value="late">少し遅刻します（遅刻）</option>
+    <option value="paid">有給休暇を申請します（有給）</option>
+  </select>
+
+  <label>② 理由の選択</label>
+  <select id="reason-select">
+    <option value="cold">突然の体調不良・発熱のため</option>
+    <option value="train">電車の遅延・運行トラブルのため</option>
+    <option value="private">私用のため（有給用）</option>
+  </select>
+
+  <label>③ 上司・連絡相手の名前</label>
+  <input type="text" id="boss-input" value="木村部長">
+
+  <!-- 生成された結果ボックス（最初から表示してリアルタイムに変化させます） -->
+  <div class="result-box">
+    <div class="result-title">自動生成された文章</div>
+    <textarea id="template-output" readonly></textarea>
+    
+    <!-- 🔒 セキュリティ＆タブ重複：target名を「cocoa_x_tab」に完全固定 -->
+    <a href="https://x.com" target="cocoa_x_tab" rel="noopener noreferrer" id="copy-link-btn">文章をコピーしてXへ完了報告 📋</a>
+  </div>
+</div>
+
+<div class="ad-space-box">
+  <div class="ad-label">Sponsored</div>
+  <div class="ad-text">※当サイトは開発費・サーバー維持費のために広告を掲載予定です。</div>
+</div>
+
+<!-- 🔒 看板リンク：同一タブに流れるようtarget固定 ＆ セキュリティお守り -->
+<div class="footer-link">
+  開発者：<a href="https://x.com/cocoa_next7" target="cocoa_x_tab" rel="noopener noreferrer">ココア (@cocoa_next7)</a>
+</div>
+
+<!-- ーーー ここに次のステップでJavaScriptを追加します ーーー -->
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const actionSelect = document.getElementById("action-select");
+        const reasonSelect = document.getElementById("reason-select");
+        const bossInput = document.getElementById("boss-input");
+        const templateOutput = document.getElementById("template-output");
+        const copyLinkBtn = document.getElementById("copy-link-btn");
+
+        // LocalStorageから過去の上司の名前を自動復元
+        const savedBoss = localStorage.getItem("cocoa-boss-name");
+        if (savedBoss) {
+            bossInput.value = savedBoss;
+        }
+
+        // 100%マナーに準拠したビジネス・公的連絡用のテキストデータ（複数バリエーション）
+        const templates = {
+            absent: {
+                cold: [
+                    "大変恐れ入りますが、今朝から体調不良による発熱があり、本日は業務をお休みさせていただきたくご連絡いたしました。急なご連絡となり大変申し訳ありません。本日は終日、静養に努めます。",
+                    "誠に申し訳ありませんが、昨夜からの体調不良が長引いており、本日は終日静養させていただきたく存じます。急なお休みとなりご迷惑をおかけしますが、何卒よろしくお願いいたします。",
+                    "大変恐縮ですが、今朝から強い寒気と発熱の症状があるため、本日は欠勤させていただけますでしょうか。急なご連絡で恐縮ですが、体調が戻り次第ご連絡いたします。"
+                ],
+                train: [
+                    "現在、通勤電車の運行トラブルによる大規模な遅延が発生しております。代替の交通手段も麻痺している状況のため、大変恐れ入りますが、本日はお休みをいただきたくご連絡いたしました。ご迷惑をおかけし深くお詫び申し上げます。",
+                    "利用している路線が事故の影響で運転見合わせとなっており、現状、出社することが極めて難しい状況です。誠に勝手ながら、本日はお休みをいただきたく存じます。ご迷惑をおかけし大変申し訳ありません。"
+                ],
+                private: [
+                    "大変私事で恐縮ですが、私用のため本日お休みをいただきたく存じます。急なご連絡となり申し訳ありません。何卒よろしくお願いいたします。",
+                    "私事都合により、誠に勝手ながら本日の業務をお休みさせていただきたくご連絡いたしました。ご不便をおかけしますが、何卒よろしくお願いいたします。"
+                ]
+            },
+            late: {
+                cold: [
+                    "今朝から少し体調が優れないため、急ぎ病院を受診してから出社させていただきたく存じます。1時間ほど遅刻する見込みです。ご迷惑をおかけし大変申し訳ありません。",
+                    "大変恐れ入りますが、朝から腹痛の症状があるため、薬を服用し回復を待ってから出社させていただけますでしょうか。通常より30分ほど遅れての到着となる見込みです。"
+                ],
+                train: [
+                    "現在、利用している路線の電車が遅延しており、駅にて運転見合わせとなっております。復旧の目処が立っていないため、本日の出社が30分ほど遅れる見込みです。進捗があり次第、追ってご連絡いたします。",
+                    "通勤途中の路線で人身事故が発生し、電車が完全にストップしております。別のルートを検討中ですが、到着が1時間ほど遅刻する可能性がございます。申し訳ありません。"
+                ],
+                private: [
+                    "大変私事で恐縮ですが、午前中に外せない用事を済ませてから向かうため、本日は11時頃に出社いたします。事前の共有が漏れてしまい、誠に申し訳ありません。"
+                ]
+            },
+            paid: {
+                cold: ["急な体調不良のため、大変恐れ入りますが、本日の出勤を有給休暇の取得に振り替えさせていただきたくご連絡いたしました。急な変更となり大変申し訳ありませんが、何卒よろしくお願いいたします。"],
+                train: ["電車の運行停止による移動不可のため、大変勝手ながら、本日の出勤を有給休暇の取得に変更させていただきたく存じます。ご迷惑をおかけいたしますが、何卒よろしくお願いいたします。"],
+                private: ["私用のため、本日は有給休暇を申請させていただきます。業務の引き継ぎ等は事前に進めております。何卒よろしくお願いいたします。"]
+            }
+        };
+
+        // テンプレを画面のテキストエリアに1つだけランダム生成する処理
+        function generateText() {
+            const action = actionSelect.value;
+            const reason = reasonSelect.value;
+            const boss = bossInput.value.trim() || "関係者各位";
+
+            // 指定された配列から、ランダムで確実に1つだけを抽出するロジック
+            const options = templates[action][reason];
+            const randomIndex = Math.floor(Math.random() * options.length);
+            const baseText = options[randomIndex];
+
+            // 組み立て
+            const finalText = boss + "、\n" + baseText;
+            
+            templateOutput.value = finalText;
+            localStorage.setItem("cocoa-boss-name", boss);
+        }
+
+        // 客が入力や選択を変えた瞬間にリアルタイム連動
+        actionSelect.addEventListener("change", generateText);
+        reasonSelect.addEventListener("change", generateText);
+        bossInput.addEventListener("input", generateText);
+
+        // コピーリンクボタンのイベント処理
+        if (copyLinkBtn) {
+            copyLinkBtn.style.display = "block";
+            copyLinkBtn.addEventListener("click", () => {
+                const textToCopy = templateOutput.value;
+                if (!textToCopy) return;
+
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    copyLinkBtn.textContent = "コピー完了！そのままLINE等の画面へ貼れます✅";
+                    copyLinkBtn.style.backgroundColor = "#2ed573";
+                    
+                    setTimeout(() => {
+                        copyLinkBtn.textContent = "文章をコピーしてXへ完了報告 📋";
+                        copyLinkBtn.style.backgroundColor = "#1da1f2";
+                    }, 2000);
+                }).catch(() => {
+                    console.log("コピーエラー");
+                });
+            });
+        }
+
+        // 初期起動時にも最初のテンプレを自動表示
+        generateText();
+    });
+</script>
+
+</body>
+</html>
