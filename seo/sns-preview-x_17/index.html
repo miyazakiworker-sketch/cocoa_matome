@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ja" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNS特化！バズるタイトル＆画面ピタッとプレビュー</title>
+    <style>
+        /* ココアさん標準：PC真ん中寄せ・スマホ完全フィット・極上の黒モード */
+        body {
+            background-color: #0d0f12;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            color: #e2e8f0;
+            margin: 0;
+            padding: 20px 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 480px;
+            width: 100%;
+            background: #1a1f26;
+            padding: 30px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            border: 1px solid #2d3748;
+            box-sizing: border-box;
+        }
+        h1 { font-size: 1.3rem; color: #3182ce; margin: 0 0 5px 0; text-align: center; font-weight: bold; }
+        .subtitle { font-size: 0.8rem; color: #a0aec0; margin: 0 0 20px 0; text-align: center; line-height: 1.4; }
+        
+        /* 入力ボックス */
+        #text-input {
+            width: 100%;
+            height: 110px;
+            background: #0d0f12;
+            border: 2px solid #3182ce;
+            border-radius: 12px;
+            color: #fff;
+            padding: 14px;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+            resize: none;
+            margin-bottom: 8px;
+        }
+        #text-input:focus { outline: none; border-color: #63b3ed; }
+        .counter-badge { text-align: right; font-size: 1rem; font-weight: bold; color: #3182ce; margin-bottom: 15px; }
+
+        /* SEOタイトルアドバイスエリア（元のデザイン・左線を完全継承） */
+        .seo-status {
+            background: #2d3748;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            text-align: left;
+            line-height: 1.4;
+            border-left: 4px solid #3182ce;
+        }
+
+        /* 新規トグルスイッチ群 */
+        .control-row { display: flex; gap: 10px; margin-bottom: 20px; }
+        .toggle-btn {
+            flex: 1;
+            background: #2d3748;
+            border: 1px solid #4a5568;
+            color: #a0aec0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .toggle-btn.active {
+            background: #3182ce;
+            border-color: #3182ce;
+            color: #fff;
+        }
+
+        /* 本物のXそっくりのプレビュー表示エリア */
+        .ad-label { font-size: 0.8rem; color: #a0aec0; margin-bottom: 8px; text-align: left; }
+        .x-preview-box {
+            background: #000000;
+            border: 1px solid #2f3336;
+            border-radius: 16px;
+            padding: 14px;
+            text-align: left;
+            display: flex;
+            gap: 12px;
+        }
+        .x-avatar {
+            width: 40px;
+            height: 40px;
+            background: #3182ce;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: white;
+            font-weight: bold;
+        }
+        .x-body { flex: 1; min-width: 0; }
+        .x-header { display: flex; flex-direction: column; margin-bottom: 4px; }
+        .x-name { font-weight: bold; font-size: 0.95rem; color: #e7e9ea; line-height: 1.2; }
+        .x-username { color: #71767b; font-size: 0.85rem; }
+        
+        #x-text-display {
+            font-size: 15px;
+            color: #e7e9ea;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-break: break-all;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3; /* 3行見切れシステム */
+        }
+        .font-serif { font-family: 'Georgia', 'Hiragino Mincho ProN', serif !important; }
+        
+        .x-more-btn { display: none; color: #1d9bf0; font-size: 0.95rem; margin-top: 2px; cursor: pointer; }
+        .x-image-slot {
+            margin-top: 10px;
+            background: #2f3336;
+            border-radius: 16px;
+            aspect-ratio: 16 / 9;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: #71767b;
+            font-size: 0.85rem;
+        }
+        .x-image-slot.show { display: flex; }
+
+        /* コピーボタン（レモン緑対応） */
+        #copy-btn {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+        #copy-btn.copied {
+            background-color: #a3e635 !important; /* レモン緑 */
+            color: #0d0f12 !important;
+        }
+
+        /* 追加パーツ（将来の広告枠、免責など） */
+        .ad-space-box { margin-top: 25px; background: #0d0f12; border: 1px dashed #4a5568; border-radius: 8px; padding: 15px; font-size: 0.75rem; color: #718096; text-align: center; }
+        .ad-link { color: #3182ce; text-decoration: none; display: block; margin-top: 4px; font-weight: bold; }
+        .author-box { margin-top: 20px; font-size: 0.8rem; color: #a0aec0; text-align: center; }
+        .author-link { color: #1d9bf0; text-decoration: none; font-weight: bold; }
+        .disclaimer { margin-top: 20px; font-size: 0.65rem; color: #4a5568; line-height: 1.4; text-align: left; border-top: 1px solid #2d3748; padding-top: 12px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>SNS＆タイトル画面シミュレーター</h1>
+        <div class="subtitle">打った文字が実際の画面でどう見えるかリアルタイム測定</div>
+        
+        <!-- 入力ボックス -->
+        <textarea id="text-input" placeholder="ブログのタイトルや、Xの投稿文をここに打ち込んでね。下の画面が全自動で変形します！"></textarea>
+        <div class="counter-badge">現在の文字数: <span id="char-count">0</span> 文字</div>
+
+        <!-- SEOタイトル用の判定（元の仕様・IDを完全維持） -->
+        <div class="seo-status" id="seo-advice">
+            🔍 Google検索用のタイトル：文字を入力すると判定が始まります。
+        </div>
+
+        <!-- 新規：切り替えトグル -->
+        <div class="control-row">
+            <button id="toggleFont" class="toggle-btn active">ゴシック体</button>
+            <button id="toggleImage" class="toggle-btn">画像なし</button>
+        </div>
+
+        <!-- 本物のXそっくりのプレビュー表示エリア -->
+        <div class="ad-label">📱 スマートフォン版 X(Twitter) での見た目</div>
+        <div class="x-preview-box">
+            <div class="x-avatar">コ</div>
+            <div class="x-body">
+                <div class="x-header">
+                    <span class="x-name">ココア＠プログラミング奮闘中</span>
+                    <span class="x-username">@cocoa_next7</span>
+                </div>
+                <div id="x-text-display">ここに打ち込んだ投稿文がリアルタイムで映し出されます。</div>
+                <div id="xMore" class="x-more-btn">…さらに表示</div>
+                <div id="xImage" class="x-image-slot">🖼️ 画像プレビューエリア (16:9)</div>
+            </div>
+        </div>
+
+        <!-- コピーボタン（元のIDを維持） -->
+        <button id="copy-btn">この文章をコピーしてXを開く 📋</button>
+
+        <!-- 将来の広告枠 ＆ フッター ＆ 免責 -->
+        <div class="ad-space-box">
+            【将来の広告枠】<br>
+            ここは将来的にスポンサー枠として活用予定 of エリアです。
+            <a href="https://x.com/cocoa_next7" target="_blank" class="ad-link">お問い合わせはこちら ↗</a>
+        </div>
+        <div class="author-box">
+            開発者：<a href="https://x.com/cocoa_next7" target="_blank" class="author-link">ココア＠プログラミング奮闘中 (@cocoa_next7) ↗</a>
+        </div>
+        <div class="disclaimer">
+            【免責事項】本ツールは、X（旧Twitter）および各種検索エンジンの表示画面を簡易的にシミュレートするものであり、完全な表示を保証するものではありません。端末やアップデート等によるズレについて、当方は一切の責任を負いかねます。
+        </div>
+    </div>
+    <script>
+        const textInput = document.getElementById("text-input");
+        const charCount = document.getElementById("char-count");
+        const seoAdvice = document.getElementById("seo-advice");
+        const xTextDisplay = document.getElementById("x-text-display");
+        const xMore = document.getElementById("xMore");
+        const xImage = document.getElementById("xImage");
+        const toggleFont = document.getElementById("toggleFont");
+        const toggleImage = document.getElementById("toggleImage");
+        const copyBtn = document.getElementById("copy-btn");
+
+        function updatePreview() {
+            const text = textInput.value;
+            const len = text.length;
+
+            // 1. 文字数の更新
+            charCount.textContent = len;
+
+            if (len === 0) {
+                xTextDisplay.textContent = "ここに打ち込んだ投稿文がリアルタイムで映し出されます。";
+                xTextDisplay.style.color = "#71767b";
+                
+                // 初期状態のSEOアドバイス（左線：元の青色）
+                seoAdvice.textContent = "🔍 Google検索用のタイトル：文字を入力すると判定が始まります。";
+                seoAdvice.style.borderLeftColor = "#3182ce";
+                xMore.style.display = 'none';
+                return;
+            }
+
+            // 2. Xプレビューの更新
+            xTextDisplay.textContent = text;
+            xTextDisplay.style.color = "#e7e9ea";
+
+            // 3. 【SEOタイトル判定】ココアさんオリジナルの神アドバイスロジックを完全復活！
+            if (len < 25) {
+                seoAdvice.textContent = `💡 ブログのタイトルとしては少し短めです（${len}文字）。もう少しキーワードを足すと検索されやすくなります！`;
+                seoAdvice.style.borderLeftColor = "#fbc531"; // 黄色
+            } else if (len <= 32) {
+                seoAdvice.textContent = `🎉 完璧なSEOタイトル文字数です！（${len}文字）Googleの検索画面で文字が絶対に「…」とはみ出さず、スマホでも一番きれいに表示されるベストな長さです！`;
+                seoAdvice.style.borderLeftColor = "#34d399"; // 緑色
+            } else {
+                seoAdvice.textContent = `⚠️ タイトルが長すぎます（${len}文字）。Googleの検索画面で後ろの文字が途中でカットされて「…」になってしまう恐れがあります！`;
+                seoAdvice.style.borderLeftColor = "#ff4757"; // 赤色
+            }
+
+            // 4. 新機能：タイムライン上での「3行見切れ（…さらに表示）」の全自動検知
+            const isOverflowing = xTextDisplay.scrollHeight > xTextDisplay.clientHeight;
+            if (isOverflowing) {
+                xMore.style.display = 'block'; // 3行を超えたら「…さらに表示」を出す
+            } else {
+                xMore.style.display = 'none';
+            }
+        }
+
+        // 入力のたびに全自動で関数を動かすリアルタイムの仕組み
+        textInput.addEventListener("input", updatePreview);
+
+        // 5. 新機能：標準フォント切り替え（ゴシック ⇔ 明朝）
+        toggleFont.addEventListener('click', () => {
+            if (xTextDisplay.classList.contains('font-serif')) {
+                xTextDisplay.classList.remove('font-serif');
+                toggleFont.textContent = 'ゴシック体';
+            } else {
+                xTextDisplay.classList.add('font-serif');
+                toggleFont.textContent = '明朝体';
+            }
+            updatePreview(); // フォント変更による3行折り返しのズレを再計算
+        });
+
+        // 6. 新機能：画像あり/なし切り替えトグル
+        toggleImage.addEventListener('click', () => {
+            const hasImage = xImage.classList.contains('show');
+            if (hasImage) {
+                xImage.classList.remove('show');
+                toggleImage.textContent = '画像なし';
+                toggleImage.classList.remove('active');
+            } else {
+                xImage.classList.add('show');
+                toggleImage.textContent = '画像あり (16:9)';
+                toggleImage.classList.add('active');
+            }
+            // 描画をわずかに待ってから3行見切れを正しく判定
+            setTimeout(updatePreview, 50);
+        });
+
+         // 7. 過去のコードベース：コピーして安全にXを開く大成功ボタン（完全復活・レモン緑最適化）
+        copyBtn.addEventListener("click", () => {
+            const text = textInput.value;
+            if (text === "") {
+                alert("文章を入力してからコピーしてください。");
+                return;
+            }
+            
+            // クリップボードに安全・確実に書き込み
+            navigator.clipboard.writeText(text).then(() => {
+                // ユーザーが確信を持てる「レモン緑」に文字と色をパッと切り替え！
+                copyBtn.textContent = "コピー完了！Xへ移動します...💨";
+                copyBtn.style.backgroundColor = "#a3e635"; // ココアさん標準のレモン緑
+                copyBtn.style.color = "#0d0f12"; // 黒文字にして視認性抜群に
+                
+                // ココアさんオリジナルの1秒タイマー：この1秒のタメがあるから別タブが100%確実に開きます！
+                setTimeout(() => {
+                    window.open("https://x.com", "_blank");
+                    
+                    // 1秒後に元の美しいココアさん仕様（元のIDのブルー）へ寸分狂わず復帰
+                    copyBtn.textContent = "この文章をコピーしてXを開く 📋";
+                    copyBtn.style.backgroundColor = "#3182ce"; // 元の鮮やかなブルー
+                    copyBtn.style.color = "#ffffff";
+                }, 1000);
+            }).catch(err => {
+                alert("コピーに失敗しました。");
+            });
+        });
+
+        // 初回ロード時のUI初期化
+        updatePreview();
+    </script>
+</body>
+</html>
