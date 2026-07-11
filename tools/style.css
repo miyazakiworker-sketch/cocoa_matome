@@ -1,0 +1,30 @@
+.category-nav{
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    margin-bottom:25px;
+    padding-bottom:5px;
+}
+
+.category-chip{
+    text-decoration:none;
+    color:#e2e8f0;
+    background:#2d3748;
+    border:1px solid #4a5568;
+    border-radius:999px;
+    padding:8px 14px;
+    white-space:nowrap;
+    font-size:.85rem;
+    transition:.2s;
+}
+
+.category-chip:hover{
+    border-color:#3182ce;
+}
+
+.category-chip.active{
+    background:#a3e635;
+    color:#111;
+    border-color:#a3e635;
+    font-weight:bold;
+}
