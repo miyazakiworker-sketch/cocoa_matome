@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>現場の労務管理！建設業の36協定・残業一瞬判定タイマー</title>
+  <style>
+    /* ココアさん標準：PC真ん中寄せ・スマホ完全フィット・極上黒モード */
+    body {
+      background-color: #12161a;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 20px 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 440px;
+      width: 100%;
+      background: #1a202c;
+      padding: 25px 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 1px solid #2d3748;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.25rem;
+      color: #e67e22;
+      margin-top: 0;
+      margin-bottom: 20px;
+      border-bottom: 3px solid #e67e22;
+      padding-bottom: 10px;
+    }
+    label {
+      font-weight: bold;
+      font-size: 13px;
+      color: #a0aec0;
+      display: block;
+      text-align: left;
+      margin-top: 15px;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      margin-top: 6px;
+    }
+    input {
+      flex: 1;
+      padding: 10px 12px;
+      background-color: #12161a;
+      border: 2px solid #4a5568;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      text-align: right;
+    }
+    input:focus { border-color: #e67e22; }
+    .unit { margin-left: 10px; font-weight: bold; font-size: 13px; color: #a0aec0; width: 45px; text-align: left; }
+    
+    #calc-btn, #copy-link-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 25px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      transition: background 0.2s;
+      box-sizing: border-box;
+    }
+    #calc-btn { background-color: #e67e22; color: white; }
+    #calc-btn:hover { background-color: #d35400; }
+    
+    /* ボタンの見た目に完全偽装した本物のHTMLリンク */
+    #copy-link-btn {
+      display: none;
+      background-color: #1da1f2;
+      color: white;
+      text-decoration: none;
+      text-align: center;
+    }
+    #copy-link-btn:hover { background-color: #4ab3f4; }
+
+    .result-box {
+      display: none;
+      background-color: #12161a;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 20px;
+      text-align: left;
+      border: 1px solid #2d3748;
+    }
+    .result-title { font-weight: bold; color: #fff; font-size: 14px; margin-bottom: 10px; border-left: 4px solid #e67e22; padding-left: 8px; }
+    .result-value { font-size: 13px; margin-bottom: 8px; color: #cbd5e0; }
+    .highlight { font-weight: bold; font-size: 16px; }
+
+    .bar-container {
+      width: 100%;
+      height: 10px;
+      background: #2d3748;
+      border-radius: 5px;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      overflow: hidden;
+    }
+    #warning-bar {
+      width: 0%;
+      height: 100%;
+      background: #2ecc71;
+      transition: width 0.3s, background-color 0.3s;
+    }
+
+    .ad-space-box {
+      width: 100%; max-width: 440px; background-color: #1a202c; border: 2px dashed #2d3748; border-radius: 12px; padding: 15px; text-align: center; color: #718096; margin-top: 20px; box-sizing: border-box;
+    }
+    .ad-label { font-size: 10px; font-weight: bold; color: #4a5568; margin-bottom: 5px; }
+    .ad-text { font-size: 11px; color: #718096; line-height: 1.4; }
+
+    .disclaimer-box { max-width: 440px; font-size: 10px; color: #555; text-align: left; margin-top: 15px; line-height: 1.4; }
+
+    .footer-link { text-align: center; margin-top: 20px; font-size: 12px; }
+    .footer-link a { color: #e67e22; text-decoration: none; font-weight: bold; }
+    .footer-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>⏱️ 36協定・残業一瞬判定タイマー</h1>
+  
+  <label>① 今月のこれまでの「総残業時間」</label>
+  <div class="input-group">
+    <input type="number" id="overtime-input" value="25" min="0" step="0.5">
+    <span class="unit">時間</span>
+  </div>
+
+  <label>② 今月の「残りの現場稼働（営業）日数」</label>
+  <div class="input-group">
+    <input type="number" id="days-input" value="10" min="1">
+    <span class="unit">日</span>
+  </div>
+
+  <button id="calc-btn">法律違反ラインを一瞬で判定！</button>
+
+  <!-- 計算結果出力ボックス -->
+  <div id="result-box" class="result-box">
+    <div class="result-title">今月の労務診断結果</div>
+    
+    <div class="result-value">残業上限（月45時間）までの猶予: <span id="res-remain" class="highlight" style="color: #2ecc71;">0</span> 時間</div>
+    <div class="result-value">今月を乗り切るための1日あたりの上限: <span id="res-daily" style="font-weight:bold; color: #fff;">0</span> 時間 / 日</div>
+    
+    <!-- 警告ビジュアルメーター -->
+    <div class="bar-container">
+      <div id="warning-bar"></div>
+    </div>
+    <div id="res-advice" style="font-size: 12px; font-weight: bold; line-height: 1.4; margin-bottom: 15px;"></div>
+    
+    <!-- 🔒 セキュリティ＆タブ重複対策：target名を「cocoa_x_tab」に完全固定し、プロ仕様の防衛お守りを付与 -->
+    <a href="https://x.com" target="cocoa_x_tab" rel="noopener noreferrer" id="copy-link-btn">この結果をコピーして残業アラート報告 📋</a>
+  </div>
+</div>
+
+<div class="ad-space-box">
+  <div class="ad-label">Sponsored</div>
+  <div class="ad-text">※当サイトは開発費・サーバー維持費のために広告を掲載予定です。</div>
+</div>
+
+<div class="disclaimer-box">
+  【免責事項】本ツールは建設業等における36協定の原則上限（月45時間）を基準とした簡易シミュレーターです。特別条項や各種手当、正確な端数処理は各社の就業規則に準拠してください。本ツールの利用による労務上のトラブルについて、開発者は一切の責任を負いません。
+</div>
+
+<!-- 🔒 看板リンク：こちらも同一タブに流れるようtargetを固定し、セキュリティお守りを完全装備 -->
+<div class="footer-link">
+  開発者：<a href="https://x.com/cocoa_next7" target="cocoa_x_tab" rel="noopener noreferrer">ココア (@cocoa_next7)</a>
+</div>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const overtimeInput = document.getElementById("overtime-input");
+    const daysInput = document.getElementById("days-input");
+    const calcBtn = document.getElementById("calc-btn");
+    const resultBox = document.getElementById("result-box");
+    
+    const resRemain = document.getElementById("res-remain");
+    const resDaily = document.getElementById("res-daily");
+    const warningBar = document.getElementById("warning-bar");
+    const resAdvice = document.getElementById("res-advice");
+    const copyLinkBtn = document.getElementById("copy-link-btn");
+
+    let shareText = "";
+
+    calcBtn.addEventListener("click", () => {
+      const currentOvertime = parseFloat(overtimeInput.value) || 0;
+      const remainingDays = parseFloat(daysInput.value) || 0;
+
+      if (remainingDays <= 0) {
+        alert("⚠️ 残り日数は1日以上を入力してください！");
+        return;
+      }
+
+      const limit = 45;
+      const remainHours = limit - currentOvertime;
+      const dailyLimit = remainHours > 0 ? (remainHours / remainingDays).toFixed(1) : 0;
+      const percent = Math.min((currentOvertime / limit) * 100, 100);
+
+      resRemain.innerText = remainHours.toFixed(1);
+      resDaily.innerText = dailyLimit;
+      if (warningBar) warningBar.style.width = percent + "%";
+
+      if (currentOvertime < 30) {
+        if (resRemain) resRemain.style.color = "#2ecc71";
+        if (warningBar) warningBar.style.backgroundColor = "#2ecc71";
+        resAdvice.innerHTML = "🟢 【安全圏】労務違反リスクは低いです。この調子で安全第一で進めましょう！";
+        resAdvice.style.color = "#2ecc71";
+      } else if (currentOvertime >= 30 && currentOvertime < 45) {
+        if (resRemain) resRemain.style.color = "#f1c40f";
+        if (warningBar) warningBar.style.backgroundColor = "#f1c40f";
+        resAdvice.innerHTML = "🟡 【注意】上限まであとわずかです！1日あたりの時間を超えないよう調整してください。";
+        resAdvice.style.color = "#f1c40f";
+      } else {
+        if (resRemain) resRemain.style.color = "#e74c3c";
+        if (warningBar) warningBar.style.backgroundColor = "#e74c3c";
+        resAdvice.innerHTML = "🚨 【法律違反アウト！】すでに36協定の上限（45時間）を超過、または猶予ゼロです。今すぐ労務調整が必要です！";
+        resAdvice.style.color = "#e74c3c";
+      }
+
+      shareText = "【36協定・残業判定結果】\n今月の残業: " + currentOvertime + "時間 / 残り稼働日数: " + remainingDays + "日\n・上限までの猶予: " + remainHours.toFixed(1) + "時間\n・1日の許容残業: あと" + dailyLimit + "時間まで\n#ココアの残業判定タイマー";
+
+      resultBox.style.display = "block";
+      copyLinkBtn.style.display = "block";
+    });
+
+    // 🔒 壊れやすい危険な記号を全排除した超安定コピー処理
+    copyLinkBtn.addEventListener("click", () => {
+      if (!shareText) return;
+      
+      navigator.clipboard.writeText(shareText).then(() => {
+        copyLinkBtn.textContent = "判定コピー完了！Xへ移動します...💨";
+        copyLinkBtn.style.backgroundColor = "#2ed573";
+        
+        setTimeout(() => {
+          copyLinkBtn.textContent = "この結果をコピーして残業アラート報告 📋";
+          copyLinkBtn.style.backgroundColor = "#1da1f2";
+        }, 1500);
+      }).catch(() => {
+        console.log("コピーエラー");
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
