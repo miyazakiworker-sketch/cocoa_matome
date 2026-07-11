@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LPファーストビュー・完全フィット検証ミラー</title>
+  <style>
+    :root { --bg-color: #f4f7f6; --panel-bg: #ffffff; --text-color: #333333; --accent-color: #0070f3; --border-color: #cccccc; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; box-sizing: border-box; }
+    
+    /* PC表示：左に操作パネル、右にスマホが美しく並ぶ「本物の2カラム構造」 */
+    .container { max-width: 1100px; margin: 0 auto; display: flex; gap: 30px; }
+    .left-panel { flex: 1; background: var(--panel-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); box-sizing: border-box; }
+    .right-preview { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+    
+    h1 { font-size: 1.4rem; color: var(--accent-color); margin: 0 0 5px 0; }
+    .subtitle { font-size: 0.85rem; color: #666; margin-bottom: 25px; }
+    .section-title { font-size: 0.95rem; font-weight: bold; color: #111; margin: 20px 0 10px 0; border-left: 4px solid var(--accent-color); padding-left: 8px; }
+    label { font-weight: bold; font-size: 0.85rem; display: block; margin-top: 12px; color: #555; }
+    input, textarea { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; margin-top: 6px; background-color: #fafafa; font-family: inherit; }
+    input:focus, textarea:focus { border-color: var(--accent-color); background-color: #fff; outline: none; }
+    
+    .toggle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 6px; }
+    .toggle-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; }
+    .btn-toggle { padding: 10px 5px; background: #e0e0e0; color: #333; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; text-align: center; }
+    .btn-toggle.active { background: var(--accent-color); color: white; }
+    
+    .btn-container { display: flex; gap: 15px; margin-top: 25px; }
+    .main-btn { flex: 1; padding: 14px 10px; border: none; border-radius: 6px; font-size: 0.95rem; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; box-sizing: border-box; }
+    .btn-clear { background-color: #e0e0e0; color: #333; }
+    .btn-x { background-color: #1da1f2; color: white; }
+    
+    /* 📱 内蔵スマホミラー領域（可変サイズCSSを完全復元） */
+    .phone-wrapper { position: relative; background: #000; border: 12px solid #333; border-radius: 40px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.2); transition: all 0.2s ease; }
+    .phone-wrapper.size-normal { width: 393px; height: 740px; }
+    .phone-wrapper.size-large { width: 430px; height: 820px; }
+    .phone-screen { width: 100%; height: 100%; background: #fff; color: #000; padding: 45px 20px 20px 20px; box-sizing: border-box; overflow-y: auto; text-align: center; display: flex; flex-direction: column; align-items: center; }
+    .phone-notch { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 100px; height: 22px; background: #000; border-radius: 12px; z-index: 10; }
+    
+    .fold-line { position: absolute; left: 0; width: 100%; border-bottom: 2px dashed #ff007f; pointer-events: none; z-index: 5; }
+    .phone-wrapper.size-normal .fold-line { top: 610px; }
+    .phone-wrapper.size-large .fold-line { top: 690px; }
+    .fold-label { position: absolute; right: 5px; background: #ff007f; color: white; font-size: 9px; padding: 2px 4px; border-radius: 3px; transform: translateY(-100%); font-weight: bold; }
+    
+    .mirror-main { font-weight: bold; font-family: inherit; line-height: 1.4; margin-top: 30px; word-break: break-all; width: 100%; transition: font-size 0.1s; font-size: 1.4rem; }
+    .mirror-sub { font-family: inherit; color: #444; margin-top: 15px; line-height: 1.5; word-break: break-all; width: 100%; transition: font-size 0.1s; font-size: 0.95rem; }
+    .mirror-btn { display: block; width: 90%; margin-top: auto; margin-bottom: 20px; color: white; font-weight: bold; text-decoration: none; border-radius: 25px; text-align: center; background: #2ed573; padding: 14px; font-size: 0.95rem; font-family: inherit; }
+    
+    .count-badge { float: right; font-size: 0.75rem; color: #666; }
+    .count-badge.alert-red { color: #ff007f; font-weight: bold; }
+    .ad-space { margin-top: 30px; padding: 20px 10px; background: #fafafa; border: 2px dashed #ddd; border-radius: 8px; text-align: center; color: #999; font-size: 0.8rem; }
+    .ad-box { width: 100%; height: 90px; display: flex; justify-content: center; align-items: center; background: #eee; color: #777; font-weight: bold; margin-top: 8px; border-radius: 4px; }
+    .disclaimer { font-size: 0.75rem; color: #666; background: #eee; padding: 12px; border-radius: 6px; margin-top: 30px; line-height: 1.5; }
+    .footer-link { text-align: center; margin-top: 25px; font-size: 0.9rem; }
+    .footer-link a { color: var(--accent-color); text-decoration: none; font-weight: bold; }
+    
+    @media (max-width: 900px) { .container { flex-direction: column; } .phone-wrapper { margin: 0 auto; } }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 左側：操作パネルエリア（タグのペア、サイズ切替HTMLを完全復元・見直し検証済み） -->
+  <div class="left-panel">
+    <h1>LP検証ミラー</h1>
+    <div class="subtitle">文字の「折り返し」「見切れ」を3秒検証。</div>
+    
+    <div class="section-title">📱 デバイス設定</div>
+    <div class="form-group">
+      <label>検証する端末サイズ</label>
+      <div class="toggle-grid">
+        <button type="button" id="btn-size-normal" class="btn-toggle active">iPhone (標準)</button>
+        <button type="button" id="btn-size-large" class="btn-toggle">Pro Max (大)</button>
+      </div>
+    </div>
+    
+    <div class="section-title">✍️ コピー入力</div>
+    <div class="form-group"><label for="input-main">メインコピー <span id="main-counter" class="count-badge">0 / 20文字</span></label><textarea id="input-main" rows="2" placeholder="例：だるい確定申告を3秒で終わらせるツール"></textarea></div>
+    <div class="form-group"><label for="input-sub">サブコピー</label><textarea id="input-sub" rows="3" placeholder="例：総売上と経費を入れるだけで手取りを一瞬で逆算。"></textarea></div>
+    <div class="form-group"><label for="input-cv">ボタンテキスト</label><input type="text" id="input-cv" placeholder="例：完全無料で一生使う"></div>
+    
+    <div class="section-title">🎨 デザイン調整</div>
+    <div class="form-group"><label>検証用フォント</label><div class="toggle-grid"><button type="button" id="btn-font-sans" class="btn-toggle active">ゴシック</button><button type="button" id="btn-font-serif" class="btn-toggle">明朝体</button></div></div>
+    <div class="form-group"><label>文字サイズ（大中小）</label><div class="toggle-grid-3"><button type="button" id="btn-scale-small" class="btn-toggle">小</button><button type="button" id="btn-scale-medium" class="btn-toggle active">中（黄金）</button><button type="button" id="btn-scale-large" class="btn-toggle">大</button></div></div>
+    
+        <!-- 💡 JSによるURL書き換えを完全廃止。ブラウザに100%ブロックされない無敵の静的直リンク形式へ修正 -->
+    <div class="btn-container">
+      <button type="button" class="main-btn btn-clear" id="clearStorageBtn">記憶クリア</button>
+      <a href="https://x.com" target="_blank" class="main-btn btn-x" id="copyLinkBtn" style="display: block; text-decoration: none; box-sizing: border-box;">Xで報告する 📋</a>
+    </div>
+  </div>
+
+  <!-- 右側：スマホ表示ミラーエリア（操作パネルの外側に完全独立） -->
+  <div class="right-preview">
+    <div class="phone-wrapper size-normal" id="phone-container">
+      <div class="phone-notch"></div>
+      <div class="fold-line"><div class="fold-label">ファーストビュー見切れ線</div></div>
+      <div class="phone-screen" id="p-screen">
+        <div class="mirror-main" id="v-main">（メインコピー）</div>
+        <div class="mirror-sub" id="v-sub">（サブコピー）</div>
+        <a href="#" class="mirror-btn" id="v-btn">ボタンテキスト</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="max-width:1100px; margin:0 auto; width:100%;">
+  <div class="ad-space">SPONSORED LINK<div class="ad-box">広告掲載スペース（準備中）</div></div>
+  <div class="disclaimer"><strong>【免責事項】</strong><br>本ツールはスマートフォン実機の表示状態をブラウザ上でシミュレートする簡易検証用ミラーです。一般的な標準デバイスの数値を元に算出していますが、ユーザーのスマホOSの文字サイズ設定やブラウザアプリ特有の仕様の違いによって、実際のデバイスでの見え方と差異が生じる場合があります。本ツールでの検証結果に基づいて制作されたLPの成果や不一致について、開発者は一切の責任を負いません。必ず実際のスマホ実機での表示テストを併せて行うようお願いいたします。</div>
+  <div class="footer-link">開発者：<a href="https://x.com/cocoa_next7" target="_blank">ココア (@cocoa_next7)</a></div>
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    var inMain = document.getElementById('input-main'), inSub = document.getElementById('input-sub'), inCv = document.getElementById('input-cv'), vMain = document.getElementById('v-main'), vSub = document.getElementById('v-sub'), vBtn = document.getElementById('v-btn'), mainCounter = document.getElementById('main-counter'), pScreen = document.getElementById('p-screen'), phoneContainer = document.getElementById('phone-container'), copyLinkBtn = document.getElementById('copyLinkBtn'), clearStorageBtn = document.getElementById('clearStorageBtn');
+    var currentFont = "sans", currentScale = "medium";
+
+    // 💡 フリーズと遮断の原因だった「copyLinkBtn.hrefの動的書き換え」を完全に全消去しました
+    function sync() {
+      var mainText = inMain ? inMain.value : "", subText = inSub ? inSub.value : "", cvText = inCv ? inCv.value : "ボタンテキスト";
+      if (vMain) vMain.innerText = mainText || "（メインコピー）";
+      if (vSub) vSub.innerText = subText || "（サブコピー）";
+      if (vBtn) vBtn.innerText = cvText || "ボタンテキスト";
+      if (mainCounter) {
+        var len = mainText.length; mainCounter.innerText = len + " / 20文字";
+        mainCounter.className = len > 20 ? "count-badge alert-red" : "count-badge";
+      }
+    }
+
+    function updateStyle() {
+      if (!pScreen || !vMain || !vSub || !vBtn) return;
+      var fontName = "'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif";
+      if (currentFont === "serif") fontName = "'Noto Serif JP', 'Hiragino Mincho ProN', serif";
+      pScreen.style.fontFamily = fontName; vMain.style.fontFamily = fontName; vSub.style.fontFamily = fontName; vBtn.style.fontFamily = fontName;
+
+      if (currentScale === "small") { vMain.style.fontSize = "1.1rem"; vSub.style.fontSize = "0.8rem"; vBtn.style.padding = "10px"; vBtn.style.fontSize = "0.85rem"; }
+      else if (currentScale === "large") { vMain.style.fontSize = "1.8rem"; vSub.style.fontSize = "1.15rem"; vBtn.style.padding = "16px"; vBtn.style.fontSize = "1.1rem"; }
+      else { vMain.style.fontSize = "1.4rem"; vSub.style.fontSize = "0.95rem"; vBtn.style.padding = "14px"; vBtn.style.fontSize = "0.95rem"; }
+      sync();
+    }
+
+    function setupToggle(btnIdPrefix, callback) {
+      var buttons = document.querySelectorAll('[id^="' + btnIdPrefix + '"]');
+      buttons.forEach(function(btn) {
+        btn.onclick = function() {
+          buttons.forEach(function(b) { b.classList.remove("active"); });
+          this.classList.add("active"); callback(this.id.replace(btnIdPrefix, ""));
+        };
+      });
+    }
+
+    setupToggle("btn-size-", function(val) {
+      if (phoneContainer) phoneContainer.className = val === "large" ? "phone-wrapper size-large" : "phone-wrapper size-normal";
+      sync();
+    });
+    setupToggle("btn-font-", function(val) { currentFont = val; updateStyle(); });
+    setupToggle("btn-scale-", function(val) { currentScale = val; updateStyle(); });
+
+    [inMain, inSub, inCv].forEach(function(el) { if(el) el.addEventListener('input', sync); });
+
+    // 💡 過去作と100%完全一致：URLの偽装クリックを完全にやめ、純粋にクリップボードへテキストをコピーするだけの鉄壁エラーフリー設計
+    if (copyLinkBtn) {
+      copyLinkBtn.addEventListener("click", function() {
+        var sizeEl = document.querySelector('[id^="btn-size-"].active');
+        var sizeName = sizeEl ? (sizeEl.innerText || "標準") : "標準";
+        var txt = inMain ? (inMain.value || "未入力") : "未入力";
+        var textToCopy = "【" + sizeName + "サイズでLPファーストビューを検証しました！】\nメインコピー: " + txt + "\nスマホ完全フィット検証ミラー「lp-fv-mirror」で文字見切れを防ぐ🔥";
+
+        navigator.clipboard.writeText(textToCopy).then(function() {
+          copyLinkBtn.textContent = "コピー完了！そのままX等の画面へ貼れます✅";
+          copyLinkBtn.style.backgroundColor = "#2ed573";
+          setTimeout(function() {
+            copyLinkBtn.textContent = "文章をコピーしてXへ完了報告 📋";
+            copyLinkBtn.style.backgroundColor = "#1da1f2";
+          }, 2000);
+        }).catch(function() { console.log("コピーエラー"); });
+      });
+    }
+
+    if (clearStorageBtn) {
+      clearStorageBtn.onclick = function() {
+        if(confirm('入力内容をリセットしますか？')) {
+          if (inMain) inMain.value = ''; if (inSub) inSub.value = ''; if (inCv) inCv.value = ''; updateStyle();
+        }
+      };
+    }
+    updateStyle();
+  });
+</script>
+</body>
+</html>
