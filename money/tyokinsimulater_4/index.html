@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>フリーランス独立計画！ココアの未来貯金シミュレーター</title>
+    <style>
+        body {
+            background-color: #f5f6fa;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: #2f3640;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: white;
+            padding: 25px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            width: 100%;       
+            max-width: 440px;  
+            box-sizing: border-box;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: #2f3542;
+            font-size: 20px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #70a1ff;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #57606f;
+            width: 55%;
+        }
+
+        .input-group input {
+            width: 40%;
+            padding: 8px 12px;
+            border: 2px solid #ced6e0;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: right;
+            outline: none;
+        }
+
+        #calc-btn {
+            background-color: #70a1ff;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            width: 100%;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(112, 161, 255, 0.3);
+        }
+
+        .result-box {
+            display: none; 
+            background-color: #f1f2f6;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .result-title {
+            font-weight: bold;
+            color: #2f3542;
+            font-size: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #2ed573;
+            padding-left: 8px;
+        }
+
+        .result-value {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #57606f;
+        }
+
+        .highlight {
+            color: #ff4757;
+            font-weight: bold;
+            font-size: 17px;
+        }
+
+        #copy-btn {
+            background-color: #1da1f2;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .ad-space-box {
+            width: 100%;
+            max-width: 440px;
+            box-sizing: border-box;
+            background-color: #f1f2f6;
+            border: 2px dashed #ced6e0;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .ad-label { font-size: 11px; font-weight: bold; color: #a4b0be; margin-bottom: 5px; }
+        .ad-placeholder-text { font-size: 12px; color: #a4b0be; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>ココアの未来貯金シミュレーター</h1>
+        
+        <div class="input-group">
+            <label>① 毎月の手取り収入 (円)</label>
+            <input type="number" id="income" value="200000" min="0">
+        </div>
+
+        <div class="input-group">
+            <label>② 家賃・光熱費 (円)</label>
+            <input type="number" id="rent" value="70000" min="0">
+        </div>
+
+        <div class="input-group">
+            <label>③ 食費・生活費 (円)</label>
+            <input type="number" id="food" value="40000" min="0">
+        </div>
+
+        <div class="input-group">
+            <label>④ 趣味・PC・交際費 (円)</label>
+            <input type="number" id="hobby" value="30000" min="0">
+        </div>
+
+        <div class="input-group" style="margin-top: 25px; border-top: 1px dashed #ced6e0; padding-top: 15px;">
+            <label style="color: #ff4757;">🎯 独立のための目標貯金額 (円)</label>
+            <input type="number" id="target" value="1000000" min="0">
+        </div>
+
+        <button id="calc-btn">未来をシミュレートする！</button>
+
+        <div id="result-box" class="result-box">
+            <div class="result-title">シミュレーション結果</div>
+            <div class="result-value">毎月の純貯金額: <span id="res-surplus" class="highlight" style="color:#2ed573;">0</span> 円</div>
+            <div class="result-value">目標達成まで: <span id="res-months" class="highlight">0</span> ヶ月</div>
+            
+            <div id="res-advice" style="margin-top: 15px; font-size: 13px; color: #747d8c; line-height: 1.4; border-top: 1px solid #ced6e0; padding-top: 10px;"></div>
+
+            <!-- パソコンの過剰セキュリティを100%すり抜けるコピー式ボタンに固定しました -->
+            <button id="copy-btn">報告文をコピーしてXを開く 📋</button>
+        </div>
+    </div>
+
+    <div class="ad-space-box">
+        <div class="ad-label">Sponsored</div>
+        <div class="ad-placeholder-text">
+            ※当サイトは開発費・サーバー維持費のために広告を掲載予定です。<br>
+            応援よろしくお願いいたします！
+        </div>
+    </div>
+
+    <script>
+        const calcBtn = document.getElementById("calc-btn");
+        const resultBox = document.getElementById("result-box");
+        const resSurplus = document.getElementById("res-surplus");
+        const resMonths = document.getElementById("res-months");
+        const resAdvice = document.getElementById("res-advice");
+        const copyBtn = document.getElementById("copy-btn");
+
+        let shareText = "";
+
+        calcBtn.addEventListener("click", () => {
+            const income = parseInt(document.getElementById("income").value) || 0;
+            const rent = parseInt(document.getElementById("rent").value) || 0;
+            const food = parseInt(document.getElementById("food").value) || 0;
+            const hobby = parseInt(document.getElementById("hobby").value) || 0;
+            const target = parseInt(document.getElementById("target").value) || 0;
+
+            const surplus = income - (rent + food + hobby);
+            resultBox.style.display = "block";
+
+            if (surplus <= 0) {
+                resSurplus.textContent = surplus.toLocaleString();
+                resSurplus.style.color = "#ff4757";
+                resMonths.textContent = "無限";
+                resAdvice.textContent = "⚠️ 現在赤字、または貯金ができない状態です！固定費を見直す計画を立てましょう！";
+                copyBtn.style.display = "none";
+                return;
+            }
+
+            const months = Math.ceil(target / surplus);
+            resSurplus.textContent = surplus.toLocaleString();
+            resSurplus.style.color = "#2ed573";
+            resMonths.textContent = months;
+
+            let advice = "";
+            if (months <= 6) {
+                advice = "💡 素晴らしい貯金ペースです！来年の今頃には完全フリーランスとして大活躍している可能性が極めて高いです！";
+            } else if (months <= 12) {
+                advice = "💡 約1年で独立資金が貯まる計画です！来年1月からの受講期間中にスキルを完全に自分のものにしましょう！";
+            } else {
+                advice = "💡 着実に前進できる計画です。簡単なCAD案件を受注して『趣味代』を浮かせると、達成が数ヶ月早まります！";
+            }
+            resAdvice.textContent = advice;
+
+            copyBtn.style.display = "block";
+            copyBtn.textContent = "報告文をコピーしてXを開く 📋";
+            copyBtn.style.backgroundColor = "#1da1f2";
+
+            shareText = `ココアの未来貯金シミュレーターで計算しました！毎月${surplus.toLocaleString()}円貯金し、あと【${months}ヶ月】で目標達成してフリーランスへ挑戦します！ #プログラミング初心者 #未来貯金シミュレーター`;
+        });
+
+        copyBtn.addEventListener("click", () => {
+            navigator.clipboard.writeText(shareText).then(() => {
+                copyBtn.textContent = "コピー完了！Xへジャンプします...💨";
+                copyBtn.style.backgroundColor = "#2ed573";
+                setTimeout(() => {
+                    window.open("https://x.com", "_blank");
+                }, 1000);
+            }).catch(err => {
+                alert("コピーに失敗しました。");
+            });
+        });
+    </script>
+</body>
+</html>
