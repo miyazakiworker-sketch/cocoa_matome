@@ -5,20 +5,20 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // ページ表示時にフェードイン
+    // フェードイン
     document.body.style.opacity = "0";
 
     setTimeout(() => {
-        document.body.style.transition = "opacity .35s";
+        document.body.style.transition = "opacity .3s ease";
         document.body.style.opacity = "1";
     }, 50);
 
-    // 外部リンクを安全に開く
+    // 外部リンク対策
     document.querySelectorAll('a[target="_blank"]').forEach(link => {
         link.setAttribute("rel", "noopener noreferrer");
     });
 
-    // カテゴリカードのクリック演出
+    // カードクリック演出
     document.querySelectorAll(".category-card").forEach(card => {
 
         card.addEventListener("click", () => {
@@ -33,18 +33,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
     });
 
-    // ツール一覧ボタン
-    const toolButton = document.querySelector(".big-button");
+    // ボタン演出
+    document.querySelectorAll(".big-button").forEach(button => {
 
-    if(toolButton){
+        button.addEventListener("click", () => {
 
-        toolButton.addEventListener("click",()=>{
+            button.style.opacity = ".85";
 
-            toolButton.textContent = "読み込み中...";
+            setTimeout(() => {
+                button.style.opacity = "";
+            }, 150);
+
+        });
+
+    });
+
+    // ページ最上部へ戻るボタン（将来用）
+    const backTop = document.getElementById("backTop");
+
+    if(backTop){
+
+        window.addEventListener("scroll",()=>{
+
+            if(window.scrollY>300){
+
+                backTop.style.display="block";
+
+            }else{
+
+                backTop.style.display="none";
+
+            }
+
+        });
+
+        backTop.addEventListener("click",()=>{
+
+            window.scrollTo({
+
+                top:0,
+
+                behavior:"smooth"
+
+            });
 
         });
 
     }
 
-    console.log("COCOA TOOLS v2.0");
+    console.log("COCOA TOOLS v2.0 Loaded");
+
 });
