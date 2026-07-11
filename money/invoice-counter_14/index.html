@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>いくら損する？インボイス・消費税一瞬判定カウンター</title>
+  <style>
+    /* ココアさん標準：PC真ん中寄せ・スマホ完全フィット・極上黒モード */
+    body {
+      background-color: #12161a;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 20px 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 440px;
+      width: 100%;
+      background: #1a202c;
+      padding: 25px 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 1px solid #2d3748;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.25rem;
+      color: #3182ce;
+      margin-top: 0;
+      margin-bottom: 20px;
+      border-bottom: 3px solid #3182ce;
+      padding-bottom: 10px;
+    }
+    .section-title {
+      font-size: 0.95rem;
+      color: #fff;
+      text-align: left;
+      margin-top: 20px;
+      margin-bottom: 5px;
+      border-left: 4px solid #3182ce;
+      padding-left: 8px;
+      font-weight: bold;
+    }
+    label {
+      font-weight: bold;
+      font-size: 11px;
+      color: #a0aec0;
+      display: block;
+      text-align: left;
+      margin-top: 10px;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      margin-top: 4px;
+    }
+    input, select {
+      flex: 1;
+      padding: 10px 12px;
+      background-color: #12161a;
+      border: 2px solid #4a5568;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      box-sizing: border-box;
+    }
+    input { text-align: right; }
+    input:focus, select:focus { border-color: #3182ce; }
+    .unit { margin-left: 10px; font-weight: bold; font-size: 13px; color: #a0aec0; width: 35px; text-align: left; }
+    
+    /* 機能①：法律基準パチパチ選択ボタン */
+    .toggle-container {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+    .toggle-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 10px;
+      background-color: #2d3748;
+      border: 2px solid #4a5568;
+      color: #cbd5e0;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .toggle-btn.active {
+      background-color: #3182ce;
+      border-color: #3182ce;
+      color: #fff;
+    }
+
+    #copy-link-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 25px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      transition: background 0.2s;
+      box-sizing: border-box;
+      background-color: #1da1f2;
+      color: white;
+      text-decoration: none;
+      text-align: center;
+      display: block;
+    }
+    #copy-link-btn:hover { background-color: #4ab3f4; }
+
+    /* 結果ボックス */
+    .result-box {
+      background-color: #12161a;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 20px;
+      text-align: left;
+      border: 1px solid #2d3748;
+    }
+    .result-box-title { font-weight: bold; color: #fff; font-size: 14px; margin-bottom: 10px; border-left: 4px solid #3182ce; padding-left: 8px; }
+    .result-value { font-size: 13px; margin-bottom: 8px; color: #cbd5e0; }
+    
+    /* 機能③：目立つけど邪魔にならない絶妙な減額表示 */
+    .loss-banner {
+      background-color: #2d1a1e;
+      border: 1px solid #e53e3e;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 15px;
+      font-size: 13px;
+      color: #fc8181;
+      font-weight: bold;
+      line-height: 1.4;
+    }
+    .loss-highlight { color: #e53e3e; font-size: 16px; }
+    .compare-box { background: #1a202c; padding: 10px; border-radius: 6px; border: 1px solid #2d3748; margin-bottom: 8px; }
+    .compare-title { font-size: 11px; color: #a0aec0; margin-bottom: 4px; font-weight: bold; }
+    .compare-value { font-size: 14px; color: #fff; font-weight: bold; }
+
+    .ad-space-box {
+      width: 100%; max-width: 440px; background-color: #1a202c; border: 2px dashed #2d3748; border-radius: 12px; padding: 15px; text-align: center; color: #718096; margin-top: 20px; box-sizing: border-box;
+    }
+    .ad-label { font-size: 10px; font-weight: bold; color: #4a5568; margin-bottom: 5px; }
+    .ad-text { font-size: 11px; color: #718096; line-height: 1.4; }
+    .disclaimer-box { max-width: 440px; font-size: 10px; color: #555; text-align: left; margin-top: 15px; line-height: 1.4; }
+    .footer-link { text-align: center; margin-top: 20px; font-size: 12px; }
+    .footer-link a { color: #3182ce; text-decoration: none; font-weight: bold; }
+    .footer-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>⏱️ インボイス・消費税一瞬判定</h1>
+  
+  <div class="section-title">基準となる2年前の売上（機能①）</div>
+  <label>課税売上高のボーダーライン選択</label>
+  <div class="toggle-container">
+    <button class="toggle-btn active" data-rev="500">1000万円以下<br>(本来は免税事業者)</button>
+    <button class="toggle-btn" data-rev="1500">1000万円超<br>(強制的に課税事業者)</button>
+  </div>
+
+  <div class="section-title">📊 現在の年間売上と業種</div>
+  <label>現在の年間総売上（税込）</label>
+  <div class="input-group">
+    <input type="number" id="current-rev-input" value="600" min="0">
+    <span class="unit">万円</span>
+  </div>
+
+  <label>みなし仕入れ率の業種区分（簡易課税用）</label>
+  <div class="input-group" style="margin-top:6px;">
+    <select id="biz-select">
+      <option value="0.5">第5種：IT・サービス業・士業 (みなし50%)</option>
+      <option value="0.6">第4種：飲食業など (みなし60%)</option>
+      <option value="0.7">第3種：製造業・建設業など (みなし70%)</option>
+      <option value="0.8">第2種：小売業など (みなし80%)</option>
+    </select>
+  </div>
+
+  <!-- 【機能⑤】リアルタイムにガチ連動する比較出力エリア -->
+  <div id="result-box" class="result-box">
+    <div class="result-box-title">インボイス影響度診断</div>
+    
+    <!-- 機能③：目立つけど上品な減額アラート -->
+    <div id="loss-alert" class="loss-banner">
+      ⚠️ インボイス登録による手取りの目減り額：<br>
+      年間で約 <span id="res-loss-val" class="loss-highlight">0</span> 万円 収入が減ります。
+    </div>
+
+    <div class="section-title" style="margin-top:0; margin-bottom:10px; font-size:12px; border-left-color:#a0aec0;">⚖️ 納税方法のシミュレーション比較（機能②）</div>
+    
+    <!-- 機能②：2割特例 vs 簡易課税の横並び比較 -->
+    <div class="compare-box">
+      <div class="compare-title">⚖️ プランA：2割特例（インボイス激変緩和措置）</div>
+      <div class="compare-value">消費税の納税額: <span id="tax-2percent" style="color:#2ecc71;">0</span> 万円</div>
+    </div>
+
+    <div class="compare-box">
+      <div class="compare-title">⚖️ プランB：簡易課税（選んだ業種区分で計算）</div>
+      <div class="compare-value">消費税の納税額: <span id="tax-simple" style="color:#f1c40f;">0</span> 万円</div>
+    </div>
+
+    <div class="result-value" style="font-size:12px; margin-top:12px; color:#a0aec0; text-align:center;">
+      💡 結論：このケースでは <span id="res-recommend" style="color:#fff; font-weight:bold; background:#3182ce; padding:2px 6px; border-radius:4px;">-</span> がお得です！
+    </div>
+    
+    <a href="https://x.com" target="cocoa_x_tab" rel="noopener noreferrer" id="copy-link-btn">この消費税診断をコピーしてXで報告 📋</a>
+  </div>
+</div>
+
+<div class="ad-space-box">
+  <div class="ad-label">Sponsored</div>
+  <div class="ad-text">※当サイトは開発費・サーバー維持費のために広告を掲載予定です。</div>
+</div>
+
+<div class="disclaimer-box">
+  【免責事項】本ツールはインボイス制度（売上税額の10%をベース）における簡易比較カウンターです。実際の登録判断や詳細な本則課税との比較は、クラウド会計ソフトや顧問税理士にご相談の上で最終決定してください。
+</div>
+
+<div class="footer-link">
+  開発者：<a href="https://x.com/cocoa_next7" target="cocoa_x_tab" rel="noopener noreferrer">ココア (@cocoa_next7)</a>
+</div>
+
+<!-- ーーー ここに次のステップでJavaScriptを追加します ーーー -->
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const currentRevInput = document.getElementById("current-rev-input");
+    const bizSelect = document.getElementById("biz-select");
+    const toggleBtns = document.querySelectorAll(".toggle-container .toggle-btn");
+
+    const resLossVal = document.getElementById("res-loss-val");
+    const tax2percent = document.getElementById("tax-2percent");
+    const taxSimple = document.getElementById("tax-simple");
+    const resRecommend = document.getElementById("res-recommend");
+    const copyLinkBtn = document.getElementById("copy-link-btn");
+
+    let isForcedTaxable = false; 
+    let shareText = "";
+
+    // ボタンパチパチ色切り替えロジック
+    toggleBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        toggleBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        const revValue = parseInt(btn.getAttribute("data-rev"));
+        isForcedTaxable = (revValue > 1000);
+
+        calculateInvoice();
+      });
+    });
+
+    // 安全なLocalStorage復元ロジック
+    const savedCurrentRev = localStorage.getItem("cocoa-invoice-rev");
+    const savedBiz = localStorage.getItem("cocoa-invoice-biz");
+    const savedForced = localStorage.getItem("cocoa-invoice-forced");
+
+    if (savedCurrentRev) currentRevInput.value = savedCurrentRev;
+    if (savedBiz) bizSelect.value = savedBiz;
+    if (savedForced === "true") {
+      isForcedTaxable = true;
+      toggleBtns.forEach(b => {
+        if (parseInt(b.getAttribute("data-rev")) > 1000) {
+          b.classList.add("active");
+        } else {
+          b.classList.remove("active");
+        }
+      });
+    }
+
+    // 【修正】超軽量・リアルタイム消費税計算エンジン
+    function calculateInvoice() {
+      const currentRev = parseFloat(currentRevInput.value) || 0; 
+      // 🔍 修正の肝：HTMLから受け取った文字列を100%確実に正しい計算用数値へ変換
+      const mishiRate = parseFloat(bizSelect.value);      
+
+      // 売上にかかる消費税の基本額（売上の10%分）
+      const baseTax = currentRev * 0.1;
+
+      // プランA：2割特例（1000万超の強制課税の人は対象外）
+      let taxA = 0;
+      if (isForcedTaxable === true) {
+        taxA = baseTax; 
+      } else {
+        taxA = baseTax * 0.2; 
+      }
+
+      // プランB：簡易課税（基本消費税 × (1 － みなし仕入れ率)）
+      const taxB = baseTax * (1.0 - mishiRate);
+
+      // インボイス登録による手取りのリアルな目減り額を逆算
+      let lossValue = 0;
+      if (isForcedTaxable === true) {
+        lossValue = 0; // もともと課税事業者の人は、インボイス関係なく消費税を払うので目減りは0
+      } else {
+        // 本来免税だった人が、インボイスに登録して納税した（一番安いプランの）額がそのまま手取りの減少になる
+        lossValue = Math.min(taxA, taxB); 
+      }
+
+      let recommendPlan = "";
+      if (isForcedTaxable === true) {
+        recommendPlan = "簡易課税（みなし仕入れ控除）";
+      } else {
+        if (taxA < taxB) {
+          recommendPlan = "プランA：2割特例";
+        } else if (taxA > taxB) {
+          recommendPlan = "プランB：簡易課税";
+        } else {
+          recommendPlan = "どちらのプランでも同額";
+        }
+      }
+
+      // 画面上の出力パーツへ一瞬で反映（0秒で数値がガチガチ動きます）
+      resLossVal.innerText = lossValue.toFixed(1);
+      
+      if (isForcedTaxable === true) {
+        tax2percent.innerText = "対象外 (本則換算: " + taxA.toFixed(1) + ")";
+      } else {
+        tax2percent.innerText = taxA.toFixed(1);
+      }
+      
+      taxSimple.innerText = taxB.toFixed(1);
+      resRecommend.innerText = recommendPlan;
+
+      localStorage.setItem("cocoa-invoice-rev", currentRev);
+      localStorage.setItem("cocoa-invoice-biz", bizSelect.value);
+      localStorage.setItem("cocoa-invoice-forced", isForcedTaxable);
+
+      shareText = "【インボイス・消費税一瞬判定結果】\n現在の売上: " + currentRev + "万円\n" +
+                  (isForcedTaxable ? "・2年前の売上: 1000万超(強制課税)\n" : "・2年前の売上: 1000万以下(本来免税)\n") +
+                  "・2割特例の納税額: " + tax2percent.innerText + "万円\n" +
+                  "・簡易課税の納税額: " + taxB.toFixed(1) + "万円\n" +
+                  "・登録による手取り目減り: 年約" + lossValue.toFixed(1) + "万円🚨\n" +
+                  "💡結論: " + recommendPlan + " がお得！\nURLは一生同じ！";
+    }
+
+    currentRevInput.addEventListener("input", calculateInvoice);
+    bizSelect.addEventListener("change", calculateInvoice);
+
+    copyLinkBtn.addEventListener("click", () => {
+      if (!shareText) return;
+      navigator.clipboard.writeText(shareText).then(() => {
+        copyLinkBtn.textContent = "判定コピー完了！Xへ移動します...💨";
+        copyLinkBtn.style.backgroundColor = "#2ed573";
+        setTimeout(() => {
+          copyLinkBtn.textContent = "この消費税診断をコピーしてXで報告 📋";
+          copyLinkBtn.style.backgroundColor = "#1da1f2";
+        }, 1500);
+      }).catch(() => {
+        console.log("コピーエラー");
+      });
+    });
+
+    calculateInvoice();
+  });
+</script>
+
+
+</body>
+</html>
