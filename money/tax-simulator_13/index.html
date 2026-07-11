@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>手取りがわかる！確定申告（青色申告）一瞬シミュレーター</title>
+  <style>
+    /* ココアさん標準：PC真ん中寄せ・スマホ完全フィット・極上黒モード */
+    body {
+      background-color: #12161a;
+      font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 20px 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 440px;
+      width: 100%;
+      background: #1a202c;
+      padding: 25px 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 1px solid #2d3748;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.25rem;
+      color: #2ecc71;
+      margin-top: 0;
+      margin-bottom: 20px;
+      border-bottom: 3px solid #2ecc71;
+      padding-bottom: 10px;
+    }
+    .section-title {
+      font-size: 0.95rem;
+      color: #fff;
+      text-align: left;
+      margin-top: 20px;
+      margin-bottom: 5px;
+      border-left: 4px solid #2ecc71;
+      padding-left: 8px;
+      font-weight: bold;
+    }
+    label {
+      font-weight: bold;
+      font-size: 11px;
+      color: #a0aec0;
+      display: block;
+      text-align: left;
+      margin-top: 10px;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      margin-top: 4px;
+    }
+    input {
+      flex: 1;
+      padding: 10px 12px;
+      background-color: #12161a;
+      border: 2px solid #4a5568;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      text-align: right;
+    }
+    input:focus { border-color: #2ecc71; }
+    .unit { margin-left: 10px; font-weight: bold; font-size: 13px; color: #a0aec0; width: 35px; text-align: left; }
+    
+    /* ボタンデザイン */
+    .toggle-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .toggle-btn {
+      flex: 1;
+      padding: 10px;
+      background-color: #2d3748;
+      border: 2px solid #4a5568;
+      color: #cbd5e0;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .toggle-btn.active {
+      background-color: #2ecc71;
+      border-color: #2ecc71;
+      color: #fff;
+    }
+
+    /* 簡単ミニ電卓の配置 */
+    .calc-box {
+      background-color: #12161a;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 6px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .calc-input { flex: 1; font-size: 12px; padding: 6px; }
+    .calc-btn-mini { background: #4a5568; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: bold; }
+
+    #copy-link-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 25px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      transition: background 0.2s;
+      box-sizing: border-box;
+      background-color: #1da1f2;
+      color: white;
+      text-decoration: none;
+      text-align: center;
+      display: block;
+    }
+    #copy-link-btn:hover { background-color: #4ab3f4; }
+
+    .result-box {
+      background-color: #12161a;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 20px;
+      text-align: left;
+      border: 1px solid #2d3748;
+    }
+    .result-box-title { font-weight: bold; color: #fff; font-size: 14px; margin-bottom: 10px; border-left: 4px solid #2ecc71; padding-left: 8px; }
+    .result-value { font-size: 13px; margin-bottom: 8px; color: #cbd5e0; }
+    .highlight { color: #2ecc71; font-weight: bold; font-size: 18px; }
+    .tax-text { color: #e53e3e; font-weight: bold; }
+
+    .ad-space-box {
+      width: 100%; max-width: 440px; background-color: #1a202c; border: 2px dashed #2d3748; border-radius: 12px; padding: 15px; text-align: center; color: #718096; margin-top: 20px; box-sizing: border-box;
+    }
+    .ad-label { font-size: 10px; font-weight: bold; color: #4a5568; margin-bottom: 5px; }
+    .ad-text { font-size: 11px; color: #718096; line-height: 1.4; }
+
+    .disclaimer-box { max-width: 440px; font-size: 10px; color: #555; text-align: left; margin-top: 15px; line-height: 1.4; }
+
+    .footer-link { text-align: center; margin-top: 20px; font-size: 12px; }
+    .footer-link a { color: #2ecc71; text-decoration: none; font-weight: bold; }
+    .footer-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>💰 確定申告・手取り一瞬シミュレーター</h1>
+  
+  <div class="section-title">📊 収入の入力</div>
+  <label>年間の総売上（収入）</label>
+  <div class="input-group">
+    <input type="number" id="revenue-input" value="600" min="0">
+    <span class="unit">万円</span>
+  </div>
+
+  <div class="section-title">💸 経費の内訳（機能①）</div>
+  
+  <!-- 機能①：家賃の按分電卓機能 -->
+  <label>① 地代家賃（仕事で使っている部屋代分）</label>
+  <div class="input-group">
+    <input type="number" id="exp-rent" value="36" min="0">
+    <span class="unit">万円</span>
+  </div>
+  <div class="calc-box">
+    <input type="number" id="calc-rent-total" placeholder="家賃月額" class="calc-input">
+    <input type="number" id="calc-rent-ratio" placeholder="仕事比率" value="30" class="calc-input" style="max-width:70px;">
+    <span style="font-size:11px; color:#a0aec0;">％</span>
+    <button id="btn-calc-rent" class="calc-btn-mini">年額を計算</button>
+  </div>
+
+  <label>② 通信費・カフェ代（スマホや会議費など）</label>
+  <div class="input-group">
+    <input type="number" id="exp-comm" value="12" min="0">
+    <span class="unit">万円</span>
+  </div>
+
+  <label>③ その他の経費（消耗品・旅費交通費など）</label>
+  <div class="input-group">
+    <input type="number" id="exp-other" value="50" min="0">
+    <span class="unit">万円</span>
+  </div>
+
+  <div class="section-title">🛡️ 控除設定（機能③）</div>
+  <label>確定申告の種類（控除額の選択）</label>
+  <div class="toggle-container">
+    <button id="btn-blue-65" class="toggle-btn active" data-value="65">青色申告 (65万控除)</button>
+    <button id="btn-white-0" class="toggle-btn" data-value="0">白色申告 (控除なし)</button>
+  </div>
+
+  <!-- 【機能⑤】リアルタイムにガチ連動する結果出力エリア -->
+  <div id="result-box" class="result-box" style="display:block;">
+    <div class="result-box-title">手取り・税金シミュレーション結果</div>
+    
+    <div class="result-value" style="font-size:15px; margin-bottom:12px;">
+      🎉 最終的な年間手取り: <span id="res-net-income" class="highlight">0</span> 万円
+    </div>
+    <div class="result-value">・総経費の合計: <span id="res-total-exp" style="font-weight:bold;">0</span> 万円</div>
+    <div class="result-value">・所得税（目安）: <span id="res-tax-income" class="tax-text">0</span> 万円</div>
+    <div class="result-value">・住民税（目安一律10%）: <span id="res-tax-resident" class="tax-text">0</span> 万円</div>
+    <div class="result-value">・国民健康保険料 ＆ 年金: <span id="res-insurance" class="tax-text">0</span> 万円</div>
+    
+    <a href="https://x.com" target="cocoa_x_tab" rel="noopener noreferrer" id="copy-link-btn">この手取り計画をコピーしてXで報告 📋</a>
+  </div>
+</div>
+
+<div class="ad-space-box">
+  <div class="ad-label">Sponsored</div>
+  <div class="ad-text">※当サイトは開発費・サーバー維持費のために広告を掲載予定です。</div>
+</div>
+
+<div class="disclaimer-box">
+  【免責事項】本ツールは単身フリーランスを想定した簡易シミュレーターです。基礎控除以外の各種所得控除（扶養控除等）は考慮していません。実際の納税額は最寄りの税務署または税理士、確定申告ソフトをご利用の上でご確認ください。
+</div>
+
+<div class="footer-link">
+  開発者：<a href="https://x.com/cocoa_next7" target="cocoa_x_tab" rel="noopener noreferrer">ココア (@cocoa_next7)</a>
+</div>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    // 各入力パーツの取得
+    const revInput = document.getElementById("revenue-input");
+    const rentInput = document.getElementById("exp-rent");
+    const commInput = document.getElementById("exp-comm");
+    const otherInput = document.getElementById("exp-other");
+    const rateInput = document.getElementById("rate-input");
+    
+    // 電卓パーツ
+    const calcRentTotal = document.getElementById("calc-rent-total");
+    const calcRentRatio = document.getElementById("calc-rent-ratio");
+    const btnCalcRent = document.getElementById("btn-calc-rent");
+
+    // ボタン設定
+    const btnBlue65 = document.getElementById("btn-blue-65");
+    const btnWhite0 = document.getElementById("btn-white-0");
+
+    // 出力パーツ
+    const resNetIncome = document.getElementById("res-net-income");
+    const resTotalExp = document.getElementById("res-total-exp");
+    const resTaxIncome = document.getElementById("res-tax-income");
+    const resTaxResident = document.getElementById("res-tax-resident");
+    const resInsurance = document.getElementById("res-insurance");
+    const copyLinkBtn = document.getElementById("copy-link-btn");
+
+    let currentDeduction = 65; // 初期値：青色65万控除
+    let shareText = "";
+
+    // 【機能④】LocalStorageから過去に入力した数値を自動で復元
+    const loadFields = ["rev", "rent", "comm", "other", "deduct"];
+    const savedData = {};
+    loadFields.forEach(f => { savedData[f] = localStorage.getItem("cocoa-tax-" + f); });
+    
+    if (savedData.rev) revInput.value = savedData.rev;
+    if (savedData.rent) rentInput.value = savedData.rent;
+    if (savedData.comm) commInput.value = savedData.comm;
+    if (savedData.other) otherInput.value = savedData.other;
+    if (savedData.deduct) {
+      currentDeduction = parseInt(savedData.deduct);
+      if (currentDeduction === 0) {
+        btnWhite0.classList.add("active");
+        btnBlue65.classList.remove("active");
+      }
+    }
+
+    // 【機能①】家賃按分の簡易電卓処理
+    btnCalcRent.addEventListener("click", () => {
+      const monthlyPrice = parseFloat(calcRentTotal.value) || 0;
+      const ratio = parseFloat(calcRentRatio.value) || 0;
+      if (monthlyPrice <= 0) { alert("⚠️ 家賃の月額を入力してください！"); return; }
+      
+      // 月額 × 12ヶ月 × 按分比率 ＝ 年間の経費（万円単位に直すため10000で割る）
+      const calculatedRentYear = ((monthlyPrice * 12) * (ratio / 100)) / 10000;
+      rentInput.value = calculatedRentYear.toFixed(1);
+      calculateTax();
+    });
+
+    // 青色・白色切り替えボタンの連動
+    btnBlue65.addEventListener("click", () => {
+      currentDeduction = 65;
+      btnBlue65.classList.add("active");
+      btnWhite0.classList.remove("active");
+      calculateTax();
+    });
+    btnWhite0.addEventListener("click", () => {
+      currentDeduction = 0;
+      btnWhite0.classList.add("active");
+      btnBlue65.classList.remove("active");
+      calculateTax();
+    });
+
+    // 【機能②・③・⑤】超軽量リアルタイム税金計算エンジン
+    function calculateTax() {
+      const rev = parseFloat(revInput.value) || 0;
+      const rent = parseFloat(rentInput.value) || 0;
+      const comm = parseFloat(commInput.value) || 0;
+      const other = parseFloat(otherInput.value) || 0;
+
+      // 経費合計
+      const totalExpenses = rent + comm + other;
+      
+      // 所得（利益） ＝ 売上 － 経費
+      const profit = Math.max(rev - totalExpenses, 0);
+
+      // 課税所得 ＝ 利益 － 基礎控除(48万) － 青色控除(65万または0万)
+      const taxableProfit = Math.max(profit - 48 - currentDeduction, 0);
+
+      // 1. 所得税（簡易5段階の累進課税ロジック）
+      let taxIncome = 0;
+      if (taxableProfit <= 195) {
+        taxIncome = taxableProfit * 0.05;
+      } else if (taxableProfit <= 330) {
+        taxIncome = (taxableProfit * 0.1) - 9.75;
+      } else if (taxableProfit <= 695) {
+        taxIncome = (taxableProfit * 0.2) - 42.75;
+      } else if (taxableProfit <= 900) {
+        taxIncome = (taxableProfit * 0.23) - 63.6;
+      } else {
+        taxIncome = (taxableProfit * 0.33) - 153.6;
+      }
+      taxIncome = Math.max(taxIncome, 0);
+
+      // 2. 住民税（一律10%）
+      const taxResident = taxableProfit * 0.1;
+
+      // 3. 社会保険料（フリーランスの国保・年金を利益から簡易算定、上限あり）
+      const insurance = Math.min((profit * 0.12) + 20, 100);
+
+      // 4. 手取りの算出 ＝ 売上 － 経費 － 所得税 － 住民税 － 社保
+      const netIncome = Math.max(rev - totalExpenses - taxIncome - taxResident - insurance, 0);
+
+      // 画面上の数値へ一瞬で超軽量反映
+      resNetIncome.innerText = netIncome.toFixed(1);
+      resTotalExp.innerText = totalExpenses.toFixed(1);
+      resTaxIncome.innerText = taxIncome.toFixed(1);
+      resTaxResident.innerText = taxResident.toFixed(1);
+      resInsurance.innerText = insurance.toFixed(1);
+
+      // 【機能④】数値をLocalStorageに自動記憶
+      localStorage.setItem("cocoa-tax-rev", rev);
+      localStorage.setItem("cocoa-tax-rent", rent);
+      localStorage.setItem("cocoa-tax-comm", comm);
+      localStorage.setItem("cocoa-tax-other", other);
+      localStorage.setItem("cocoa-tax-deduct", currentDeduction);
+
+      // コピー用テキスト
+      shareText = "【確定申告・手取り一瞬判定結果】\n年間の総売上: " + rev + "万円\n・経費合計: " + totalExpenses.toFixed(1) + "万円\n・年間手取り: " + netIncome.toFixed(1) + "万円🔥\n" + (currentDeduction === 65 ? "🎯青色申告65万控除クリア！" : "💡白色申告で算出") + "\nアプデ後もURLは一生同じ！";
+    }
+
+    // 全ての入力の瞬間をリアルタイムで監視
+    [revInput, rentInput, commInput, otherInput].forEach(inp => {
+      inp.addEventListener("input", calculateTax);
+    });
+
+    // 最速コピー処理
+    copyLinkBtn.addEventListener("click", () => {
+      if (!shareText) return;
+      navigator.clipboard.writeText(shareText).then(() => {
+        copyLinkBtn.textContent = "計画コピー完了！Xへ移動します...💨";
+        copyLinkBtn.style.backgroundColor = "#2ed573";
+        setTimeout(() => {
+          copyLinkBtn.textContent = "この手取り計画をコピーしてXで報告 📋";
+          copyLinkBtn.style.backgroundColor = "#1da1f2";
+        }, 1500);
+      }).catch(() => {
+        console.log("コピーエラー");
+      });
+    });
+
+    // 起動時に1回計算を走らせる
+    calculateTax();
+  });
+</script>
+
+</body>
+</html>
