@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ja" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO文字数＆キーワード一瞬カウンター 2.0</title>
+    <style>
+    /* ココアさん仕様：PCは真ん中寄せ・集中できる黒モードデザイン */
+    body {
+        background-color: #1a1a1a;
+        font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+        color: #e0e0e0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+
+    .container {
+        background-color: #262626;
+        padding: 25px 20px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        width: 100%;       
+        max-width: 440px;  
+        box-sizing: border-box;
+        text-align: center;
+        margin: 0 auto 20px auto;
+        border: 1px solid #333;
+    }
+
+    h1 {
+        color: #2980b9; 
+        font-size: 19px;
+        margin-top: 0;
+        margin-bottom: 20px;
+        border-bottom: 3px solid #2980b9;
+        padding-bottom: 10px;
+    }
+
+    label {
+        font-weight: bold;
+        font-size: 13px;
+        color: #b3b3b3;
+        display: block;
+        text-align: left;
+        margin-bottom: 5px;
+    }
+
+    /* 入力エリアも黒背景に統一してプロ仕様に */
+    input[type="text"], textarea {
+        width: 100%;
+        padding: 10px;
+        background-color: #1a1a1a;
+        border: 2px solid #444;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+        margin-bottom: 15px;
+    }
+    input[type="text"]:focus, textarea:focus {
+        border-color: #2980b9;
+        background-color: #1f1f1f;
+    }
+
+    #calc-btn, #copy-btn {
+        background-color: #2980b9;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        font-size: 15px;
+        font-weight: bold;
+        border-radius: 25px;
+        cursor: pointer;
+        width: 100%;
+        margin: 10px 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        transition: background 0.2s;
+    }
+    #calc-btn:hover { background-color: #3498db; }
+    
+    #copy-btn { background-color: #1da1f2; margin-top: 15px; }
+    #copy-btn:hover { background-color: #4ab3f4; }
+
+    .result-box {
+        background-color: #1a1a1a;
+        padding: 20px;
+        border-radius: 12px;
+        margin-top: 20px;
+        text-align: left;
+        border: 1px solid #333;
+    }
+
+    .result-title {
+        font-weight: bold;
+        color: #fff;
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    /* 警告バーのベース（グレー部分） */
+    .bar-container {
+        width: 100%;
+        height: 8px;
+        background: #333;
+        border-radius: 4px;
+        margin-top: 4px;
+        margin-bottom: 15px;
+        overflow: hidden;
+    }
+
+    .counter-info {
+        font-size: 12px;
+        color: #aaa;
+        margin-top: -10px;
+        margin-bottom: 5px;
+        text-align: left;
+    }
+
+    .ad-space-box {
+        width: 100%;
+        max-width: 440px;
+        box-sizing: border-box;
+        background-color: #262626;
+        border: 2px dashed #444;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        color: #888;
+        margin-bottom: 20px;
+    }
+    .ad-label { font-size: 11px; font-weight: bold; color: #666; margin-bottom: 5px; }
+    .ad-placeholder-text { font-size: 12px; color: #888; line-height: 1.4; }
+
+    .disclaimer-box {
+        max-width: 440px;
+        width: 100%;
+        text-align: left;
+        padding: 0 10px;
+        box-sizing: border-box;
+        margin-bottom: 15px;
+    }
+    .disclaimer-text {
+        font-size: 11px;
+        color: #666;
+        line-height: 1.5;
+    }
+
+    .author-box {
+        max-width: 440px;
+        width: 100%;
+        text-align: center;
+        margin: 0 auto;
+    }
+    .author-link {
+        font-size: 12px;
+        color: #3498db;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    .author-link:hover { text-decoration: underline; }
+</style>
+
+</head>
+<body>
+
+    <div class="container">
+        <h1>SEO文字数＆キーワード一瞬カウンター 2.0</h1>
+        
+        <!-- 新機能：タイトル監視 -->
+        <div class="input-block">
+            <label>① 記事タイトル（目標32文字以内）</label>
+            <input type="text" id="title-input" placeholder="タイトルを入力">
+            <div style="font-size: 11px; margin-top: 4px; color: #7f8c8d;">文字数: <span id="title-count" style="font-weight: bold;">0</span> / 32 文字</div>
+            <div class="meter-container"><div id="title-bar" class="meter-bar"></div></div>
+        </div>
+
+        <!-- 新機能：ディスクリプション監視 -->
+        <div class="input-block">
+            <label>② メタディスクリプション（目標120文字以内）</label>
+            <input type="text" id="desc-input" placeholder="ディスクリプションを入力">
+            <div style="font-size: 11px; margin-top: 4px; color: #7f8c8d;">文字数: <span id="desc-count" style="font-weight: bold;">0</span> / 120 文字</div>
+            <div class="meter-container"><div id="desc-bar" class="meter-bar"></div></div>
+        </div>
+
+        <!-- 既存機能 -->
+        <div class="input-block">
+            <label>③ 狙いたいSEOキーワード</label>
+            <input type="text" id="keyword-input" placeholder="例: フリーランス">
+        </div>
+
+        <div class="input-block">
+            <label>④ 本文テキスト</label>
+            <textarea id="target-text" placeholder="ここに記事の本文を貼り付けてください..."></textarea>
+        </div>
+
+        <!-- リアルタイム結果ボックス -->
+        <div class="result-box">
+            <div class="result-title">分析結果（リアルタイム監視中）</div>
+            <div class="result-value">本文総文字数: <span id="char-count" class="highlight">0</span> 文字</div>
+            <div class="result-value">キーワード出現回数: <span id="keyword-count" class="highlight" style="color:#e67e22;">0</span> 回</div>
+            <div class="result-value">キーワード出現比率: <span id="keyword-percent" class="highlight" style="color:#9b59b6;">0.0</span> ％</div>
+            
+            <!-- プロのマーケアドバイス -->
+            <div id="seo-advice">💡 狙いたいSEOキーワードを入力してください。</div>
+
+            <button id="copy-btn">この分析結果をコピーしてXでライティング報告 📋</button>
+        </div>
+    </div>
+
+    <!-- 将来の広告枠 -->
+    <div class="ad-space-box">
+        <div class="ad-label">Sponsored</div>
+        <div class="ad-placeholder-text">
+            ※当サイトは開発費・サーバー維持費のために広告を掲載予定です。<br>
+            応援よろしくお願いいたします！
+        </div>
+    </div>
+
+    <!-- お守り免責事項 -->
+    <div class="disclaimer-box">
+        <div class="disclaimer-text">
+            【ご利用上の注意】<br>
+            本ツールはブログ運営やSEOライティングの補助用シミュレーターです。キーワード比率の黄金比はGoogleのアルゴリズム変更等により効果が変動する場合があります。本ツールの利用によって生じた検索順位の変動や損害について、開発者は一切の責任を負いません。
+        </div>
+    </div>
+
+    <!-- ココアさんの公式看板リンク -->
+    <div class="author-box">
+        <a class="author-link" href="https://x.com/cocoa_next7" target="_blank">
+            🛠️ 開発者：ココア (@cocoa_next7) プロのフリーランスへの成長記録はコチラ 🛠️
+        </a>
+    </div>
+
+    <script>
+    // 画面が完全に読み込まれてから安全に作動させる
+    window.addEventListener('DOMContentLoaded', () => {
+        const textarea = document.getElementById("target-text");
+        const keywordInput = document.getElementById("keyword-input");
+        const charCountSpan = document.getElementById("char-count");
+        const keywordCountSpan = document.getElementById("keyword-count");
+        const keywordPercentSpan = document.getElementById("keyword-percent");
+        const seoAdviceDiv = document.getElementById("seo-advice");
+        const copyBtn = document.getElementById("copy-btn");
+
+        const titleInput = document.getElementById("title-input");
+        const descInput = document.getElementById("desc-input");
+        const titleCount = document.getElementById("title-count");
+        const descCount = document.getElementById("desc-count");
+        const titleBar = document.getElementById("title-bar");
+        const descBar = document.getElementById("desc-bar");
+
+        let shareText = "";
+
+        function analyzeText() {
+            const text = textarea.value || "";
+            const keyword = keywordInput.value.trim();
+            const titleText = titleInput ? titleInput.value : "";
+            const descText = descInput ? descInput.value : "";
+            
+            // 1. 本文文字数
+            if (charCountSpan) charCountSpan.innerText = text.length;
+
+            // 2. タイトル文字数とバーの連動
+            if (titleCount) titleCount.innerText = titleText.length;
+            if (titleBar) {
+                const titlePercent = Math.min((titleText.length / 32) * 100, 100);
+                titleBar.style.width = titlePercent + "%";
+                titleBar.style.backgroundColor = titleText.length > 32 ? "#e74c3c" : "#2ecc71";
+            }
+
+            // 3. ディスクリプション警告バーの連動（120文字超えで赤）
+            const descPercent = Math.min((descText.length / 120) * 100, 100);
+            if (descCount) descCount.innerText = descText.length;
+            if (descBar) {
+                descBar.style.width = descPercent + "%";
+                descBar.style.backgroundColor = descText.length > 120 ? "#e74c3c" : "#2ecc71";
+            }
+
+            // 4. キーワード未入力時の処理
+            if (!keyword) {
+                if (keywordCountSpan) keywordCountSpan.innerText = "0";
+                if (keywordPercentSpan) keywordPercentSpan.innerText = "0.0";
+                if (seoAdviceDiv) {
+                    seoAdviceDiv.innerHTML = "💡 狙いたいSEOキーワードを入力してください。";
+                    seoAdviceDiv.style.color = "#333";
+                }
+                return;
+            }
+
+            // 5. キーワード出現数（giロジック）
+            const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(escapedKeyword, "gi");
+            const matches = text.match(regex);
+            const count = matches ? matches.length : 0;
+            if (keywordCountSpan) keywordCountSpan.innerText = count;
+
+            // 6. 比率計算とアドバイス切り替え
+            const percent = text.length > 0 ? ((count * keyword.length) / text.length) * 100 : 0;
+            if (keywordPercentSpan) keywordPercentSpan.innerText = percent.toFixed(1);
+
+            if (seoAdviceDiv) {
+                if (count === 0) {
+                    seoAdviceDiv.innerHTML = "⚠️ キーワードが記事内に含まれていません！";
+                    seoAdviceDiv.style.color = "#e74c3c";
+                } else if (percent < 2.0) {
+                    seoAdviceDiv.innerHTML = "📉 キーワード比率が低め（2%未満）です。見出し等に追加しましょう。";
+                    seoAdviceDiv.style.color = "#e67e22";
+                } else if (percent >= 2.0 && percent <= 3.5) {
+                    seoAdviceDiv.innerHTML = "🎯 【黄金比率】キーワード比率が2%〜3.5%の適正範囲です！";
+                    seoAdviceDiv.style.color = "#2ecc71";
+                } else {
+                    seoAdviceDiv.innerHTML = "🚨 【入れすぎ注意】比率が過剰（3.5%超）です！ペナルティリスクがあります。";
+                    seoAdviceDiv.style.color = "#e74c3c";
+                }
+            }
+
+            shareText = `【SEO一瞬カウンター分析完了】\n本文: ${text.length}文字\nキーワード: 「${keyword}」\n出現: ${count}回 (${percent.toFixed(1)}%)\nアプデ後もURLは一生同じ！`;
+        }
+
+        // 監視の実行
+        textarea.addEventListener("input", analyzeText);
+        keywordInput.addEventListener("input", analyzeText);
+        if (titleInput) titleInput.addEventListener("input", analyzeText);
+        if (descInput) descInput.addEventListener("input", analyzeText);
+
+        // Xコピーボタンの動作
+        if (copyBtn) {
+            copyBtn.addEventListener("click", () => {
+                if (!textarea.value) { alert("⚠️ まずは文章を入力してください！"); return; }
+                navigator.clipboard.writeText(shareText).then(() => {
+                    alert("📋 X報告用の文章をコピーしました！");
+                }).catch(() => { alert("⚠️ コピーに失敗しました。"); });
+            });
+        }
+    });
+</script>
