@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>だるい見積書・請求書一瞬PDFジェネレーター</title>
+  <style>
+    /* --- ココアさんの基本デザインシステム --- */
+    :root {
+      --bg-color: #f4f7f6;
+      --panel-bg: #ffffff;
+      --text-color: #333333;
+      --accent-color: #0076df;
+      --border-color: #cccccc;
+      --x-color: #1da1f2;
+    }
+
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: 0 auto;
+    }
+
+    h1, .subtitle {
+      text-align: center;
+      margin: 0 0 5px 0;
+    }
+
+    h1 {
+      color: var(--accent-color);
+      font-size: 24px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    /* 操作パネル */
+    .control-panel {
+      background: var(--panel-bg);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 0 0 15px 0;
+      border-bottom: 2px solid var(--accent-color);
+      padding-bottom: 5px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .form-row > div {
+      flex: 1;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    .toggle-container {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-toggle {
+      flex: 1;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: bold;
+      border: 1px solid var(--border-color);
+      background: #f9f9f9;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-toggle.active {
+      background-color: var(--accent-color);
+      color: white;
+      border-color: var(--accent-color);
+    }
+
+    .btn-container {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: bold;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn-pdf { background-color: #2ed573; color: white; }
+    .btn-x { background-color: var(--x-color); color: white; text-decoration: none; }
+    .btn-clear { background-color: #e0e0e0; color: #333; }
+    
+    .x-follow-badge {
+      display: inline-block;
+      background-color: #1da1f2 !important;
+      color: white !important;
+      text-decoration: none !important;
+      font-weight: bold;
+      font-size: 13px;
+      padding: 10px 24px;
+      border-radius: 20px;
+      margin: 20px 0;
+    }
+
+    /* 広告枠（過去作準拠の点線枠） */
+    .ad-container {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .ad-label {
+      font-size: 10px;
+      color: #999999;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    .ad-box {
+      background: #ffffff;
+      border: 2px dashed var(--border-color);
+      border-radius: 6px;
+      padding: 20px;
+      color: #777777;
+      font-size: 13px;
+      font-weight: bold;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    .disclaimer {
+      margin-top: 30px;
+      padding: 15px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 11px;
+      color: #666;
+    }
+    
+    /* 📋 印刷用隠しプレビューエリア（通常画面では非表示、印刷時のみ出現） */
+    #runtime-invoice-wrapper { display: none; }
+    .invoice-page { font-size: 14px; color: #000; background: #fff; }
+    .invoice-title { font-size: 28px; font-weight: bold; letter-spacing: 4px; text-align: center; margin-bottom: 30px; border-bottom: 3px double #000; padding-bottom: 5px; }
+    .invoice-header { display: flex; justify-content: space-between; margin-bottom: 30px; }
+    .client-side { width: 50%; }
+    .client-name { font-size: 18px; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; }
+    .provider-side { width: 45%; text-align: right; }
+    .provider-name { font-size: 16px; font-weight: bold; }
+    .total-block { background: #f2f2f2; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 10px 15px; font-size: 20px; font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 30px; }
+    .item-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    .item-table th { background: #f2f2f2; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 8px; font-size: 13px; }
+    .item-table td { border-bottom: 1px solid #e0e0e0; padding: 10px 8px; }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .invoice-footer-details { display: flex; gap: 20px; margin-top: 40px; }
+    .bottom-box { flex: 1; border: 1px solid #ccc; padding: 12px; border-radius: 4px; background: #fafafa; font-size: 12px; }
+    .bottom-box-title { font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #ccc; padding-bottom: 3px; }
+    .bottom-box p { margin: 4px 0; white-space: pre-wrap; }
+    
+    @media print {
+      body { background: none; padding: 0; }
+      .control-panel, h1, .subtitle, .disclaimer, .no-print, .x-follow-badge, .ad-container { display: none !important; }
+      #runtime-invoice-wrapper { display: block !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>だるい見積書・請求書一瞬PDFジェネレーター</h1>
+  <div class="subtitle">一度入力すればLocalStorageが一生記憶。次回から3秒でマナー100点満点のPDF出力が可能。</div>
+
+  <!-- 操作パネル -->
+  <div class="control-panel">
+    <div class="panel-title">⚙️ 書類設定（入力するとリアルタイム反映）</div>
+    <div class="form-row">
+      <div><label>書類種別</label><select id="input-doc-type"><option value="請求書">請求書</option><option value="見積書">見積書</option></select></div>
+      <div><label>書類番号 (任意)</label><input type="text" id="input-doc-id" placeholder="例：IV-20260001"></div>
+    </div>
+    <div class="form-row">
+      <div><label>発行日</label><input type="date" id="input-issue-date"></div>
+      <div><label>お支払期限 / 有効期限</label><input type="date" id="input-due-date"></div>
+    </div>
+    <div class="form-row">
+      <div style="flex: 2;"><label>取引先名 (宛名)</label><input type="text" id="input-client" placeholder="株式会社〇〇 御中"></div>
+      <div><label>件名</label><input type="text" id="input-subject" placeholder="例：Webサイト制作御請求"></div>
+    </div>
+    <div class="form-row">
+      <div style="flex: 2;"><label>品名 / 案件名</label><input type="text" id="input-item-name" placeholder="例：システム開発案件 コーディング費"></div>
+      <div><label>単価 (税抜・円)</label><input type="number" id="input-item-price" placeholder="300000"></div>
+    </div>
+    <div class="form-row">
+      <div><label>インボイス制度</label><div class="toggle-container"><button type="button" id="btn-invoice-on" class="btn-toggle active">対応する</button><button type="button" id="btn-invoice-off" class="btn-toggle">非対応</button></div></div>
+      <div><label>源泉徴収税の自動差引</label><div class="toggle-container"><button type="button" id="btn-gensen-on" class="btn-toggle">引く</button><button type="button" id="btn-gensen-off" class="btn-toggle active">引かない</button></div></div>
+    </div>
+    <div class="panel-title" style="margin-top: 25px;">👤 あなたの情報（自動記憶されます）</div>
+    <div class="form-row">
+      <div><label>屋号 / 氏名</label><input type="text" id="save-my-name" placeholder="ココアアプリ開発工房"></div>
+      <div><label>インボイス登録番号</label><input type="text" id="save-my-invoice-id" placeholder="T1234567890123"></div>
+    </div>
+    <div class="form-group" style="margin-bottom: 15px;"><label>住所・連絡先</label><textarea id="save-my-address" rows="2" placeholder="〒000-0000..."></textarea></div>
+    <div class="form-group" style="margin-bottom: 15px;"><label>お振込先口座情報</label><textarea id="save-my-bank" rows="2" placeholder="〇〇銀行..."></textarea></div>
+    <div class="form-group"><label>備考欄</label><textarea id="input-notes" rows="2"></textarea></div>
+    <div class="btn-container">
+      <button class="btn btn-clear" id="clear-storage-btn">記憶クリア</button>
+      <button class="btn btn-pdf" id="pdf-output-btn">✨ 1タップでPDF出力</button>
+    </div>
+  </div>
+
+  <!-- 過去作準拠：将来使う広告枠 -->
+  <div class="ad-container no-print">
+    <div class="ad-label">SPONSORED</div>
+    <div class="ad-box"><p>【ここに将来の広告や自作アプリのバナーを表示】</p></div>
+  </div>
+
+  <div style="text-align: center;" class="no-print"><a href="https://x.com/cocoa_next7" target="_blank" class="x-follow-badge">🐦 開発者ココアのXをフォローする </a></div>
+  </div> <!-- .ad-container の閉じタグ -->
+
+  <!-- 💡 過去作に完全に準拠した、誠実でマナーに配慮した免責事項エリア -->
+  <div class="disclaimer">
+    <strong>【免責事項】</strong><br>
+    本ツールは個人フリーランスや副業の初心者層を想定した、ブラウザ上で完結する簡易書類生成シミュレーターです。LocalStorage機能を使用してユーザーの端末内のみに事業者情報を記憶させる仕組みであり、サーバー等へのデータ送信は一切行いません。本ツールで計算・出力された書類の正確性、およびこれに起因する取引上のトラブルや税務上の不利益について、開発者は一切の責任を負いません。適格請求書（インボイス）としての正確な要件や、実際の取引に関する商習慣マナーにつきましては、ご自身の業種や取引先の指定、税務署等のガイドラインをご確認の上でご利用ください。
+  </div>
+
+</div> <!-- .container の閉じタグ -->
+
+<!-- 印刷用データコンテナ -->
+<div id="runtime-invoice-wrapper"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 画面上の全要素を取得
+    const docTypeInput = document.getElementById("input-doc-type"), docIdInput = document.getElementById("input-doc-id"), issueDateInput = document.getElementById("input-issue-date"), dueDateInput = document.getElementById("input-due-date"), clientInput = document.getElementById("input-client"), subjectInput = document.getElementById("input-subject"), itemNameInput = document.getElementById("input-item-name"), itemPriceInput = document.getElementById("input-item-price"), notesInput = document.getElementById("input-notes"), myNameInput = document.getElementById("save-my-name"), myInvoiceIdInput = document.getElementById("save-my-invoice-id"), myAddressInput = document.getElementById("save-my-address"), myBankInput = document.getElementById("save-my-bank"), btnInvoiceOn = document.getElementById("btn-invoice-on"), btnInvoiceOff = document.getElementById("btn-invoice-off"), btnGensenOn = document.getElementById("btn-gensen-on"), btnGensenOff = document.getElementById("btn-gensen-off"), clearStorageBtn = document.getElementById("clear-storage-btn"), copyXBtn = document.getElementById("copy-x-btn"), pdfOutputBtn = document.getElementById("pdf-output-btn");
+    let isInvoiceMode = true, isGensenMode = false;
+
+    // 日付初期値セット
+    const today = new Date();
+    if (issueDateInput) issueDateInput.value = today.toISOString().substr(0, 10);
+    const nextMonthEnd = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+    if (dueDateInput) dueDateInput.value = nextMonthEnd.toISOString().substr(0, 10);
+    if (notesInput) notesInput.value = "※振込手数料は貴社にてご負担願います。";
+
+      // LocalStorageからデータを復元（クラスの重複によるフリーズを完全に修正）
+    if (localStorage.getItem("cocoa-invoice-name") && myNameInput) myNameInput.value = localStorage.getItem("cocoa-invoice-name");
+    if (localStorage.getItem("cocoa-invoice-invoice_id") && myInvoiceIdInput) myInvoiceIdInput.value = localStorage.getItem("cocoa-invoice-invoice_id");
+    if (localStorage.getItem("cocoa-invoice-address") && myAddressInput) myAddressInput.value = localStorage.getItem("cocoa-invoice-address");
+    if (localStorage.getItem("cocoa-invoice-bank") && myBankInput) myBankInput.value = localStorage.getItem("cocoa-invoice-bank");
+    
+       // 💡 トグルボタンのフリーズとX報告の不具合をピンポイントで完全修正
+    if (localStorage.getItem("cocoa-invoice-invoice_mode") === "false") {
+      isInvoiceMode = false;
+      if (btnInvoiceOn) btnInvoiceOn.classList.remove("active");
+      if (btnInvoiceOff) btnInvoiceOff.classList.add("active");
+    }
+    if (localStorage.getItem("cocoa-invoice-gensen_mode") === "true") {
+      isGensenMode = true;
+      if (btnGensenOn) btnGensenOn.classList.add("active");
+      if (btnGensenOff) btnGensenOff.classList.remove("active");
+    }
+
+    if (copyXBtn) {
+      copyXBtn.onclick = function(e) {
+        e.preventDefault();
+        var docType = docTypeInput ? (docTypeInput.value || '請求書') : '請求書';
+        var subject = subjectInput ? (subjectInput.value || '〇〇に関する御請求') : '〇〇に関する御請求';
+        var itemPrice = itemPriceInput ? (parseFloat(itemPriceInput.value) || 0) : 0;
+        var subtotal = itemPrice, tax = isInvoiceMode ? Math.floor(subtotal * 0.10) : 0, gensen = isGensenMode ? Math.floor(subtotal * 0.1021) : 0, grandTotal = subtotal + tax - gensen;
+        var shareText = "【" + docType + "一瞬ジェネレーターで書類を作成しました！】\n件名: " + subject + "\n総額: ￥" + grandTotal.toLocaleString() + "-\n次回から3秒でマナー100点満点のPDF出力が可能🔥";
+        
+        window.open('https://twitter.com' + encodeURIComponent(shareText), '_blank');
+      };
+    }
+  });
+</script>
+</body>
+</html>
