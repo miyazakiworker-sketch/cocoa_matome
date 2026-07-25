@@ -1,97 +1,71 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>だるい見積書・請求書 一瞬PDFジェネレーター｜COCOA TOOLS</title>
-
-<meta name="description"
-content="見積書・請求書を一瞬で作成。PDF保存・インボイス・源泉徴収・LocalStorage対応の無料ツール。">
+<title>だるい見積書・請求書 一瞬PDFジェネレーター | COCOA TOOLS v2.0</title>
 
 <style>
 
 *{
-margin:0;
-padding:0;
-box-sizing:border-box;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
 body{
 
-background:#0d0f12;
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-color:#e5e7eb;
-padding:20px;
+    background:#0d0f12;
+    color:#fff;
+    font-family:
+    "Yu Gothic",
+    "Hiragino Kaku Gothic ProN",
+    sans-serif;
 
 }
 
 .container{
 
-max-width:980px;
-margin:auto;
+    max-width:480px;
+    margin:auto;
+    padding:16px;
+
+}
+
+.card{
+
+    background:#1a1f26;
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:16px;
+    border:1px solid #2b313a;
 
 }
 
 h1{
 
-font-size:2rem;
-text-align:center;
-margin-bottom:8px;
-color:white;
+    font-size:24px;
+    text-align:center;
+    margin-bottom:8px;
 
 }
 
 .subtitle{
 
-text-align:center;
-color:#94a3b8;
-margin-bottom:30px;
-
-}
-
-.panel{
-
-background:#1a1f26;
-border:1px solid #2d3748;
-border-radius:18px;
-padding:22px;
-margin-bottom:24px;
-
-}
-
-.panel-title{
-
-font-size:1.1rem;
-font-weight:bold;
-margin-bottom:18px;
-color:#fff;
-
-}
-
-.row{
-
-display:flex;
-gap:16px;
-margin-bottom:16px;
-flex-wrap:wrap;
-
-}
-
-.group{
-
-flex:1;
-min-width:220px;
+    text-align:center;
+    color:#999;
+    font-size:13px;
+    margin-bottom:20px;
 
 }
 
 label{
 
-display:block;
-font-size:.85rem;
-margin-bottom:6px;
-color:#cbd5e1;
+    display:block;
+    margin-top:14px;
+    margin-bottom:6px;
+    font-weight:bold;
 
 }
 
@@ -99,764 +73,796 @@ input,
 textarea,
 select{
 
-width:100%;
-padding:12px;
-border-radius:12px;
-border:1px solid #334155;
-background:#111827;
-color:white;
-font-size:.95rem;
+    width:100%;
+    background:#11161c;
+    color:#fff;
+    border:1px solid #333;
+    border-radius:8px;
+    padding:10px;
+    font-size:15px;
 
 }
 
 textarea{
 
-resize:vertical;
+    resize:vertical;
+    min-height:90px;
 
 }
 
-.toggle{
+.row{
 
-display:flex;
-gap:10px;
-
-}
-
-.toggle button{
-
-flex:1;
-padding:12px;
-border:none;
-border-radius:12px;
-cursor:pointer;
-background:#374151;
-color:white;
-font-weight:bold;
-
-transition:.2s;
+    display:flex;
+    gap:10px;
 
 }
 
-.toggle button.active{
+.row>.col{
 
-background:#a3e635;
-color:#111827;
-
-}
-
-.item-row{
-
-display:flex;
-gap:10px;
-margin-bottom:12px;
-align-items:end;
-flex-wrap:wrap;
-
-}
-
-.item-row input{
-
-flex:1;
-
-}
-
-.small{
-
-max-width:110px;
+    flex:1;
 
 }
 
 button{
 
-cursor:pointer;
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:8px;
+    font-size:15px;
+    cursor:pointer;
+    margin-top:12px;
 
 }
 
-.main-btn{
+.btn-main{
 
-background:#a3e635;
-color:#111827;
-border:none;
-padding:14px;
-border-radius:14px;
-font-weight:bold;
-font-size:15px;
-transition:.2s;
+    background:#2563eb;
+    color:white;
 
 }
 
-.main-btn:hover{
+.btn-green{
 
-transform:translateY(-2px);
-
-}
-
-.gray-btn{
-
-background:#374151;
-color:white;
-border:none;
-padding:14px;
-border-radius:14px;
-font-weight:bold;
+    background:#a3e635;
+    color:#111;
+    font-weight:bold;
 
 }
 
-.blue-btn{
+.btn-red{
 
-background:#2563eb;
-color:white;
-border:none;
-padding:14px;
-border-radius:14px;
-font-weight:bold;
+    background:#ef4444;
+    color:white;
 
 }
 
-.red-btn{
+table{
 
-background:#dc2626;
-color:white;
-border:none;
-padding:14px;
-border-radius:14px;
-font-weight:bold;
+    width:100%;
+    border-collapse:collapse;
+    margin-top:14px;
 
 }
 
-.button-grid{
+th{
 
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:12px;
-margin-top:20px;
-
-}/* ===========================
-   明細テーブル
-=========================== */
-
-#items{
-
-margin-top:15px;
+    background:#202732;
+    padding:8px;
+    font-size:13px;
 
 }
 
-.item-row{
+td{
 
-background:#111827;
-border:1px solid #334155;
-padding:14px;
-border-radius:14px;
+    border-top:1px solid #333;
+    padding:6px;
 
 }
 
-.item-row input{
+td input{
 
-margin-bottom:8px;
-
-}
-
-/* ===========================
-   合計表示
-=========================== */
-
-.total-box{
-
-margin-top:25px;
-background:#111827;
-border:1px solid #334155;
-border-radius:16px;
-padding:20px;
+    margin:0;
 
 }
 
-.total-line{
+.summary{
 
-display:flex;
-justify-content:space-between;
-margin-bottom:12px;
-font-size:16px;
+    margin-top:20px;
 
 }
 
-.total-line:last-child{
+.summary div{
 
-margin-bottom:0;
-
-}
-
-.grand-total{
-
-font-size:24px;
-font-weight:bold;
-color:#a3e635;
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
 
 }
 
-/* ===========================
-   広告
-=========================== */
+.total{
 
-.ad-box{
-
-margin-top:35px;
-padding:35px;
-border:2px dashed #374151;
-border-radius:16px;
-text-align:center;
-color:#94a3b8;
+    font-size:22px;
+    font-weight:bold;
+    color:#a3e635;
 
 }
 
-/* ===========================
-   免責
-=========================== */
+.ad{
 
-.disclaimer{
-
-margin-top:25px;
-background:#111827;
-border:1px solid #2d3748;
-border-radius:14px;
-padding:16px;
-font-size:.82rem;
-line-height:1.8;
-color:#94a3b8;
+    height:120px;
+    border:2px dashed #444;
+    border-radius:10px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#888;
+    margin-top:15px;
 
 }
 
-/* ===========================
-   フッター
-=========================== */
+.notice{
+
+    color:#bbb;
+    font-size:12px;
+    line-height:1.7;
+
+}
 
 footer{
 
-margin-top:35px;
-text-align:center;
-color:#94a3b8;
+    text-align:center;
+    color:#888;
+    font-size:12px;
+    margin:30px 0;
 
 }
 
-footer a{
+a{
 
-color:#60a5fa;
-text-decoration:none;
-
-}
-
-/* ===========================
-   印刷エリア
-=========================== */
-
-#printArea{
-
-display:none;
+    color:#7fb3ff;
+    text-decoration:none;
 
 }
 
-@media print{
-
-body{
-
-background:white;
-padding:0;
-
-}
+@media(min-width:600px){
 
 .container{
 
-display:none;
-
-}
-
-#printArea{
-
-display:block;
-
-}
-
-.a4{
-
-width:210mm;
-min-height:297mm;
-padding:18mm;
-background:white;
-color:black;
-font-size:13px;
-
-}
-
-.a4-title{
-
-text-align:center;
-font-size:28px;
-font-weight:bold;
-margin-bottom:28px;
-letter-spacing:4px;
-
-}
-
-.a4-header{
-
-display:flex;
-justify-content:space-between;
-margin-bottom:25px;
-
-}
-
-.a4-left{
-
-width:48%;
-
-}
-
-.a4-right{
-
-width:40%;
-text-align:right;
-
-}
-
-.a4-company{
-
-font-size:20px;
-font-weight:bold;
-border-bottom:2px solid black;
-padding-bottom:5px;
-margin-bottom:10px;
-
-}
-
-.a4-table{
-
-width:100%;
-border-collapse:collapse;
-margin-top:25px;
-
-}
-
-.a4-table th{
-
-border:1px solid black;
-background:#f3f4f6;
-padding:8px;
-
-}
-
-.a4-table td{
-
-border:1px solid black;
-padding:8px;
-
-}
-
-.a4-total{
-
-margin-top:25px;
-margin-left:auto;
-width:280px;
-
-}
-
-.a4-total table{
-
-width:100%;
-border-collapse:collapse;
-
-}
-
-.a4-total td{
-
-border:1px solid black;
-padding:8px;
-
-}
-
-.a4-note{
-
-margin-top:40px;
-border-top:1px solid black;
-padding-top:15px;
-font-size:12px;
+max-width:900px;
 
 }
 
 }
 
-@media(max-width:600px){
-
-body{
-
-padding:12px;
-
-}
-
-.panel{
-
-padding:18px;
-
-}
-
-.button-grid{
-
-grid-template-columns:1fr;
-
-}
-
-}
 </style>
-</head><body>
+
+</head>
+
+<body>
 
 <div class="container">
 
-<h1>📄 見積書・請求書 一瞬PDFジェネレーター</h1>
+<h1>📄 だるい見積書・請求書</h1>
 
 <p class="subtitle">
-だるい書類作成を3秒で終わらせる。
+COCOA TOOLS v2.0
 </p>
 
-<!-- ========================= -->
-<!-- 基本情報 -->
-<!-- ========================= -->
+<div class="card">
 
-<div class="panel">
-
-<div class="panel-title">
-📋 基本情報
-</div>
-
-<div class="row">
-
-<div class="group">
 <label>書類種類</label>
 
 <select id="docType">
 
-<option value="請求書">請求書</option>
-
-<option value="見積書">見積書</option>
+<option>見積書</option>
+<option>請求書</option>
 
 </select>
 
-</div>
+<div class="row">
 
-<div class="group">
+<div class="col">
+
 <label>書類番号</label>
 
 <input
-id="docNo"
 type="text"
-placeholder="INV-2026-001">
+id="docNo"
+placeholder="EST-20260725001">
 
 </div>
 
-</div>
-
-<div class="row">
-
-<div class="group">
+<div class="col">
 
 <label>発行日</label>
 
 <input
-id="issueDate"
-type="date">
+type="date"
+id="issueDate">
 
 </div>
 
-<div class="group">
+</div>
 
-<label>支払期限・有効期限</label>
+<label>支払期限</label>
 
 <input
-id="dueDate"
-type="date">
+type="date"
+id="dueDate">
 
 </div>
 
-</div>
+<div class="card">
+
+<h2>自社情報</h2>
+
+<label>会社名</label>
+<input id="company">
+
+<label>担当者</label>
+<input id="owner">
+
+<label>住所</label>
+<textarea id="address"></textarea>
+
+<label>TEL</label>
+<input id="tel">
+
+<label>メール</label>
+<input id="mail">
+
+<label>登録番号（インボイス）</label>
+<input id="invoiceNo">
 
 </div>
 
-<!-- ========================= -->
-<!-- 宛先 -->
-<!-- ========================= -->
+<div class="card">
 
-<div class="panel">
+<h2>宛先</h2>
 
-<div class="panel-title">
+<label>会社名</label>
+<input id="client">
 
-🏢 宛先
-
-</div>
-
-<div class="row">
-
-<div class="group">
-
-<label>会社名・宛名</label>
-
-<input
-id="client"
-type="text"
-placeholder="株式会社○○ 御中">
-
-</div>
-
-</div>
-
-<div class="row">
-
-<div class="group">
+<label>担当者</label>
+<input id="clientPerson">
 
 <label>件名</label>
+<input id="subject">
+
+</div>
+
+<div class="card">
+
+<h2>明細</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>内容</th>
+<th>数量</th>
+<th>単位</th>
+<th>単価</th>
+<th>金額</th>
+
+</tr>
+
+</thead>
+
+<tbody id="items">
+
+<tr>
+
+<td>
 
 <input
-id="subject"
-type="text"
-placeholder="ホームページ制作費">
+placeholder="作業内容">
 
-</div>
+</td>
 
-</div>
-
-</div>
-
-<!-- ========================= -->
-<!-- 発行者 -->
-<!-- ========================= -->
-
-<div class="panel">
-
-<div class="panel-title">
-
-👤 発行者情報
-
-</div>
-
-<div class="row">
-
-<div class="group">
-
-<label>会社名・氏名</label>
+<td>
 
 <input
-id="myName"
-type="text">
+type="number"
+placeholder="1">
 
-</div>
+</td>
 
-<div class="group">
-
-<label>インボイス番号</label>
+<td>
 
 <input
-id="invoiceNo"
-type="text"
-placeholder="T1234567890123">
+placeholder="式">
 
-</div>
+</td>
 
-</div>
+<td>
 
-<div class="row">
+<input
+type="number"
+placeholder="10000">
 
-<div class="group">
+</td>
 
-<label>住所・電話番号</label>
+<td>
 
-<textarea
-id="address"
-rows="3"></textarea>
+0
 
-</div>
+</td>
 
-</div>
+</tr>
 
-<div class="row">
+</tbody>
 
-<div class="group">
-
-<label>振込先</label>
-
-<textarea
-id="bank"
-rows="3"></textarea>
-
-</div>
-
-</div>
-
-</div>
-
-<!-- ========================= -->
-<!-- 明細 -->
-<!-- ========================= -->
-
-<div class="panel">
-
-<div class="panel-title">
-
-🧾 明細
-
-</div>
-
-<div id="items">
-
-</div>
+</table>
 
 <button
-id="addItem"
-class="gray-btn">
+class="btn-main"
+id="addItem">
 
-＋ 明細を追加
+＋ 明細追加
 
 </button>
 
-</div><!-- ========================= -->
-<!-- オプション -->
-<!-- ========================= -->
-
-<div class="panel">
-
-<div class="panel-title">
-⚙️ オプション
 </div>
 
-<div class="toggle-row">
+<div class="card">
 
-<label>
-<input type="checkbox" id="useTax" checked>
-消費税10%を計算
-</label>
+<h2>金額</h2>
 
-</div>
+<label>消費税</label>
 
-<div class="toggle-row">
+<select id="tax">
 
-<label>
-<input type="checkbox" id="useGensen">
-源泉徴収税を差し引く
-</label>
+<option value="10">
+10%
+</option>
 
-</div>
+<option value="8">
+8%
+</option>
 
-</div>
+<option value="0">
+0%
+</option>
 
-<!-- ========================= -->
-<!-- 合計 -->
-<!-- ========================= -->
+</select>
 
-<div class="total-box">
+<div class="summary">
 
-<div class="total-line">
+<div>
+
 <span>小計</span>
-<span id="subtotal">¥0</span>
+
+<strong id="subtotal">
+
+¥0
+
+</strong>
+
 </div>
 
-<div class="total-line">
+<div>
+
 <span>消費税</span>
-<span id="tax">¥0</span>
+
+<strong id="taxAmount">
+
+¥0
+
+</strong>
+
 </div>
 
-<div class="total-line">
-<span>源泉徴収</span>
-<span id="gensen">¥0</span>
-</div>
+<div class="total">
 
-<hr style="margin:15px 0;border-color:#334155;">
-
-<div class="total-line grand-total">
 <span>合計</span>
-<span id="grandTotal">¥0</span>
+
+<strong id="total">
+
+¥0
+
+</strong>
+
+</div>
+
 </div>
 
 </div>
 
-<!-- ========================= -->
-<!-- ボタン -->
-<!-- ========================= -->
+<div class="card">
 
-<div class="button-grid">
+<h2>備考</h2>
 
-<button
-class="green-btn"
-id="pdfBtn">
+<textarea
+id="memo"
+placeholder="備考を入力"></textarea>
 
-📄 PDF出力
+</div>
+
+<div class="card">
+
+<button class="btn-green">
+
+PDF出力
 
 </button>
 
-<button
-class="blue-btn"
-id="saveBtn">
+<button class="btn-main">
 
-💾 自動保存
+印刷
 
 </button>
 
-<button
-class="gray-btn"
-id="clearBtn">
+<button class="btn-main">
 
-🗑 入力クリア
+JSON保存
+
+</button>
+
+<button class="btn-main">
+
+JSON読込
+
+</button>
+
+<button class="btn-red">
+
+リセット
 
 </button>
 
 </div>
 
-<!-- ========================= -->
-<!-- 広告 -->
-<!-- ========================= -->
+<div class="card">
 
-<div class="ad-box">
+<h2>広告</h2>
 
-広告スペース
+<div class="ad">
+
+Advertisement
 
 </div>
 
-<!-- ========================= -->
-<!-- 免責 -->
-<!-- ========================= -->
+</div>
 
-<div class="disclaimer">
+<div class="card">
 
-本ツールはブラウザ内のみで動作します。<br>
-入力内容はLocalStorageへ保存されます。<br>
-PDF内容は必ずご自身で確認してください。
+<h2>免責事項</h2>
+
+<p class="notice">
+
+本ツールは入力内容をもとに見積書・請求書を作成する補助ツールです。<br>
+作成された書類の内容については利用者自身の責任で確認してください。<br>
+税率・金額・インボイス制度等については最新の法令をご確認ください。
+
+</p>
 
 </div>
 
 <footer>
 
-<p>
+COCOA TOOLS v2.0<br><br>
 
-開発：
+X：
 <a href="https://x.com/cocoa_next7" target="_blank">
-
-ココア (@cocoa_next7)
-
+@cocoa_next7
 </a>
-
-</p>
-
-<p>
-
-© COCOA TOOLS v2.0
-
-</p>
 
 </footer>
 
 </div>
 
-<!-- ========================= -->
-<!-- 印刷専用A4 -->
-<!-- ========================= -->
+<script>
 
-<div id="printArea"></div>
+// Part2で実装
 
-<script src="app.js"></script>
+</script>
 
 </body>
-</html>
+</html>const STORAGE_KEY = "cocoa_invoice_v2";
+
+/* ==========
+   明細行生成
+========== */
+
+function createRow(data = {}) {
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+<td>
+<input class="item-name" placeholder="作業内容" value="${data.name || ""}">
+</td>
+
+<td>
+<input class="item-qty" type="number" min="0" step="0.01"
+value="${data.qty ?? 1}">
+</td>
+
+<td>
+<input class="item-unit"
+placeholder="式"
+value="${data.unit || ""}">
+</td>
+
+<td>
+<input class="item-price"
+type="number"
+min="0"
+step="1"
+value="${data.price ?? 0}">
+</td>
+
+<td class="item-total">
+¥0
+</td>
+
+<td>
+<button class="deleteRow btn-red">
+×
+</button>
+</td>
+`;
+
+    document.getElementById("items").appendChild(tr);
+
+    bindRow(tr);
+
+    calculate();
+
+}
+
+/* ==========
+   行イベント
+========== */
+
+function bindRow(tr){
+
+    tr.querySelectorAll("input").forEach(input=>{
+
+        input.addEventListener("input",()=>{
+
+            calculate();
+            saveData();
+
+        });
+
+    });
+
+    const del = tr.querySelector(".deleteRow");
+
+    if(del){
+
+        del.onclick=()=>{
+
+            if(document.querySelectorAll("#items tr").length===1){
+
+                alert("最低1行必要です。");
+                return;
+
+            }
+
+            tr.remove();
+
+            calculate();
+            saveData();
+
+        };
+
+    }
+
+}
+
+/* ==========
+   金額計算
+========== */
+
+function calculate(){
+
+    let subtotal = 0;
+
+    document.querySelectorAll("#items tr").forEach(tr=>{
+
+        const qty =
+        Number(tr.querySelector(".item-qty").value)||0;
+
+        const price =
+        Number(tr.querySelector(".item-price").value)||0;
+
+        const total = qty*price;
+
+        tr.querySelector(".item-total").textContent =
+        "¥"+total.toLocaleString("ja-JP");
+
+        subtotal += total;
+
+    });
+
+    const taxRate =
+    Number(document.getElementById("tax").value);
+
+    const tax =
+    Math.round(subtotal*taxRate/100);
+
+    const grand =
+    subtotal+tax;
+
+    document.getElementById("subtotal").textContent =
+    "¥"+subtotal.toLocaleString("ja-JP");
+
+    document.getElementById("taxAmount").textContent =
+    "¥"+tax.toLocaleString("ja-JP");
+
+    document.getElementById("total").textContent =
+    "¥"+grand.toLocaleString("ja-JP");
+
+}
+
+/* ==========
+   保存
+========== */
+
+function saveData(){
+
+    const rows=[];
+
+    document.querySelectorAll("#items tr").forEach(tr=>{
+
+        rows.push({
+
+            name:
+            tr.querySelector(".item-name").value,
+
+            qty:
+            tr.querySelector(".item-qty").value,
+
+            unit:
+            tr.querySelector(".item-unit").value,
+
+            price:
+            tr.querySelector(".item-price").value
+
+        });
+
+    });
+
+    const data={
+
+        docType:
+        document.getElementById("docType").value,
+
+        docNo:
+        document.getElementById("docNo").value,
+
+        issueDate:
+        document.getElementById("issueDate").value,
+
+        dueDate:
+        document.getElementById("dueDate").value,
+
+        company:
+        document.getElementById("company").value,
+
+        owner:
+        document.getElementById("owner").value,
+
+        address:
+        document.getElementById("address").value,
+
+        tel:
+        document.getElementById("tel").value,
+
+        mail:
+        document.getElementById("mail").value,
+
+        invoiceNo:
+        document.getElementById("invoiceNo").value,
+
+        client:
+        document.getElementById("client").value,
+
+        clientPerson:
+        document.getElementById("clientPerson").value,
+
+        subject:
+        document.getElementById("subject").value,
+
+        memo:
+        document.getElementById("memo").value,
+
+        tax:
+        document.getElementById("tax").value,
+
+        rows
+
+    };
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(data)
+    );
+
+}
+
+/* ==========
+   復元
+========== */
+
+function loadData(){
+
+    const json =
+    localStorage.getItem(STORAGE_KEY);
+
+    if(!json){
+
+        document.querySelector("#items").innerHTML="";
+        createRow();
+        return;
+
+    }
+
+    const data =
+    JSON.parse(json);
+
+    Object.keys(data).forEach(key=>{
+
+        const el =
+        document.getElementById(key);
+
+        if(el && key!=="rows"){
+
+            el.value=data[key];
+
+        }
+
+    });
+
+    document.querySelector("#items").innerHTML="";
+
+    data.rows.forEach(r=>{
+
+        createRow(r);
+
+    });
+
+    calculate();
+
+}
+
+/* ==========
+   共通イベント
+========== */
+
+document.getElementById("addItem").onclick=()=>{
+
+    createRow();
+
+    saveData();
+
+};
+
+document.getElementById("tax")
+.addEventListener("change",()=>{
+
+    calculate();
+    saveData();
+
+});
+
+document.querySelectorAll(
+"input,textarea,select"
+).forEach(el=>{
+
+    el.addEventListener("input",saveData);
+
+});
+
+/* ==========
+   初期化
+========== */
+
+loadData();
+calculate();
