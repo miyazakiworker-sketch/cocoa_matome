@@ -1,0 +1,269 @@
+/**
+==========================================================
+COCOA TOOLS v2.0
+invoice/css/invoice.css
+見積書・請求書専用CSS
+==========================================================
+*/
+
+
+/* ======================================
+   書類タイトル
+====================================== */
+
+#documentTitle{
+
+    font-size:28px;
+
+    letter-spacing:2px;
+
+}
+
+
+
+/* ======================================
+   見積書入力エリア
+====================================== */
+
+
+#invoiceForm{
+
+    overflow:hidden;
+
+}
+
+
+
+#invoiceForm table{
+
+    min-width:650px;
+
+}
+
+
+
+#invoiceForm input{
+
+    font-size:14px;
+
+}
+
+
+
+/* ======================================
+   明細
+====================================== */
+
+
+#itemBody input{
+
+    padding:8px;
+
+}
+
+
+
+.item-total{
+
+    background:#11161c;
+
+    text-align:right;
+
+}
+
+
+
+/* ======================================
+   金額エリア
+====================================== */
+
+
+.summary{
+
+    border-top:1px solid var(--border);
+
+    padding-top:12px;
+
+}
+
+
+
+.summary-row{
+
+    font-size:15px;
+
+}
+
+
+
+.summary-total{
+
+    font-size:22px;
+
+}
+
+
+
+
+
+/* ======================================
+   PDF印刷用
+====================================== */
+
+
+.print-area{
+
+    background:#fff;
+
+    color:#000;
+
+    padding:20mm;
+
+}
+
+
+
+.print-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    margin-bottom:20px;
+
+}
+
+
+
+.print-company{
+
+    text-align:right;
+
+}
+
+
+
+/* ======================================
+   印刷設定
+====================================== */
+
+
+@media print{
+
+
+    body{
+
+        background:#fff;
+
+        color:#000;
+
+    }
+
+
+
+    .container{
+
+        max-width:none;
+
+        padding:0;
+
+    }
+
+
+
+    .no-print{
+
+        display:none !important;
+
+    }
+
+
+
+    .card{
+
+        border:none;
+
+        box-shadow:none;
+
+        background:#fff;
+
+        color:#000;
+
+    }
+
+
+
+    input,
+    textarea,
+    select{
+
+        border:none;
+
+        background:transparent;
+
+        color:#000;
+
+        padding:0;
+
+    }
+
+
+
+    table{
+
+        width:100%;
+
+        border-collapse:collapse;
+
+    }
+
+
+
+    th{
+
+        background:#eee !important;
+
+        color:#000;
+
+    }
+
+
+
+    td,
+    th{
+
+        border:1px solid #333;
+
+        padding:8px;
+
+    }
+
+
+
+    .summary-total{
+
+        color:#000;
+
+    }
+
+
+}
+
+
+
+/* ======================================
+   PC表示
+====================================== */
+
+
+@media(min-width:900px){
+
+
+    #invoiceForm{
+
+        padding:24px;
+
+    }
+
+
+}
