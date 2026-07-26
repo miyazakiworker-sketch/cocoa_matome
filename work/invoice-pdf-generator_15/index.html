@@ -1,241 +1,28 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>だるい見積書・請求書 一瞬PDFジェネレーター | COCOA TOOLS v2.0</title>
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1">
 
-<style>
+<title>
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
+だるい見積書・請求書
+一瞬PDFジェネレーター
 
-body{
+</title>
 
-    background:#0d0f12;
-    color:#fff;
-    font-family:
-    "Yu Gothic",
-    "Hiragino Kaku Gothic ProN",
-    sans-serif;
+<link
+rel="manifest"
+href="./manifest.json">
 
-}
-
-.container{
-
-    max-width:480px;
-    margin:auto;
-    padding:16px;
-
-}
-
-.card{
-
-    background:#1a1f26;
-    border-radius:14px;
-    padding:16px;
-    margin-bottom:16px;
-    border:1px solid #2b313a;
-
-}
-
-h1{
-
-    font-size:24px;
-    text-align:center;
-    margin-bottom:8px;
-
-}
-
-.subtitle{
-
-    text-align:center;
-    color:#999;
-    font-size:13px;
-    margin-bottom:20px;
-
-}
-
-label{
-
-    display:block;
-    margin-top:14px;
-    margin-bottom:6px;
-    font-weight:bold;
-
-}
-
-input,
-textarea,
-select{
-
-    width:100%;
-    background:#11161c;
-    color:#fff;
-    border:1px solid #333;
-    border-radius:8px;
-    padding:10px;
-    font-size:15px;
-
-}
-
-textarea{
-
-    resize:vertical;
-    min-height:90px;
-
-}
-
-.row{
-
-    display:flex;
-    gap:10px;
-
-}
-
-.row>.col{
-
-    flex:1;
-
-}
-
-button{
-
-    width:100%;
-    padding:13px;
-    border:none;
-    border-radius:8px;
-    font-size:15px;
-    cursor:pointer;
-    margin-top:12px;
-
-}
-
-.btn-main{
-
-    background:#2563eb;
-    color:white;
-
-}
-
-.btn-green{
-
-    background:#a3e635;
-    color:#111;
-    font-weight:bold;
-
-}
-
-.btn-red{
-
-    background:#ef4444;
-    color:white;
-
-}
-
-table{
-
-    width:100%;
-    border-collapse:collapse;
-    margin-top:14px;
-
-}
-
-th{
-
-    background:#202732;
-    padding:8px;
-    font-size:13px;
-
-}
-
-td{
-
-    border-top:1px solid #333;
-    padding:6px;
-
-}
-
-td input{
-
-    margin:0;
-
-}
-
-.summary{
-
-    margin-top:20px;
-
-}
-
-.summary div{
-
-    display:flex;
-    justify-content:space-between;
-    padding:8px 0;
-
-}
-
-.total{
-
-    font-size:22px;
-    font-weight:bold;
-    color:#a3e635;
-
-}
-
-.ad{
-
-    height:120px;
-    border:2px dashed #444;
-    border-radius:10px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    color:#888;
-    margin-top:15px;
-
-}
-
-.notice{
-
-    color:#bbb;
-    font-size:12px;
-    line-height:1.7;
-
-}
-
-footer{
-
-    text-align:center;
-    color:#888;
-    font-size:12px;
-    margin:30px 0;
-
-}
-
-a{
-
-    color:#7fb3ff;
-    text-decoration:none;
-
-}
-
-@media(min-width:600px){
-
-.container{
-
-max-width:900px;
-
-}
-
-}
-
-</style>
+<link
+rel="stylesheet"
+href="../core/cocoa.css">
 
 </head>
 
@@ -243,272 +30,59 @@ max-width:900px;
 
 <div class="container">
 
-<h1>📄 だるい見積書・請求書</h1>
+<div class="card">
 
-<p class="subtitle">
+<h1>
+
+📄
+だるい見積書・請求書
+
+</h1>
+
+<small>
+
 COCOA TOOLS v2.0
-</p>
 
-<div class="card">
-
-<label>書類種類</label>
-
-<select id="docType">
-
-<option>見積書</option>
-<option>請求書</option>
-
-</select>
-
-<div class="row">
-
-<div class="col">
-
-<label>書類番号</label>
-
-<input
-type="text"
-id="docNo"
-placeholder="EST-20260725001">
+</small>
 
 </div>
 
-<div class="col">
-
-<label>発行日</label>
-
-<input
-type="date"
-id="issueDate">
+<div
+class="card"
+id="invoiceForm">
 
 </div>
 
-</div>
-
-<label>支払期限</label>
-
-<input
-type="date"
-id="dueDate">
-
-</div>
-
-<div class="card">
-
-<h2>自社情報</h2>
-
-<label>会社名</label>
-<input id="company">
-
-<label>担当者</label>
-<input id="owner">
-
-<label>住所</label>
-<textarea id="address"></textarea>
-
-<label>TEL</label>
-<input id="tel">
-
-<label>メール</label>
-<input id="mail">
-
-<label>登録番号（インボイス）</label>
-<input id="invoiceNo">
-
-</div>
-
-<div class="card">
-
-<h2>宛先</h2>
-
-<label>会社名</label>
-<input id="client">
-
-<label>担当者</label>
-<input id="clientPerson">
-
-<label>件名</label>
-<input id="subject">
-
-</div>
-
-<div class="card">
-
-<h2>明細</h2>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>内容</th>
-<th>数量</th>
-<th>単位</th>
-<th>単価</th>
-<th>金額</th>
-
-</tr>
-
-</thead>
-
-<tbody id="items">
-
-<tr>
-
-<td>
-
-<input
-placeholder="作業内容">
-
-</td>
-
-<td>
-
-<input
-type="number"
-placeholder="1">
-
-</td>
-
-<td>
-
-<input
-placeholder="式">
-
-</td>
-
-<td>
-
-<input
-type="number"
-placeholder="10000">
-
-</td>
-
-<td>
-
-0
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
+<div
+class="card no-print">
 
 <button
-class="btn-main"
-id="addItem">
+class="btn btn-success"
+id="printBtn">
 
-＋ 明細追加
-
-</button>
-
-</div>
-
-<div class="card">
-
-<h2>金額</h2>
-
-<label>消費税</label>
-
-<select id="tax">
-
-<option value="10">
-10%
-</option>
-
-<option value="8">
-8%
-</option>
-
-<option value="0">
-0%
-</option>
-
-</select>
-
-<div class="summary">
-
-<div>
-
-<span>小計</span>
-
-<strong id="subtotal">
-
-¥0
-
-</strong>
-
-</div>
-
-<div>
-
-<span>消費税</span>
-
-<strong id="taxAmount">
-
-¥0
-
-</strong>
-
-</div>
-
-<div class="total">
-
-<span>合計</span>
-
-<strong id="total">
-
-¥0
-
-</strong>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="card">
-
-<h2>備考</h2>
-
-<textarea
-id="memo"
-placeholder="備考を入力"></textarea>
-
-</div>
-
-<div class="card">
-
-<button class="btn-green">
-
-PDF出力
+印刷(PDF保存)
 
 </button>
 
-<button class="btn-main">
+<button
+class="btn btn-primary"
+id="saveBtn">
 
-印刷
-
-</button>
-
-<button class="btn-main">
-
-JSON保存
+保存
 
 </button>
 
-<button class="btn-main">
+<button
+class="btn btn-primary"
+id="loadBtn">
 
 JSON読込
 
 </button>
 
-<button class="btn-red">
+<button
+class="btn btn-danger"
+id="resetBtn">
 
 リセット
 
@@ -516,353 +90,31 @@ JSON読込
 
 </div>
 
-<div class="card">
+<div
+class="footer">
 
-<h2>広告</h2>
-
-<div class="ad">
-
-Advertisement
+COCOA TOOLS v2.0
 
 </div>
 
 </div>
 
-<div class="card">
+<script src="../core/cocoa-utils.js"></script>
 
-<h2>免責事項</h2>
+<script src="../core/cocoa-storage.js"></script>
 
-<p class="notice">
+<script src="../core/cocoa-ui.js"></script>
 
-本ツールは入力内容をもとに見積書・請求書を作成する補助ツールです。<br>
-作成された書類の内容については利用者自身の責任で確認してください。<br>
-税率・金額・インボイス制度等については最新の法令をご確認ください。
+<script src="../core/cocoa-form.js"></script>
 
-</p>
+<script src="../core/cocoa-json.js"></script>
 
-</div>
+<script src="../core/cocoa-print.js"></script>
 
-<footer>
+<script src="../core/cocoa-pwa.js"></script>
 
-COCOA TOOLS v2.0<br><br>
-
-X：
-<a href="https://x.com/cocoa_next7" target="_blank">
-@cocoa_next7
-</a>
-
-</footer>
-
-</div>
-
-<script>
-
-// Part2で実装
-
-</script>
+<script src="./invoice.js"></script>
 
 </body>
-</html>const STORAGE_KEY = "cocoa_invoice_v2";
 
-/* ==========
-   明細行生成
-========== */
-
-function createRow(data = {}) {
-
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-<td>
-<input class="item-name" placeholder="作業内容" value="${data.name || ""}">
-</td>
-
-<td>
-<input class="item-qty" type="number" min="0" step="0.01"
-value="${data.qty ?? 1}">
-</td>
-
-<td>
-<input class="item-unit"
-placeholder="式"
-value="${data.unit || ""}">
-</td>
-
-<td>
-<input class="item-price"
-type="number"
-min="0"
-step="1"
-value="${data.price ?? 0}">
-</td>
-
-<td class="item-total">
-¥0
-</td>
-
-<td>
-<button class="deleteRow btn-red">
-×
-</button>
-</td>
-`;
-
-    document.getElementById("items").appendChild(tr);
-
-    bindRow(tr);
-
-    calculate();
-
-}
-
-/* ==========
-   行イベント
-========== */
-
-function bindRow(tr){
-
-    tr.querySelectorAll("input").forEach(input=>{
-
-        input.addEventListener("input",()=>{
-
-            calculate();
-            saveData();
-
-        });
-
-    });
-
-    const del = tr.querySelector(".deleteRow");
-
-    if(del){
-
-        del.onclick=()=>{
-
-            if(document.querySelectorAll("#items tr").length===1){
-
-                alert("最低1行必要です。");
-                return;
-
-            }
-
-            tr.remove();
-
-            calculate();
-            saveData();
-
-        };
-
-    }
-
-}
-
-/* ==========
-   金額計算
-========== */
-
-function calculate(){
-
-    let subtotal = 0;
-
-    document.querySelectorAll("#items tr").forEach(tr=>{
-
-        const qty =
-        Number(tr.querySelector(".item-qty").value)||0;
-
-        const price =
-        Number(tr.querySelector(".item-price").value)||0;
-
-        const total = qty*price;
-
-        tr.querySelector(".item-total").textContent =
-        "¥"+total.toLocaleString("ja-JP");
-
-        subtotal += total;
-
-    });
-
-    const taxRate =
-    Number(document.getElementById("tax").value);
-
-    const tax =
-    Math.round(subtotal*taxRate/100);
-
-    const grand =
-    subtotal+tax;
-
-    document.getElementById("subtotal").textContent =
-    "¥"+subtotal.toLocaleString("ja-JP");
-
-    document.getElementById("taxAmount").textContent =
-    "¥"+tax.toLocaleString("ja-JP");
-
-    document.getElementById("total").textContent =
-    "¥"+grand.toLocaleString("ja-JP");
-
-}
-
-/* ==========
-   保存
-========== */
-
-function saveData(){
-
-    const rows=[];
-
-    document.querySelectorAll("#items tr").forEach(tr=>{
-
-        rows.push({
-
-            name:
-            tr.querySelector(".item-name").value,
-
-            qty:
-            tr.querySelector(".item-qty").value,
-
-            unit:
-            tr.querySelector(".item-unit").value,
-
-            price:
-            tr.querySelector(".item-price").value
-
-        });
-
-    });
-
-    const data={
-
-        docType:
-        document.getElementById("docType").value,
-
-        docNo:
-        document.getElementById("docNo").value,
-
-        issueDate:
-        document.getElementById("issueDate").value,
-
-        dueDate:
-        document.getElementById("dueDate").value,
-
-        company:
-        document.getElementById("company").value,
-
-        owner:
-        document.getElementById("owner").value,
-
-        address:
-        document.getElementById("address").value,
-
-        tel:
-        document.getElementById("tel").value,
-
-        mail:
-        document.getElementById("mail").value,
-
-        invoiceNo:
-        document.getElementById("invoiceNo").value,
-
-        client:
-        document.getElementById("client").value,
-
-        clientPerson:
-        document.getElementById("clientPerson").value,
-
-        subject:
-        document.getElementById("subject").value,
-
-        memo:
-        document.getElementById("memo").value,
-
-        tax:
-        document.getElementById("tax").value,
-
-        rows
-
-    };
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(data)
-    );
-
-}
-
-/* ==========
-   復元
-========== */
-
-function loadData(){
-
-    const json =
-    localStorage.getItem(STORAGE_KEY);
-
-    if(!json){
-
-        document.querySelector("#items").innerHTML="";
-        createRow();
-        return;
-
-    }
-
-    const data =
-    JSON.parse(json);
-
-    Object.keys(data).forEach(key=>{
-
-        const el =
-        document.getElementById(key);
-
-        if(el && key!=="rows"){
-
-            el.value=data[key];
-
-        }
-
-    });
-
-    document.querySelector("#items").innerHTML="";
-
-    data.rows.forEach(r=>{
-
-        createRow(r);
-
-    });
-
-    calculate();
-
-}
-
-/* ==========
-   共通イベント
-========== */
-
-document.getElementById("addItem").onclick=()=>{
-
-    createRow();
-
-    saveData();
-
-};
-
-document.getElementById("tax")
-.addEventListener("change",()=>{
-
-    calculate();
-    saveData();
-
-});
-
-document.querySelectorAll(
-"input,textarea,select"
-).forEach(el=>{
-
-    el.addEventListener("input",saveData);
-
-});
-
-/* ==========
-   初期化
-========== */
-
-loadData();
-calculate();
+</html>
