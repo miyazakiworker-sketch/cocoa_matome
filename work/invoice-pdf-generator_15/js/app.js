@@ -9,14 +9,12 @@
 window.Invoice = window.Invoice || {};
 
 Invoice.VERSION = "2.0.0";
-
 Invoice.STORAGE_KEY = "invoice";
 
-Invoice.init = function () {
+Invoice.init = () => {
 
     console.log(
-        "COCOA TOOLS Invoice v" +
-        Invoice.VERSION
+        `COCOA TOOLS Invoice v${Invoice.VERSION}`
     );
 
     // PWA
@@ -25,80 +23,38 @@ Invoice.init = function () {
     // フォーム生成
     Invoice.Form.create();
 
-    // 明細初期化
+    // 明細
     Invoice.Items.init();
 
-    // 保存データ読込
-    Invoice.Save.load();
-
-    // イベント登録
-    Invoice.bindEvents();
-
-    // 初回計算
+    // 計算
+    Invoice.Calc.bind();
     Invoice.Calc.update();
 
-};
-
-/* ======================================
-   イベント
-====================================== */
-
-Invoice.bindEvents = function () {
-
-    const printBtn = COCOA.id("printBtn");
-
-    if (printBtn) {
-
-        printBtn.onclick = () => {
-
-            Invoice.Print.print();
-
-        };
-
-    }
-
-    const saveBtn = COCOA.id("saveBtn");
-
-    if (saveBtn) {
-
-        saveBtn.onclick = () => {
-
-            Invoice.Save.save();
-
-        };
-
-    }
-
-    const loadBtn = COCOA.id("loadBtn");
-
-    if (loadBtn) {
-
-        loadBtn.onclick = () => {
-
-            Invoice.Save.importJSON();
-
-        };
-
-    }
-
-    const resetBtn = COCOA.id("resetBtn");
-
-    if (resetBtn) {
-
-        resetBtn.onclick = () => {
-
-            Invoice.Save.reset();
-
-        };
-
-    }
+    // 共通イベント
+    bindEvents();
 
 };
+
+function bindEvents() {
+
+    // フォーム変更で再計算
+    document.addEventListener("input", e => {
+
+        if (
+            e.target.matches(
+                "#invoiceForm input,#invoiceForm select,#invoiceForm textarea"
+            )
+        ) {
+
+            Invoice.Calc.update();
+
+        }
+
+    });
+
+}
 
 document.addEventListener(
-
     "DOMContentLoaded",
-
     Invoice.init
-
 );
