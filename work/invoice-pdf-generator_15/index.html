@@ -7,70 +7,103 @@
 
 <meta
 name="viewport"
-content="width=device-width,initial-scale=1">
+content="width=device-width, initial-scale=1.0">
 
 <title>
-
-だるい見積書・請求書
-一瞬PDFジェネレーター
-
+だるい見積書・請求書 一瞬PDFジェネレーター
 </title>
+
+
+<!-- PWA -->
 
 <link
 rel="manifest"
 href="./manifest.json">
 
+
+<!-- COCOA TOOLS 共通CSS -->
+
 <link
 rel="stylesheet"
 href="../core/cocoa.css">
 
+
+<!-- アプリ専用CSS -->
+
+<link
+rel="stylesheet"
+href="./css/invoice.css">
+
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
-<div class="card">
 
-<h1>
+<header class="card text-center">
 
-📄
-だるい見積書・請求書
+
+<h1 id="documentTitle">
+
+見積書
 
 </h1>
 
-<small>
+
+<p>
 
 COCOA TOOLS v2.0
 
-</small>
+</p>
 
-</div>
 
-<div
+</header>
+
+
+
+
+<!-- 入力フォーム -->
+
+<section
 class="card"
 id="invoiceForm">
 
-</div>
 
-<div
+</section>
+
+
+
+
+
+<!-- 操作ボタン -->
+
+<section
 class="card no-print">
+
 
 <button
 class="btn btn-success"
-id="printBtn">
-
-印刷(PDF保存)
-
-</button>
-
-<button
-class="btn btn-primary"
 id="saveBtn">
 
 保存
 
 </button>
+
+
+
+<button
+class="btn btn-primary"
+id="printBtn">
+
+PDF保存・印刷
+
+</button>
+
+
 
 <button
 class="btn btn-primary"
@@ -80,6 +113,8 @@ JSON読込
 
 </button>
 
+
+
 <button
 class="btn btn-danger"
 id="resetBtn">
@@ -88,16 +123,69 @@ id="resetBtn">
 
 </button>
 
+
+</section>
+
+
+
+
+
+<!-- 広告枠 -->
+
+<section
+class="card no-print">
+
+
+<div class="ad-box">
+
+広告スペース
+
 </div>
 
-<div
+
+</section>
+
+
+
+
+
+<footer
 class="footer">
+
+
+<p>
 
 COCOA TOOLS v2.0
 
-</div>
+</p>
+
+
+<p>
+
+X:
+<a href="#">
+
+@cocoa_next7
+
+</a>
+
+</p>
+
+
+</footer>
+
+
 
 </div>
+
+
+
+
+
+<!-- ==========================
+     Core
+========================== -->
+
 
 <script src="../core/cocoa-utils.js"></script>
 
@@ -105,15 +193,38 @@ COCOA TOOLS v2.0
 
 <script src="../core/cocoa-ui.js"></script>
 
-<script src="../core/cocoa-form.js"></script>
+<script src="../core/cocoa-print.js"></script>
 
 <script src="../core/cocoa-json.js"></script>
 
-<script src="../core/cocoa-print.js"></script>
-
 <script src="../core/cocoa-pwa.js"></script>
 
-<script src="./invoice.js"></script>
+<script src="../core/cocoa-form.js"></script>
+
+
+
+
+
+<!-- ==========================
+     Invoice App
+========================== -->
+
+
+<script src="./js/form.js"></script>
+
+<script src="./js/items.js"></script>
+
+<script src="./js/calc.js"></script>
+
+<script src="./js/save.js"></script>
+
+<script src="./js/print.js"></script>
+
+<script src="./js/validation.js"></script>
+
+<script src="./js/app.js"></script>
+
+
 
 </body>
 
