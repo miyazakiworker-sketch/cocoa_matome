@@ -243,6 +243,23 @@ selected>
 
 <strong>
 
+<div class="summary-row">
+
+<span>
+
+値引き
+
+</span>
+
+<input
+id="discount"
+type="number"
+value="0"
+min="0"
+placeholder="0">
+
+</div>
+
 合計
 
 </strong>
