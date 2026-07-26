@@ -260,6 +260,23 @@ placeholder="0">
 
 </div>
 
+<div class="summary-row">
+
+    <span>
+
+        送料・諸経費
+
+    </span>
+
+    <input
+        id="shipping"
+        type="number"
+        min="0"
+        value="0"
+        placeholder="0">
+
+</div>
+
 合計
 
 </strong>
