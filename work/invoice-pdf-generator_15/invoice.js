@@ -238,7 +238,7 @@ id="addRow">
                 "#invoiceForm input,#invoiceForm select,#invoiceForm textarea"
             ),
 
-            rows: state.rows
+           rows: getRows()
 
         };
 
@@ -285,12 +285,7 @@ id="addRow">
 
         );
 
-        state.rows = [];
-
-        COCOA.id("itemBody").innerHTML = "";
-
-        data.rows.forEach(addRow);
-
+       loadRows(data.rows);
     }
 
     /**
@@ -351,3 +346,241 @@ document.addEventListener(
     Invoice.init
 
 );
+/* ==========================================================
+   明細エンジン
+========================================================== */
+
+function addRow(data = {}) {
+
+    const tbody = COCOA.id("itemBody");
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+
+<td>
+
+<input
+class="item-name"
+placeholder="内容"
+value="${data.name || ""}">
+
+</td>
+
+<td>
+
+<input
+type="number"
+class="item-qty"
+min="0"
+step="0.01"
+value="${data.qty ?? 1}">
+
+</td>
+
+<td>
+
+<input
+type="number"
+class="item-price"
+min="0"
+step="1"
+value="${data.price ?? 0}">
+
+</td>
+
+<td class="item-total">
+
+¥0
+
+</td>
+
+<td>
+
+<button
+type="button"
+class="btn-danger deleteRow">
+
+×
+
+</button>
+
+</td>
+
+`;
+
+    tbody.appendChild(tr);
+
+    bindRow(tr);
+
+    calculate();
+
+}
+
+function bindRow(tr){
+
+    tr.querySelectorAll("input")
+
+    .forEach(input=>{
+
+        input.addEventListener(
+
+            "input",
+
+            ()=>{
+
+                calculate();
+
+                autoSave();
+
+            }
+
+        );
+
+    });
+
+    tr.querySelector(".deleteRow")
+
+    .onclick=()=>{
+
+        removeRow(tr);
+
+    };
+
+}
+
+function removeRow(tr){
+
+    const rows=document.querySelectorAll(
+
+        "#itemBody tr"
+
+    );
+
+    if(rows.length===1){
+
+        COCOA.UI.toast(
+
+            "最低1行必要です"
+
+        );
+
+        return;
+
+    }
+
+    tr.remove();
+
+    calculate();
+
+    autoSave();
+
+}
+
+/* ==========================================================
+   明細取得
+========================================================== */
+
+function getRows(){
+
+    const rows=[];
+
+    document
+
+    .querySelectorAll(
+
+        "#itemBody tr"
+
+    )
+
+    .forEach(tr=>{
+
+        rows.push({
+
+            name:
+
+            tr.querySelector(
+
+                ".item-name"
+
+            ).value,
+
+            qty:
+
+            COCOA.number(
+
+                tr.querySelector(
+
+                    ".item-qty"
+
+                ).value
+
+            ),
+
+            price:
+
+            COCOA.number(
+
+                tr.querySelector(
+
+                    ".item-price"
+
+                ).value
+
+            )
+
+        });
+
+    });
+
+    return rows;
+
+}
+
+/* ==========================================================
+   明細復元
+========================================================== */
+
+function loadRows(rows){
+
+    COCOA.id("itemBody").innerHTML="";
+
+    rows.forEach(row=>{
+
+        addRow(row);
+
+    });
+
+}
+
+/* ==========================================================
+   自動保存
+========================================================== */
+
+function autoSave(){
+
+    const data={
+
+        form:
+
+        COCOA.Form.get(
+
+            "#invoiceForm input,#invoiceForm select"
+
+        ),
+
+        rows:
+
+        getRows()
+
+    };
+
+    COCOA.Storage.save(
+
+        STORAGE_KEY,
+
+        data
+
+    );
+
+}
