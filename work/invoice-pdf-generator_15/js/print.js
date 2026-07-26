@@ -2,135 +2,124 @@
  * ==========================================================
  * COCOA TOOLS v2.0
  * invoice/js/print.js
- * 印刷・PDF保存
+ * 印刷・PDF
  * ==========================================================
  */
 
 window.Invoice = window.Invoice || {};
 
+
 Invoice.Print = (() => {
 
-    /**
-     * 初期化
-     */
-    function init() {
+
+
+    function init(){
+
 
         window.addEventListener(
 
             "beforeprint",
 
-            beforePrint
+            before
 
         );
 
-        window.addEventListener(
-
-            "afterprint",
-
-            afterPrint
-
-        );
 
     }
 
-    /**
-     * 印刷前
-     */
-    function beforePrint() {
 
-        document.body.classList.add(
 
-            "printing"
+    function before(){
 
-        );
+
+        if(
+
+            Invoice.Validation &&
+
+            !Invoice.Validation.beforePrint()
+
+        ){
+
+            return false;
+
+        }
+
+
 
         updateTitle();
 
-        updateDocumentType();
 
     }
 
-    /**
-     * 印刷後
-     */
-    function afterPrint() {
 
-        document.body.classList.remove(
 
-            "printing"
+    function updateTitle(){
 
-        );
 
-    }
+        const type =
 
-    /**
-     * タイトル更新
-     */
-    function updateTitle() {
+        COCOA.id(
 
-        const type = COCOA.id("docType")?.value;
+            "docType"
+
+        ).value;
+
+
 
         document.title =
 
-            type === "invoice"
+        type === "invoice"
 
-            ? "請求書"
+        ?
 
-            : "見積書";
+        "請求書"
 
-    }
+        :
 
-    /**
-     * 書類タイトル更新
-     */
-    function updateDocumentType() {
+        "見積書";
 
-        const title = document.getElementById(
-
-            "documentTitle"
-
-        );
-
-        if (!title) return;
-
-        title.textContent =
-
-            COCOA.id("docType").value === "invoice"
-
-            ? "請求書"
-
-            : "見積書";
 
     }
 
-    /**
-     * 印刷実行
-     */
-    function print() {
+
+
+    function print(){
+
+
+        if(
+
+            Invoice.Validation &&
+
+            !Invoice.Validation.beforePrint()
+
+        ){
+
+            return;
+
+        }
+
+
 
         Invoice.Calc.update();
 
+
+
         COCOA.Print.print();
 
-    }
-
-    /**
-     * PDF保存
-     */
-    function savePDF() {
-
-        print();
 
     }
+
+
 
     return {
 
+
         init,
 
-        print,
+        print
 
-        savePDF
 
     };
+
 
 })();
