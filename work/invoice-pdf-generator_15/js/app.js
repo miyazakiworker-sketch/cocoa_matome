@@ -55,6 +55,8 @@ Invoice.init = function () {
     // 印刷モジュール初期化
     Invoice.Print.init();
 
+　　Invoice.Validation = Invoice.Validation || {};
+
 
     // 共通イベント
     Invoice.bindEvents();
