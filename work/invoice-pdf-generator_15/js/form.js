@@ -2,7 +2,7 @@
  * ==========================================================
  * COCOA TOOLS v2.0
  * invoice/js/form.js
- * フォーム生成
+ * フォーム生成・初期値
  * ==========================================================
  */
 
@@ -10,330 +10,516 @@ window.Invoice = window.Invoice || {};
 
 Invoice.Form = (() => {
 
+    /**
+     * フォーム生成
+     */
     function create() {
 
-        const root = COCOA.id("invoiceForm");
+        const root =
 
-        if (!root) return;
+            COCOA.id("invoiceForm");
+
+        if (!root) {
+
+            return;
+
+        }
+
 
         root.innerHTML = `
 
-<div class="row">
+            <!-- ==========================================
+                 基本情報
+            =========================================== -->
 
-    <div class="col">
+            <div class="row">
 
-        <label>書類種類</label>
+                <div class="col">
 
-        <select id="docType">
+                    <label for="docType">
+                        書類種類
+                    </label>
 
-            <option value="estimate">
-                見積書
-            </option>
+                    <select id="docType">
 
-            <option value="invoice">
-                請求書
-            </option>
+                        <option value="estimate">
+                            見積書
+                        </option>
 
-        </select>
+                        <option value="invoice">
+                            請求書
+                        </option>
 
-    </div>
+                    </select>
 
-    <div class="col">
+                </div>
 
-        <label>書類番号</label>
 
-        <input
-            id="docNo"
-            placeholder="INV-0001">
+                <div class="col">
 
-    </div>
+                    <label for="docNo">
+                        書類番号
+                    </label>
 
-</div>
+                    <input
+                        id="docNo"
+                        type="text"
+                        placeholder="自動採番">
 
+                </div>
 
-<div class="row">
+            </div>
 
-    <div class="col">
 
-        <label>発行日</label>
+            <div class="row">
 
-        <input
-            type="date"
-            id="issueDate">
+                <div class="col">
 
-    </div>
+                    <label for="issueDate">
+                        発行日
+                    </label>
 
-    <div class="col">
+                    <input
+                        type="date"
+                        id="issueDate">
 
-        <label>支払期限</label>
+                </div>
 
-        <input
-            type="date"
-            id="dueDate">
 
-    </div>
+                <div class="col">
 
-</div>
+                    <label for="dueDate">
+                        支払期限
+                    </label>
 
+                    <input
+                        type="date"
+                        id="dueDate">
 
-<label>宛名</label>
+                </div>
 
-<input
-id="client"
-placeholder="○○株式会社">
+            </div>
 
 
-<label>件名</label>
+            <!-- ==========================================
+                 取引先
+            =========================================== -->
 
-<input
-id="subject"
-placeholder="内装工事一式">
+            <label for="client">
+                宛名
+            </label>
 
+            <input
+                id="client"
+                type="text"
+                placeholder="○○株式会社">
 
-<label>御社名</label>
 
-<input
-id="company"
-placeholder="COCOA COMPANY">
+            <label for="subject">
+                件名
+            </label>
 
+            <input
+                id="subject"
+                type="text"
+                placeholder="内装工事一式">
 
-<label>住所</label>
 
-<textarea
-id="address"
-rows="2"></textarea>
+            <!-- ==========================================
+                 発行者
+            =========================================== -->
 
+            <h2 class="mt-3">
+                発行者情報
+            </h2>
 
-<label>電話番号</label>
 
-<input
-id="tel">
+            <label for="company">
+                御社名
+            </label>
 
+            <input
+                id="company"
+                type="text"
+                placeholder="COCOA COMPANY">
 
-<label>メールアドレス</label>
 
-<input
-id="mail">
+            <label for="address">
+                住所
+            </label>
 
+            <textarea
+                id="address"
+                rows="2"
+                placeholder="〒000-0000&#10;○○県○○市..."></textarea>
 
-<label>振込先</label>
 
-<textarea
-id="bank"
-rows="3"
-placeholder="○○銀行 ○○支店 普通 1234567"></textarea>
+            <label for="tel">
+                電話番号
+            </label>
 
+            <input
+                id="tel"
+                type="tel"
+                placeholder="000-0000-0000">
 
-<h2 class="mt-3">
 
-明細
+            <label for="mail">
+                メールアドレス
+            </label>
 
-</h2>
+            <input
+                id="mail"
+                type="email"
+                placeholder="example@example.com">
 
-<div class="table-responsive">
 
-<table>
+            <label for="bank">
+                振込先
+            </label>
 
-<thead>
+            <textarea
+                id="bank"
+                rows="3"
+                placeholder="○○銀行 ○○支店&#10;普通 1234567&#10;口座名義：COCOA COMPANY"></textarea>
 
-<tr>
 
-<th style="width:42%">内容</th>
+            <!-- ==========================================
+                 明細
+            =========================================== -->
 
-<th style="width:12%">数量</th>
+            <h2 class="mt-3">
+                明細
+            </h2>
 
-<th style="width:18%">単価</th>
 
-<th style="width:18%">金額</th>
+            <div class="table-responsive">
 
-<th style="width:10%"></th>
+                <table>
 
-</tr>
+                    <thead>
 
-</thead>
+                        <tr>
 
-<tbody id="itemBody">
+                            <th style="width:38%">
+                                内容
+                            </th>
 
-</tbody>
+                            <th style="width:12%">
+                                数量
+                            </th>
 
-</table>
+                            <th style="width:18%">
+                                単価
+                            </th>
 
-</div>
+                            <th style="width:18%">
+                                金額
+                            </th>
 
-<button
-type="button"
-class="btn btn-primary mt-2"
-id="addRow">
+                            <th style="width:14%">
+                                操作
+                            </th>
 
-＋ 明細追加
+                        </tr>
 
-</button>
+                    </thead>
 
 
-<div class="summary mt-3">
+                    <tbody id="itemBody">
 
-<div class="summary-row">
+                    </tbody>
 
-<span>小計</span>
+                </table>
 
-<strong id="subtotal">
+            </div>
 
-¥0
 
-</strong>
+            <button
+                type="button"
+                class="btn btn-primary mt-2"
+                id="addRow">
 
-</div>
+                ＋ 明細追加
 
-<div class="summary-row">
+            </button>
 
-<span>
 
-消費税
+            <!-- ==========================================
+                 金額
+            =========================================== -->
 
-</span>
+            <div class="summary mt-3">
 
-<div>
 
-<select
-id="taxRate">
+                <div class="summary-row">
 
-<option value="0">
+                    <span>
+                        小計
+                    </span>
 
-0%
+                    <strong id="subtotal">
+                        ¥0
+                    </strong>
 
-</option>
+                </div>
 
-<option value="8">
 
-8%
+                <div class="summary-row">
 
-</option>
+                    <span>
+                        値引き
+                    </span>
 
-<option
-value="10"
-selected>
+                    <input
+                        id="discount"
+                        type="number"
+                        min="0"
+                        step="1"
+                        value="0"
+                        placeholder="0">
 
-10%
+                </div>
 
-</option>
 
-</select>
+                <div class="summary-row">
 
-</div>
+                    <span>
+                        送料・諸経費
+                    </span>
 
-</div>
+                    <input
+                        id="shipping"
+                        type="number"
+                        min="0"
+                        step="1"
+                        value="0"
+                        placeholder="0">
 
-<div class="summary-row">
+                </div>
 
-<strong>
 
-税額
+                <div class="summary-row">
 
-</strong>
+                    <span>
+                        課税対象額
+                    </span>
 
-<strong id="tax">
+                    <strong id="taxable">
+                        ¥0
+                    </strong>
 
-¥0
+                </div>
 
-</strong>
 
-</div>
+                <div class="summary-row">
 
-<div class="summary-row summary-total">
+                    <span>
+                        消費税率
+                    </span>
 
-<strong>
+                    <select id="taxRate">
 
-<div class="summary-row">
+                        <option value="0">
+                            0%
+                        </option>
 
-<span>
+                        <option value="8">
+                            8%
+                        </option>
 
-値引き
+                        <option
+                            value="10"
+                            selected>
+                            10%
+                        </option>
 
-</span>
+                    </select>
 
-<input
-id="discount"
-type="number"
-value="0"
-min="0"
-placeholder="0">
+                </div>
 
-</div>
 
-<div class="summary-row">
+                <div class="summary-row">
 
-    <span>
+                    <strong>
+                        税額
+                    </strong>
 
-        送料・諸経費
+                    <strong id="tax">
+                        ¥0
+                    </strong>
 
-    </span>
+                </div>
 
-    <input
-        id="shipping"
-        type="number"
-        min="0"
-        value="0"
-        placeholder="0">
 
-</div>
+                <div class="summary-row summary-total">
 
-合計
+                    <strong>
+                        合計
+                    </strong>
 
-</strong>
+                    <strong id="total">
+                        ¥0
+                    </strong>
 
-<strong id="total">
+                </div>
 
-¥0
 
-</strong>
+            </div>
 
-</div>
 
-</div>
+            <!-- ==========================================
+                 備考
+            =========================================== -->
 
+            <label
+                class="mt-3"
+                for="memo">
 
-<label class="mt-3">
+                備考
 
-備考
+            </label>
 
-</label>
+            <textarea
+                id="memo"
+                rows="5"
+                placeholder="支払条件・注意事項など"></textarea>
 
-<textarea
-id="memo"
-rows="5"></textarea>
+        `;
 
-`;
 
         initDefault();
 
     }
 
+
+    /**
+     * 初期値
+     */
     function initDefault() {
 
-        const today = COCOA.today();
+        const today =
 
-        if (!COCOA.id("issueDate").value) {
+            COCOA.today();
 
-            COCOA.id("issueDate").value = today;
+
+        const issue =
+
+            COCOA.id("issueDate");
+
+
+        const due =
+
+            COCOA.id("dueDate");
+
+
+        if (
+
+            issue &&
+
+            !issue.value
+
+        ) {
+
+            issue.value = today;
 
         }
 
-        if (!COCOA.id("dueDate").value) {
 
-            const date = new Date();
+        if (
 
-            date.setDate(date.getDate() + 30);
+            due &&
 
-            COCOA.id("dueDate").value =
-                date.toISOString().slice(0, 10);
+            !due.value
+
+        ) {
+
+            const date =
+
+                new Date();
+
+
+            date.setDate(
+
+                date.getDate() + 30
+
+            );
+
+
+            due.value =
+
+                date.toISOString()
+
+                    .slice(0, 10);
 
         }
 
     }
 
+
+    /**
+     * 書類種類取得
+     */
+    function type() {
+
+        return (
+
+            COCOA.id("docType")?.value ||
+
+            "estimate"
+
+        );
+
+    }
+
+
+    /**
+     * 書類種類変更
+     */
+    function setType(value) {
+
+        const element =
+
+            COCOA.id("docType");
+
+
+        if (!element) {
+
+            return;
+
+        }
+
+
+        if (
+
+            value !== "estimate" &&
+
+            value !== "invoice"
+
+        ) {
+
+            return;
+
+        }
+
+
+        element.value = value;
+
+    }
+
+
+    /**
+     * 公開API
+     */
     return {
 
-        create
+        create,
+
+        initDefault,
+
+        type,
+
+        setType
 
     };
 
