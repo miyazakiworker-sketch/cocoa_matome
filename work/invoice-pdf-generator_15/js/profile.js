@@ -2,7 +2,7 @@
  * ==========================================================
  * COCOA TOOLS v2.0
  * invoice/js/profile.js
- * 会社情報
+ * 発行者情報管理
  * ==========================================================
  */
 
@@ -12,97 +12,256 @@ Invoice.Profile = (() => {
 
     const KEY = "invoice_profile";
 
+
+    /**
+     * 対象フィールド
+     */
+    const FIELDS = [
+
+        "company",
+
+        "address",
+
+        "tel",
+
+        "mail",
+
+        "bank"
+
+    ];
+
+
+    /**
+     * プロフィール取得
+     */
     function collect() {
 
-        return {
+        const data = {};
 
-            company: COCOA.id("company")?.value || "",
+        FIELDS.forEach(id => {
 
-            address: COCOA.id("address")?.value || "",
+            const element =
 
-            tel: COCOA.id("tel")?.value || "",
+                COCOA.id(id);
 
-            mail: COCOA.id("mail")?.value || "",
 
-            bank: COCOA.id("bank")?.value || ""
+            if (element) {
 
-        };
+                data[id] =
+
+                    element.value || "";
+
+            }
+
+        });
+
+
+        return data;
 
     }
 
+
+    /**
+     * プロフィール保存
+     */
     function save() {
+
+        const data = collect();
+
 
         localStorage.setItem(
 
             KEY,
 
-            JSON.stringify(
-
-                collect()
-
-            )
+            JSON.stringify(data)
 
         );
 
-        COCOA.UI.toast(
 
-            "会社情報を保存しました"
+        toast(
+
+            "発行者情報を保存しました"
 
         );
 
     }
 
+
+    /**
+     * プロフィール読込
+     */
     function load() {
 
-        const json = localStorage.getItem(KEY);
+        const raw =
 
-        if (!json) {
+            localStorage.getItem(KEY);
+
+
+        if (!raw) {
+
+            return false;
+
+        }
+
+
+        try {
+
+            const data =
+
+                JSON.parse(raw);
+
+
+            FIELDS.forEach(id => {
+
+                const element =
+
+                    COCOA.id(id);
+
+
+                if (
+
+                    element &&
+
+                    data[id] !== undefined
+
+                ) {
+
+                    element.value =
+
+                        data[id];
+
+                }
+
+            });
+
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+
+                "Invoice.Profile.load error:",
+
+                error
+
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /**
+     * プロフィール削除
+     */
+    function reset() {
+
+        localStorage.removeItem(KEY);
+
+
+        FIELDS.forEach(id => {
+
+            const element =
+
+                COCOA.id(id);
+
+
+            if (element) {
+
+                element.value = "";
+
+            }
+
+        });
+
+
+        toast(
+
+            "発行者情報を削除しました"
+
+        );
+
+    }
+
+
+    /**
+     * 保存されているか
+     */
+    function exists() {
+
+        return Boolean(
+
+            localStorage.getItem(KEY)
+
+        );
+
+    }
+
+
+    /**
+     * 通知
+     */
+    function toast(message) {
+
+        if (
+
+            window.CocoaToast &&
+
+            typeof CocoaToast.show ===
+
+                "function"
+
+        ) {
+
+            CocoaToast.show(message);
 
             return;
 
         }
 
-        const data = JSON.parse(json);
 
-        set("company", data.company);
-        set("address", data.address);
-        set("tel", data.tel);
-        set("mail", data.mail);
-        set("bank", data.bank);
+        if (
 
-    }
+            window.COCOA &&
 
-    function clear() {
+            COCOA.UI &&
 
-        localStorage.removeItem(KEY);
+            typeof COCOA.UI.toast ===
 
-        COCOA.UI.toast(
+                "function"
 
-            "会社情報を削除しました"
+        ) {
 
-        );
+            COCOA.UI.toast(message);
 
-    }
-
-    function set(id, value) {
-
-        const el = COCOA.id(id);
-
-        if (el) {
-
-            el.value = value || "";
+            return;
 
         }
 
+
+        console.log(message);
+
     }
 
+
+    /**
+     * 公開API
+     */
     return {
+
+        collect,
 
         save,
 
         load,
 
-        clear
+        reset,
+
+        exists
 
     };
 
