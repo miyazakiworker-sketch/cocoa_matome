@@ -1,8 +1,8 @@
 /**
  * ==========================================================
  * COCOA TOOLS v2.0
- * cocoa-pwa.js
- * PWA共通ライブラリ
+ * core/pwa.js
+ * PWA共通モジュール
  * ==========================================================
  */
 
@@ -10,191 +10,409 @@ window.COCOA = window.COCOA || {};
 
 COCOA.PWA = (() => {
 
-    let deferredPrompt = null;
+    let registration = null;
+
 
     /**
-     * Service Worker登録
+     * ======================================================
+     * PWA初期化
+     * ======================================================
      */
-    async function register(serviceWorker = "./sw.js") {
 
-        if (!("serviceWorker" in navigator)) {
+    function init(
 
-            console.warn("Service Worker 非対応");
-
-            return false;
-
-        }
-
-        try {
-
-            const registration =
-                await navigator.serviceWorker.register(serviceWorker);
-
-            console.log("Service Worker登録完了");
-
-            return registration;
-
-        }
-
-        catch (error) {
-
-            console.error(error);
-
-            return false;
-
-        }
-
-    }
-
-    /**
-     * installイベント保持
-     */
-    function installEvent() {
-
-        window.addEventListener("beforeinstallprompt", e => {
-
-            e.preventDefault();
-
-            deferredPrompt = e;
-
-            document.dispatchEvent(
-
-                new CustomEvent("cocoa:pwa-ready")
-
-            );
-
-        });
-
-    }
-
-    /**
-     * インストール
-     */
-    async function install() {
-
-        if (!deferredPrompt) {
-
-            return false;
-
-        }
-
-        deferredPrompt.prompt();
-
-        const result =
-            await deferredPrompt.userChoice;
-
-        deferredPrompt = null;
-
-        return result.outcome === "accepted";
-
-    }
-
-    /**
-     * インストール可能？
-     */
-    function canInstall() {
-
-        return deferredPrompt !== null;
-
-    }
-
-    /**
-     * 更新検知
-     */
-    function updateListener(callback) {
-
-        if (!("serviceWorker" in navigator)) return;
-
-        navigator.serviceWorker.addEventListener(
-
-            "controllerchange",
-
-            callback
-
-        );
-
-    }
-
-    /**
-     * 更新確認
-     */
-    async function checkUpdate() {
-
-        const reg =
-            await navigator.serviceWorker.getRegistration();
-
-        if (!reg) return;
-
-        reg.update();
-
-    }
-
-    /**
-     * オンライン判定
-     */
-    function isOnline() {
-
-        return navigator.onLine;
-
-    }
-
-    /**
-     * 接続イベント
-     */
-    function networkEvents(
-
-        online,
-
-        offline
+        swPath = "./sw.js"
 
     ) {
 
-        window.addEventListener(
+        /*
+         * Service Worker非対応
+         */
 
-            "online",
+        if (
 
-            online
+            !("serviceWorker" in navigator)
 
-        );
+        ) {
 
-        window.addEventListener(
+            console.info(
 
-            "offline",
+                "COCOA PWA: Service Worker unavailable."
 
-            offline
+            );
 
-        );
+            return null;
+
+        }
+
+
+        /*
+         * file:// では登録しない
+         */
+
+        if (
+
+            location.protocol ===
+
+                "file:"
+
+        ) {
+
+            console.info(
+
+                "COCOA PWA: skipped on file://"
+
+            );
+
+            return null;
+
+        }
+
+
+        /*
+         * 登録
+         */
+
+        navigator.serviceWorker
+
+            .register(swPath)
+
+            .then(
+
+                reg => {
+
+                    registration = reg;
+
+
+                    console.log(
+
+                        "COCOA PWA: registered",
+
+                        reg.scope
+
+                    );
+
+
+                    setupUpdate(reg);
+
+                }
+
+            )
+
+            .catch(
+
+                error => {
+
+                    console.error(
+
+                        "COCOA PWA registration failed:",
+
+                        error
+
+                    );
+
+                }
+
+            );
+
+
+        return registration;
 
     }
+
 
     /**
-     * 初期化
+     * ======================================================
+     * 更新監視
+     * ======================================================
      */
-    function init(serviceWorker = "./sw.js") {
 
-        register(serviceWorker);
+    function setupUpdate(reg) {
 
-        installEvent();
+        reg.addEventListener(
+
+            "updatefound",
+
+            () => {
+
+                const worker =
+
+                    reg.installing;
+
+
+                if (!worker) {
+
+                    return;
+
+                }
+
+
+                worker.addEventListener(
+
+                    "statechange",
+
+                    () => {
+
+                        if (
+
+                            worker.state ===
+
+                            "installed" &&
+
+                            navigator.serviceWorker.controller
+
+                        ) {
+
+                            showUpdateNotice();
+
+                        }
+
+                    }
+
+                );
+
+            }
+
+        );
 
     }
+
+
+    /**
+     * ======================================================
+     * 更新通知
+     * ======================================================
+     */
+
+    function showUpdateNotice() {
+
+        if (
+
+            document.getElementById(
+
+                "cocoaPwaUpdate"
+
+            )
+
+        ) {
+
+            return;
+
+        }
+
+
+        const box =
+
+            document.createElement("div");
+
+
+        box.id =
+
+            "cocoaPwaUpdate";
+
+
+        box.style.position =
+
+            "fixed";
+
+
+        box.style.left =
+
+            "16px";
+
+
+        box.style.right =
+
+            "16px";
+
+
+        box.style.bottom =
+
+            "76px";
+
+
+        box.style.zIndex =
+
+            "99998";
+
+
+        box.style.padding =
+
+            "12px";
+
+
+        box.style.border =
+
+            "1px solid #303740";
+
+
+        box.style.borderRadius =
+
+            "12px";
+
+
+        box.style.background =
+
+            "#1a1f26";
+
+
+        box.style.color =
+
+            "#f4f4f5";
+
+
+        box.innerHTML = `
+
+            <div style="font-weight:700;margin-bottom:8px;">
+
+                新しいバージョンがあります
+
+            </div>
+
+            <button
+
+                type="button"
+
+                id="cocoaPwaUpdateBtn"
+
+                style="
+
+                    border:0;
+
+                    border-radius:8px;
+
+                    padding:8px 12px;
+
+                    background:#a3e635;
+
+                    color:#111;
+
+                    font-weight:700;
+
+                    cursor:pointer;
+
+                "
+
+            >
+
+                更新する
+
+            </button>
+
+        `;
+
+
+        document.body.appendChild(box);
+
+
+        const button =
+
+            document.getElementById(
+
+                "cocoaPwaUpdateBtn"
+
+            );
+
+
+        button.addEventListener(
+
+            "click",
+
+            () => {
+
+                update();
+
+            }
+
+        );
+
+    }
+
+
+    /**
+     * ======================================================
+     * 更新実行
+     * ======================================================
+     */
+
+    function update() {
+
+        if (!registration) {
+
+            return false;
+
+        }
+
+
+        const worker =
+
+            registration.waiting;
+
+
+        if (!worker) {
+
+            return false;
+
+        }
+
+
+        worker.postMessage({
+
+            type:
+
+                "SKIP_WAITING"
+
+        });
+
+
+        navigator.serviceWorker
+
+            .addEventListener(
+
+                "controllerchange",
+
+                () => {
+
+                    window.location.reload();
+
+                },
+
+                { once: true }
+
+            );
+
+
+        return true;
+
+    }
+
+
+    /**
+     * ======================================================
+     * 登録情報取得
+     * ======================================================
+     */
+
+    function getRegistration() {
+
+        return registration;
+
+    }
+
+
+    /**
+     * ======================================================
+     * 公開API
+     * ======================================================
+     */
 
     return {
 
         init,
 
-        register,
+        update,
 
-        install,
-
-        canInstall,
-
-        checkUpdate,
-
-        updateListener,
-
-        isOnline,
-
-        networkEvents
+        getRegistration
 
     };
 
