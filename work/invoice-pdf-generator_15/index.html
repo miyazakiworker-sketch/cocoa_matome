@@ -3,37 +3,634 @@
 
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
-<title>
-だるい見積書・請求書 一瞬PDFジェネレーター
-</title>
+    <meta
+        name="theme-color"
+        content="#0d0f12">
+
+    <meta
+        name="description"
+        content="見積書・請求書をブラウザだけで作成してPDF保存できる無料ツール。COCOA TOOLS v2.0">
+
+    <meta
+        name="robots"
+        content="index,follow">
+
+    <title>
+        だるい見積書・請求書 一瞬PDFジェネレーター - COCOA TOOLS
+    </title>
+
+    <link
+        rel="manifest"
+        href="./manifest.json">
+
+    <link
+        rel="icon"
+        href="./icon-192.png">
 
 
-<!-- PWA -->
+    <style>
 
-<link
-rel="manifest"
-href="./manifest.json">
+        :root {
+
+            --bg:
+                #0d0f12;
+
+            --panel:
+                #1a1f26;
+
+            --panel-2:
+                #20262e;
+
+            --border:
+                #303740;
+
+            --text:
+                #f4f4f5;
+
+            --muted:
+                #a1a1aa;
+
+            --accent:
+                #a3e635;
+
+            --danger:
+                #ef4444;
+
+        }
 
 
-<!-- COCOA TOOLS 共通CSS -->
+        * {
 
-<link
-rel="stylesheet"
-href="../core/cocoa.css">
+            box-sizing:
+                border-box;
+
+        }
 
 
-<!-- アプリ専用CSS -->
+        html {
 
-<link
-rel="stylesheet"
-href="./css/invoice.css">
+            scroll-behavior:
+                smooth;
 
+        }
+
+
+        body {
+
+            margin:
+                0;
+
+            min-height:
+                100vh;
+
+            background:
+                var(--bg);
+
+            color:
+                var(--text);
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            line-height:
+                1.6;
+
+        }
+
+
+        button,
+        input,
+        textarea,
+        select {
+
+            font:
+                inherit;
+
+        }
+
+
+        button {
+
+            cursor:
+                pointer;
+
+        }
+
+
+        .app {
+
+            width:
+                100%;
+
+            max-width:
+                480px;
+
+            margin:
+                0 auto;
+
+            padding:
+                16px;
+
+        }
+
+
+        header {
+
+            margin-bottom:
+                20px;
+
+        }
+
+
+        .brand {
+
+            font-size:
+                12px;
+
+            color:
+                var(--accent);
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                .08em;
+
+        }
+
+
+        h1 {
+
+            margin:
+                4px 0 0;
+
+            font-size:
+                22px;
+
+            line-height:
+                1.35;
+
+        }
+
+
+        h2 {
+
+            margin:
+                22px 0 10px;
+
+            font-size:
+                16px;
+
+        }
+
+
+        .card {
+
+            background:
+                var(--panel);
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                14px;
+
+            padding:
+                16px;
+
+            margin-bottom:
+                14px;
+
+        }
+
+
+        label {
+
+            display:
+                block;
+
+            margin:
+                12px 0 6px;
+
+            font-size:
+                13px;
+
+            font-weight:
+                700;
+
+        }
+
+
+        input,
+        textarea,
+        select {
+
+            width:
+                100%;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                9px;
+
+            background:
+                var(--panel-2);
+
+            color:
+                var(--text);
+
+            padding:
+                11px 12px;
+
+            outline:
+                none;
+
+        }
+
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+
+            border-color:
+                var(--accent);
+
+        }
+
+
+        textarea {
+
+            resize:
+                vertical;
+
+        }
+
+
+        .row {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap:
+                10px;
+
+        }
+
+
+        .col {
+
+            min-width:
+                0;
+
+        }
+
+
+        .table-responsive {
+
+            width:
+                100%;
+
+            overflow-x:
+                auto;
+
+        }
+
+
+        table {
+
+            width:
+                100%;
+
+            min-width:
+                430px;
+
+            border-collapse:
+                collapse;
+
+        }
+
+
+        th,
+        td {
+
+            border-bottom:
+                1px solid var(--border);
+
+            padding:
+                7px 4px;
+
+            font-size:
+                12px;
+
+            vertical-align:
+                middle;
+
+        }
+
+
+        th {
+
+            color:
+                var(--muted);
+
+            text-align:
+                left;
+
+        }
+
+
+        .item-actions {
+
+            display:
+                flex;
+
+            gap:
+                3px;
+
+        }
+
+
+        .item-actions button {
+
+            width:
+                28px;
+
+            height:
+                28px;
+
+            padding:
+                0;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                6px;
+
+            background:
+                var(--panel-2);
+
+            color:
+                var(--text);
+
+        }
+
+
+        .summary {
+
+            border-top:
+                1px solid var(--border);
+
+        }
+
+
+        .summary-row {
+
+            display:
+                flex;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                center;
+
+            gap:
+                12px;
+
+            padding:
+                9px 0;
+
+        }
+
+
+        .summary-row input,
+        .summary-row select {
+
+            width:
+                120px;
+
+        }
+
+
+        .summary-total {
+
+            margin-top:
+                6px;
+
+            padding:
+                14px 0;
+
+            border-top:
+                1px solid var(--border);
+
+            font-size:
+                18px;
+
+        }
+
+
+        .btn-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap:
+                8px;
+
+        }
+
+
+        .btn {
+
+            min-height:
+                44px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                9px;
+
+            padding:
+                10px 12px;
+
+            background:
+                var(--panel-2);
+
+            color:
+                var(--text);
+
+            font-weight:
+                700;
+
+        }
+
+
+        .btn-primary {
+
+            border-color:
+                var(--accent);
+
+            background:
+                var(--accent);
+
+            color:
+                #111;
+
+        }
+
+
+        .btn-danger {
+
+            border-color:
+                var(--danger);
+
+            color:
+                #fff;
+
+        }
+
+
+        .notice {
+
+            padding:
+                12px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius:
+                10px;
+
+            color:
+                var(--muted);
+
+            font-size:
+                12px;
+
+        }
+
+
+        .ad-space {
+
+            min-height:
+                90px;
+
+            margin:
+                18px 0;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            border:
+                1px dashed var(--border);
+
+            border-radius:
+                10px;
+
+            color:
+                var(--muted);
+
+            font-size:
+                11px;
+
+        }
+
+
+        footer {
+
+            padding:
+                20px 0 10px;
+
+            text-align:
+                center;
+
+            color:
+                var(--muted);
+
+            font-size:
+                12px;
+
+        }
+
+
+        footer a {
+
+            color:
+                var(--accent);
+
+            text-decoration:
+                none;
+
+        }
+
+
+        .input-error {
+
+            border-color:
+                var(--danger) !important;
+
+        }
+
+
+        .print-only {
+
+            display:
+                none;
+
+        }
+
+
+        @media (min-width: 700px) {
+
+            body {
+
+                padding:
+                    30px 0;
+
+            }
+
+        }
+
+
+        @media print {
+
+            body {
+
+                background:
+                    #fff;
+
+                color:
+                    #000;
+
+            }
+
+        }
+
+    </style>
 
 </head>
 
@@ -41,174 +638,250 @@ href="./css/invoice.css">
 <body>
 
 
-<div class="container">
+<div class="app">
 
 
-<header class="card text-center">
+    <header>
+
+        <div class="brand">
+            COCOA TOOLS v2.0
+        </div>
+
+        <h1>
+            だるい見積書・請求書<br>
+            一瞬PDFジェネレーター
+        </h1>
+
+    </header>
 
 
-<h1 id="documentTitle">
+    <!-- =====================================================
+         操作
+    ====================================================== -->
 
-見積書
+    <section class="card no-print">
 
-</h1>
+        <div class="btn-grid">
 
+            <button
+                type="button"
+                class="btn btn-primary"
+                id="printBtn">
 
-<p>
+                PDF / 印刷
 
-COCOA TOOLS v2.0
-
-</p>
-
-
-</header>
-
-
-
-
-<!-- 入力フォーム -->
-
-<section
-class="card"
-id="invoiceForm">
+            </button>
 
 
-</section>
+            <button
+                type="button"
+                class="btn"
+                id="saveBtn">
+
+                保存
+
+            </button>
 
 
+            <button
+                type="button"
+                class="btn"
+                id="loadBtn">
+
+                JSON読込
+
+            </button>
 
 
+            <button
+                type="button"
+                class="btn btn-danger"
+                id="resetBtn">
 
-<!-- 操作ボタン -->
+                リセット
 
-<section
-class="card no-print">
+            </button>
 
+        </div>
 
-<button
-class="btn btn-success"
-id="saveBtn">
-
-保存
-
-</button>
+    </section>
 
 
+    <!-- =====================================================
+         メインフォーム
+    ====================================================== -->
 
-<button
-class="btn btn-primary"
-id="printBtn">
+    <main>
 
-PDF保存・印刷
+        <section class="card">
 
-</button>
+            <form id="invoiceForm"></form>
 
-
-
-<button
-class="btn btn-primary"
-id="loadBtn">
-
-JSON読込
-
-</button>
+        </section>
 
 
+        <!-- =================================================
+             発行者情報
+        ================================================== -->
 
-<button
-class="btn btn-danger"
-id="resetBtn">
+        <section class="card no-print">
 
-リセット
+            <h2>
+                発行者情報
+            </h2>
 
-</button>
+            <div class="btn-grid">
 
+                <button
+                    type="button"
+                    class="btn"
+                    id="profileSaveBtn">
 
-</section>
+                    発行者情報を保存
 
-
-
-
-
-<!-- 広告枠 -->
-
-<section
-class="card no-print">
+                </button>
 
 
-<div class="ad-box">
+                <button
+                    type="button"
+                    class="btn"
+                    id="profileLoadBtn">
 
-広告スペース
+                    保存情報を読込
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    id="profileResetBtn">
+
+                    保存情報を削除
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             データ出力
+        ================================================== -->
+
+        <section class="card no-print">
+
+            <h2>
+                データ出力
+            </h2>
+
+            <div class="btn-grid">
+
+                <button
+                    type="button"
+                    class="btn"
+                    id="jsonExportBtn">
+
+                    JSON保存
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn"
+                    id="csvBtn">
+
+                    CSV保存
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn"
+                    id="copyTextBtn">
+
+                    テキストコピー
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             注意書き
+        ================================================== -->
+
+        <section class="notice no-print">
+
+            <strong>
+                ご利用上の注意
+            </strong>
+
+            <br>
+
+            このツールは見積書・請求書作成を補助する
+            簡易ツールです。
+
+            <br>
+
+            税務・法務上の最終確認、および実際の
+            請求・発注条件についてはご自身で確認してください。
+
+        </section>
+
+
+        <!-- =================================================
+             広告スペース
+        ================================================== -->
+
+        <div class="ad-space no-print">
+
+            広告スペース
+
+        </div>
+
+
+    </main>
+
+
+    <footer>
+
+        COCOA TOOLS v2.0
+
+        <br>
+
+        <a
+            href="https://x.com/cocoa_next7"
+            target="_blank"
+            rel="noopener noreferrer">
+
+            @cocoa_next7
+
+        </a>
+
+    </footer>
+
 
 </div>
 
 
-</section>
+<!-- =========================================================
+     COCOA CORE
+========================================================== -->
+
+<script src="./core/cocoa.js"></script>
+
+<script src="./core/pwa.js"></script>
 
 
-
-
-
-<footer
-class="footer">
-
-
-<p>
-
-COCOA TOOLS v2.0
-
-</p>
-
-
-<p>
-
-X:
-<a href="#">
-
-@cocoa_next7
-
-</a>
-
-</p>
-
-
-</footer>
-
-
-
-</div>
-
-
-
-
-
-<!-- ==========================
-     Core
-========================== -->
-
-
-<script src="../core/cocoa-utils.js"></script>
-
-<script src="../core/cocoa-storage.js"></script>
-
-<script src="../core/cocoa-ui.js"></script>
-
-<script src="../core/cocoa-print.js"></script>
-
-<script src="../core/cocoa-json.js"></script>
-
-<script src="../core/cocoa-pwa.js"></script>
-
-<script src="../core/cocoa-form.js"></script>
-
-
-
-
-
-<!-- ==========================
-     Invoice App
-========================== -->
-
+<!-- =========================================================
+     Invoice Modules
+========================================================== -->
 
 <script src="./js/form.js"></script>
 
@@ -216,14 +889,28 @@ X:
 
 <script src="./js/calc.js"></script>
 
+<script src="./js/validation.js"></script>
+
 <script src="./js/save.js"></script>
+
+<script src="./js/profile.js"></script>
+
+<script src="./js/history.js"></script>
+
+<script src="./js/template.js"></script>
+
+<script src="./js/export.js"></script>
 
 <script src="./js/print.js"></script>
 
-<script src="./js/validation.js"></script>
+<script src="./js/ui.js"></script>
+
+
+<!-- =========================================================
+     App
+========================================================== -->
 
 <script src="./js/app.js"></script>
-
 
 
 </body>
