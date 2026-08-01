@@ -8,35 +8,307 @@
 
 window.Invoice = window.Invoice || {};
 
-
 Invoice.Validation = (() => {
+
+    /**
+     * エラー表示
+     */
+    function showError(message, target) {
+
+        if (target) {
+
+            target.focus();
+
+            target.classList.add(
+                "input-error"
+            );
+
+            setTimeout(() => {
+
+                target.classList.remove(
+                    "input-error"
+                );
+
+            }, 2500);
+
+        }
+
+        if (
+            window.CocoaToast &&
+            typeof CocoaToast.error === "function"
+        ) {
+
+            CocoaToast.error(message);
+
+            return false;
+
+        }
+
+        if (
+            COCOA.UI &&
+            typeof COCOA.UI.toast === "function"
+        ) {
+
+            COCOA.UI.toast(message);
+
+            return false;
+
+        }
+
+        alert(message);
+
+        return false;
+
+    }
+
+
+    /**
+     * 必須項目チェック
+     */
+    function required(id, label) {
+
+        const element = COCOA.id(id);
+
+        if (!element) {
+
+            return true;
+
+        }
+
+        if (
+            String(element.value || "")
+                .trim() === ""
+        ) {
+
+            return showError(
+                `${label}を入力してください。`,
+                element
+            );
+
+        }
+
+        return true;
+
+    }
+
+
+    /**
+     * 日付チェック
+     */
+    function dates() {
+
+        const issue =
+
+            COCOA.id("issueDate");
+
+        const due =
+
+            COCOA.id("dueDate");
+
+
+        if (
+            !issue ||
+            !due ||
+            !issue.value ||
+            !due.value
+        ) {
+
+            return true;
+
+        }
+
+
+        if (due.value < issue.value) {
+
+            return showError(
+                "支払期限は発行日以降にしてください。",
+                due
+            );
+
+        }
+
+        return true;
+
+    }
+
+
+    /**
+     * 明細チェック
+     */
+    function items() {
+
+        if (
+            !Invoice.Items ||
+            typeof Invoice.Items.data !== "function"
+        ) {
+
+            return true;
+
+        }
+
+
+        const rows =
+
+            Invoice.Items.data();
+
+
+        if (!rows.length) {
+
+            return showError(
+                "明細を1件以上追加してください。"
+            );
+
+        }
+
+
+        for (
+            let i = 0;
+            i < rows.length;
+            i++
+        ) {
+
+            const item = rows[i];
+
+
+            /*
+             * 空行は許可
+             * 完全な空行はスキップ
+             */
+
+            if (
+                !String(item.name || "").trim() &&
+                Number(item.qty || 0) === 0 &&
+                Number(item.price || 0) === 0
+            ) {
+
+                continue;
+
+            }
+
+
+            if (
+                !String(item.name || "").trim()
+            ) {
+
+                return showError(
+                    `明細${i + 1}行目の内容を入力してください。`
+                );
+
+            }
+
+
+            if (
+                Number(item.qty) <= 0
+            ) {
+
+                return showError(
+                    `明細${i + 1}行目の数量を確認してください。`
+                );
+
+            }
+
+
+            if (
+                Number(item.price) < 0
+            ) {
+
+                return showError(
+                    `明細${i + 1}行目の単価を確認してください。`
+                );
+
+            }
+
+        }
+
+        return true;
+
+    }
+
+
+    /**
+     * 税率チェック
+     */
+    function taxRate() {
+
+        const element =
+
+            COCOA.id("taxRate");
+
+
+        if (!element) {
+
+            return true;
+
+        }
+
+
+        const rate =
+
+            Number(element.value);
+
+
+        if (
+            Number.isNaN(rate) ||
+            rate < 0 ||
+            rate > 100
+        ) {
+
+            return showError(
+                "消費税率を正しく入力してください。",
+                element
+            );
+
+        }
+
+        return true;
+
+    }
 
 
     /**
      * 全体チェック
      */
-    function check(){
+    function validate() {
 
-        const basic = checkBasic();
-
-        if(!basic.ok){
-
-            COCOA.UI.toast(
-                basic.message
-            );
+        if (
+            !required(
+                "client",
+                "宛名"
+            )
+        ) {
 
             return false;
 
         }
 
 
-        const items = checkItems();
+        if (
+            !required(
+                "subject",
+                "件名"
+            )
+        ) {
 
-        if(!items.ok){
+            return false;
 
-            COCOA.UI.toast(
-                items.message
-            );
+        }
+
+
+        if (!dates()) {
+
+            return false;
+
+        }
+
+
+        if (!items()) {
+
+            return false;
+
+        }
+
+
+        if (!taxRate()) {
 
             return false;
 
@@ -48,207 +320,52 @@ Invoice.Validation = (() => {
     }
 
 
-
-    /**
-     * 基本情報チェック
-     */
-    function checkBasic(){
-
-
-        const required = [
-
-            {
-                id:"client",
-                name:"宛名"
-            },
-
-            {
-                id:"subject",
-                name:"件名"
-            },
-
-            {
-                id:"company",
-                name:"会社名"
-            }
-
-        ];
-
-
-        for(
-            const item of required
-        ){
-
-            const el = COCOA.id(
-                item.id
-            );
-
-
-            if(
-                !el ||
-                el.value.trim()===""
-            ){
-
-                return {
-
-                    ok:false,
-
-                    message:
-                    item.name +
-                    "を入力してください"
-
-                };
-
-            }
-
-        }
-
-
-        return {
-
-            ok:true
-
-        };
-
-
-    }
-
-
-
-    /**
-     * 明細チェック
-     */
-    function checkItems(){
-
-
-        const rows =
-        Invoice.Items.data();
-
-
-
-        if(
-            rows.length === 0
-        ){
-
-            return {
-
-                ok:false,
-
-                message:
-                "明細を1件以上入力してください"
-
-            };
-
-        }
-
-
-
-        for(
-            const row of rows
-        ){
-
-
-            if(
-                row.name.trim()===""
-            ){
-
-                return {
-
-                    ok:false,
-
-                    message:
-                    "明細内容を入力してください"
-
-                };
-
-            }
-
-
-
-            if(
-                row.qty <= 0
-            ){
-
-                return {
-
-                    ok:false,
-
-                    message:
-                    "数量を確認してください"
-
-                };
-
-            }
-
-
-
-            if(
-                row.price < 0
-            ){
-
-                return {
-
-                    ok:false,
-
-                    message:
-                    "単価を確認してください"
-
-                };
-
-            }
-
-
-        }
-
-
-        return {
-
-            ok:true
-
-        };
-
-
-    }
-
-
-
     /**
      * 印刷前チェック
      */
-    function beforePrint(){
+    function beforePrint() {
 
-        return check();
+        return validate();
 
     }
-
 
 
     /**
-     * 保存前チェック
+     * 入力エラーを全部解除
      */
-    function beforeSave(){
+    function clearErrors() {
 
-        return check();
+        document
+            .querySelectorAll(
+                ".input-error"
+            )
+            .forEach(element => {
+
+                element.classList.remove(
+                    "input-error"
+                );
+
+            });
 
     }
-
 
 
     return {
 
+        required,
 
-        check,
+        dates,
 
-        checkBasic,
+        items,
 
-        checkItems,
+        taxRate,
+
+        validate,
 
         beforePrint,
 
-        beforeSave
-
+        clearErrors
 
     };
-
 
 })();
