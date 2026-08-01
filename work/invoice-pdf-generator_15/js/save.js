@@ -2,297 +2,655 @@
  * ==========================================================
  * COCOA TOOLS v2.0
  * invoice/js/save.js
- * 保存・復元
+ * LocalStorage保存・読込・JSON入出力
  * ==========================================================
  */
 
 window.Invoice = window.Invoice || {};
 
-
 Invoice.Save = (() => {
 
+    const KEY =
 
-    const KEY = Invoice.STORAGE_KEY;
+        Invoice.STORAGE_KEY ||
 
+        "invoice";
+
+    let timer = null;
 
 
     /**
-     * データ取得
+     * フォームデータ取得
      */
-    function collect(){
+    function collectForm() {
+
+        const form =
+
+            COCOA.id("invoiceForm");
+
+        if (!form) {
+
+            return {};
+
+        }
+
+
+        const data = {};
+
+
+        form
+            .querySelectorAll(
+                "input, select, textarea"
+            )
+            .forEach(element => {
+
+                if (!element.id) {
+
+                    return;
+
+                }
+
+
+                data[element.id] =
+
+                    element.value;
+
+            });
+
+
+        return data;
+
+    }
+
+
+    /**
+     * 保存データ作成
+     */
+    function collect() {
 
         return {
 
+            version:
+
+                Invoice.VERSION ||
+
+                "2.0.0",
+
+            savedAt:
+
+                new Date().toISOString(),
+
             form:
 
-            COCOA.Form.get(
-
-                "#invoiceForm input," +
-                "#invoiceForm select," +
-                "#invoiceForm textarea"
-
-            ),
-
+                collectForm(),
 
             items:
 
-            Invoice.Items.data()
+                Invoice.Items &&
+                Invoice.Items.data
 
+                    ? Invoice.Items.data()
+
+                    : []
 
         };
 
     }
 
 
-
     /**
-     * 保存
+     * フォーム復元
      */
-    function save(){
+    function restoreForm(data) {
 
-        if(
-
-            Invoice.Validation &&
-
-            !Invoice.Validation.beforeSave()
-
-        ){
+        if (!data) {
 
             return;
 
         }
 
 
+        Object.entries(data)
 
-        COCOA.Storage.save(
+            .forEach(([id, value]) => {
 
-            KEY,
+                const element =
 
-            collect()
-
-        );
-
+                    COCOA.id(id);
 
 
-        COCOA.UI.toast(
+                if (!element) {
 
-            "保存しました"
+                    return;
 
-        );
+                }
+
+
+                element.value =
+
+                    value ?? "";
+
+            });
 
     }
-
 
 
     /**
-     * 自動保存
+     * 保存
      */
-    function autoSave(){
+    function save() {
+
+        try {
+
+            const data = collect();
 
 
-        COCOA.Storage.save(
+            localStorage.setItem(
 
-            KEY,
+                KEY,
 
-            collect()
+                JSON.stringify(data)
 
-        );
+            );
 
+
+            toast(
+
+                "保存しました"
+
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+
+                "Invoice.Save.save error:",
+
+                error
+
+            );
+
+
+            toast(
+
+                "保存に失敗しました"
+
+            );
+
+
+            return false;
+
+        }
 
     }
-
 
 
     /**
      * 読込
      */
-    function load(){
+    function load() {
+
+        const raw =
+
+            localStorage.getItem(KEY);
 
 
-        const data =
+        if (!raw) {
 
-            COCOA.Storage.load(
-
-                KEY,
-
-                null
-
-            );
-
-
-
-        if(!data){
-
-            return;
+            return false;
 
         }
 
 
+        try {
 
-        if(data.form){
+            const data =
 
-            COCOA.Form.fill(
+                JSON.parse(raw);
+
+
+            restoreForm(
 
                 data.form
 
             );
 
-        }
+
+            if (
+
+                Invoice.Items &&
+
+                Invoice.Items.load
+
+            ) {
+
+                Invoice.Items.load(
+
+                    data.items || []
+
+                );
+
+            }
 
 
+            return true;
 
-        if(
+        } catch (error) {
 
-            Array.isArray(data.items)
+            console.error(
 
-        ){
+                "Invoice.Save.load error:",
 
-            Invoice.Items.load(
-
-                data.items
+                error
 
             );
 
-        }
 
+            return false;
+
+        }
 
     }
 
 
+    /**
+     * 自動保存
+     */
+    function autoSave() {
+
+        clearTimeout(timer);
+
+
+        timer = setTimeout(
+
+            () => {
+
+                try {
+
+                    const data = collect();
+
+
+                    localStorage.setItem(
+
+                        KEY,
+
+                        JSON.stringify(data)
+
+                    );
+
+                } catch (error) {
+
+                    console.error(
+
+                        "Invoice.Save.autoSave error:",
+
+                        error
+
+                    );
+
+                }
+
+            },
+
+            400
+
+        );
+
+    }
+
 
     /**
-     * 削除
+     * JSON取得
      */
-    function reset(){
+    function getJSON() {
+
+        return JSON.stringify(
+
+            collect(),
+
+            null,
+
+            2
+
+        );
+
+    }
 
 
-        if(
+    /**
+     * JSONファイル出力
+     */
+    function exportJSON() {
 
-            !confirm(
+        const blob = new Blob(
 
-                "入力内容を削除しますか？"
+            [getJSON()],
 
-            )
+            {
 
-        ){
+                type:
+
+                    "application/json"
+
+            }
+
+        );
+
+
+        const url =
+
+            URL.createObjectURL(blob);
+
+
+        const link =
+
+            document.createElement("a");
+
+
+        link.href = url;
+
+
+        link.download =
+
+            "invoice-" +
+
+            getFileDate() +
+
+            ".json";
+
+
+        document.body.appendChild(link);
+
+
+        link.click();
+
+
+        link.remove();
+
+
+        URL.revokeObjectURL(url);
+
+
+        toast(
+
+            "JSONを書き出しました"
+
+        );
+
+    }
+
+
+    /**
+     * JSONファイル読込
+     */
+    function importJSON() {
+
+        const input =
+
+            document.createElement("input");
+
+
+        input.type = "file";
+
+        input.accept =
+
+            "application/json,.json";
+
+
+        input.onchange = function () {
+
+            const file =
+
+                input.files?.[0];
+
+
+            if (!file) {
+
+                return;
+
+            }
+
+
+            const reader =
+
+                new FileReader();
+
+
+            reader.onload = function () {
+
+                try {
+
+                    const data =
+
+                        JSON.parse(
+
+                            reader.result
+
+                        );
+
+
+                    if (
+                        !data ||
+                        typeof data !== "object"
+                    ) {
+
+                        throw new Error(
+                            "Invalid data"
+                        );
+
+                    }
+
+
+                    restoreForm(
+
+                        data.form || {}
+
+                    );
+
+
+                    if (
+
+                        Invoice.Items &&
+
+                        Invoice.Items.load
+
+                    ) {
+
+                        Invoice.Items.load(
+
+                            data.items || []
+
+                        );
+
+                    }
+
+
+                    save();
+
+
+                    if (
+
+                        Invoice.Calc &&
+
+                        Invoice.Calc.update
+
+                    ) {
+
+                        Invoice.Calc.update();
+
+                    }
+
+
+                    toast(
+
+                        "JSONを読み込みました"
+
+                    );
+
+                } catch (error) {
+
+                    console.error(
+
+                        "Invoice.Save.importJSON error:",
+
+                        error
+
+                    );
+
+
+                    toast(
+
+                        "JSONの読み込みに失敗しました"
+
+                    );
+
+                }
+
+            };
+
+
+            reader.readAsText(
+
+                file,
+
+                "UTF-8"
+
+            );
+
+        };
+
+
+        input.click();
+
+    }
+
+
+    /**
+     * 全データ削除
+     */
+    function reset() {
+
+        const confirmed =
+
+            window.confirm(
+
+                "入力内容をすべて削除しますか？"
+
+            );
+
+
+        if (!confirmed) {
 
             return;
 
         }
 
 
-
-        COCOA.Storage.remove(
-
-            KEY
-
-        );
+        localStorage.removeItem(KEY);
 
 
         location.reload();
 
-
     }
-
 
 
     /**
-     * JSON出力
+     * 日付
      */
-    function exportJSON(){
+    function getFileDate() {
+
+        const d = new Date();
 
 
-        COCOA.JSON.save(
+        const y =
 
-            "invoice-backup.json",
-
-            collect()
-
-        );
+            d.getFullYear();
 
 
-        COCOA.UI.toast(
+        const m = String(
 
-            "JSONを書き出しました"
+            d.getMonth() + 1
 
-        );
+        ).padStart(2, "0");
 
+
+        const day = String(
+
+            d.getDate()
+
+        ).padStart(2, "0");
+
+
+        return `${y}${m}${day}`;
 
     }
-
 
 
     /**
-     * JSON読込
+     * 通知
      */
-    function importJSON(){
+    function toast(message) {
+
+        if (
+
+            window.CocoaToast &&
+
+            typeof CocoaToast.show ===
+
+                "function"
+
+        ) {
+
+            CocoaToast.show(message);
+
+            return;
+
+        }
 
 
-        COCOA.JSON.load()
+        if (
 
-        .then(data=>{
+            COCOA.UI &&
 
+            typeof COCOA.UI.toast ===
 
-            if(data.form){
+                "function"
 
-                COCOA.Form.fill(
+        ) {
 
-                    data.form
+            COCOA.UI.toast(message);
 
-                );
+            return;
 
-            }
-
-
-
-            if(
-
-                Array.isArray(data.items)
-
-            ){
-
-                Invoice.Items.load(
-
-                    data.items
-
-                );
-
-            }
+        }
 
 
-
-            Invoice.Calc.update();
-
-
-            autoSave();
-
-
-        });
-
+        console.log(message);
 
     }
-
 
 
     return {
-
 
         collect,
 
         save,
 
-        autoSave,
-
         load,
 
-        reset,
+        autoSave,
+
+        getJSON,
 
         exportJSON,
 
-        importJSON
+        importJSON,
 
+        reset
 
     };
-
 
 })();
