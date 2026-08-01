@@ -2,7 +2,8 @@
  * ==========================================================
  * COCOA TOOLS v2.0
  * invoice/js/calc.js
- * 金額計算
+ * 計算エンジン
+ * Part1
  * ==========================================================
  */
 
@@ -10,178 +11,471 @@ window.Invoice = window.Invoice || {};
 
 Invoice.Calc = (() => {
 
+    let lastResult = {
+
+        subtotal: 0,
+
+        discount: 0,
+
+        shipping: 0,
+
+        taxable: 0,
+
+        tax: 0,
+
+        total: 0
+
+    };
+
+
     /**
-     * 再計算
+     * 明細小計
      */
-    function update() {
+    function getSubtotal() {
 
-        let subtotal = 0;
+        if (
 
-        document
-            .querySelectorAll("#itemBody tr")
-            .forEach(tr => {
+            Invoice.Items &&
 
-                const qty = COCOA.number(
-                    tr.querySelector(".item-qty").value
-                );
+            Invoice.Items.subtotal
 
-                const price = COCOA.number(
-                    tr.querySelector(".item-price").value
-                );
+        ) {
 
-                const total = qty * price;
+            return Invoice.Items.subtotal();
 
-                subtotal += total;
+        }
 
-                tr.querySelector(".item-total").value =
-                    COCOA.money(total);
-
-            });
-
-        const taxRate =
-            COCOA.number(
-                COCOA.id("taxRate").value
-            );
-
-        const tax =
-            Math.round(
-                subtotal *
-                taxRate /
-                100
-            );
-
-        const grandTotal =
-            subtotal + tax;
-
-        COCOA.id("subtotal").textContent =
-            COCOA.money(subtotal);
-
-        COCOA.id("tax").textContent =
-            COCOA.money(tax);
-
-        COCOA.id("total").textContent =
-            COCOA.money(grandTotal);
+        return 0;
 
     }
 
+
     /**
-     * 小計取得
+     * 値引き
      */
-    function subtotal() {
+    function getDiscount(subtotal) {
 
-        let total = 0;
+        if (
 
-        Invoice.Items.data()
+            Invoice.Discount &&
 
-            .forEach(item => {
+            Invoice.Discount.amount
 
-                total +=
-                    item.qty *
-                    item.price;
+        ) {
 
-            });
+            return Invoice.Discount.amount(
 
-        return total;
+                subtotal
+
+            );
+
+        }
+
+        return 0;
 
     }
 
+
     /**
-     * 税額取得
+     * 送料・諸経費
      */
-    function tax() {
+    function getShipping() {
 
-        const rate =
-            COCOA.number(
-                COCOA.id("taxRate").value
-            );
+        if (
 
-        return Math.round(
+            Invoice.Shipping &&
 
-            subtotal()
+            Invoice.Shipping.amount
 
-            * rate
+        ) {
 
-            /100
+            return Invoice.Shipping.amount();
+
+        }
+
+        return 0;
+
+    }
+
+
+    /**
+     * 課税対象額
+     */
+    function getTaxable(
+
+        subtotal,
+
+        discount,
+
+        shipping
+
+    ) {
+
+        return Math.max(
+
+            0,
+
+            subtotal -
+
+            discount +
+
+            shipping
 
         );
 
     }
 
-    /**
-     * 合計取得
-     */
-    function total() {
-
-        return subtotal() + tax();
-
-    }
 
     /**
-     * 明細データ取得
+     * 消費税
      */
-    function detail() {
+    function getTax(taxable) {
 
-        return Invoice.Items.data()
+        if (
 
-            .map(item => ({
+            Invoice.Tax &&
 
-                ...item,
+            Invoice.Tax.amount
 
-                total:
+        ) {
 
-                item.qty *
+            return Invoice.Tax.amount(
 
-                item.price
-
-            }));
-
-    }
-
-    /**
-     * イベント登録
-     */
-    function bind() {
-
-        COCOA.id("taxRate")
-
-            .addEventListener(
-
-                "change",
-
-                () => {
-
-                    update();
-
-                    if (
-
-                        Invoice.Save?.autoSave
-
-                    ) {
-
-                        Invoice.Save.autoSave();
-
-                    }
-
-                }
+                taxable
 
             );
 
+        }
+
+        return 0;
+
     }
 
+
+    /**
+     * 全計算
+     */
+    function calculate() {
+
+        const subtotal =
+
+            getSubtotal();
+
+
+        const discount =
+
+            getDiscount(
+
+                subtotal
+
+            );
+
+
+        const shipping =
+
+            getShipping();
+
+
+        const taxable =
+
+            getTaxable(
+
+                subtotal,
+
+                discount,
+
+                shipping
+
+            );
+
+
+        const tax =
+
+            getTax(
+
+                taxable
+
+            );
+
+
+        const total =
+
+            taxable +
+
+            tax;
+
+
+        lastResult = {
+
+            subtotal,
+
+            discount,
+
+            shipping,
+
+            taxable,
+
+            tax,
+
+            total
+
+        };
+
+
+        return {
+
+            ...lastResult
+
+        };
+
+    }
+
+
+    /**
+     * 最終結果取得
+     */
+    function result() {
+
+        return {
+
+            ...lastResult
+
+        };
+
+    }/**
+ * ==========================================================
+ * COCOA TOOLS v2.0
+ * invoice/js/calc.js
+ * 計算エンジン
+ * Part2
+ * 画面反映・イベント
+ * ==========================================================
+ */
+
+
+    /**
+     * 金額フォーマット
+     */
+    function money(value) {
+
+        return "¥" +
+
+            Math.round(
+
+                Number(value) || 0
+
+            ).toLocaleString("ja-JP");
+
+    }
+
+
+    /**
+     * 画面へ計算結果を反映
+     */
+    function render(view) {
+
+        const subtotal =
+
+            COCOA.id("subtotal");
+
+
+        const tax =
+
+            COCOA.id("tax");
+
+
+        const total =
+
+            COCOA.id("total");
+
+
+        const discount =
+
+            COCOA.id("discount");
+
+
+        const shipping =
+
+            COCOA.id("shipping");
+
+
+        if (subtotal) {
+
+            subtotal.textContent =
+
+                money(view.subtotal);
+
+        }
+
+
+        if (tax) {
+
+            tax.textContent =
+
+                money(view.tax);
+
+        }
+
+
+        if (total) {
+
+            total.textContent =
+
+                money(view.total);
+
+        }
+
+
+        /*
+         * 値引き・送料の表示が
+         * inputではなく表示欄の場合にも対応
+         */
+
+        const discountView =
+
+            COCOA.id("discountAmount");
+
+
+        if (discountView) {
+
+            discountView.textContent =
+
+                money(view.discount);
+
+        }
+
+
+        const shippingView =
+
+            COCOA.id("shippingAmount");
+
+
+        if (shippingView) {
+
+            shippingView.textContent =
+
+                money(view.shipping);
+
+        }
+
+    }
+
+
+    /**
+     * 再計算
+     */
+    function update() {
+
+        const view = calculate();
+
+        render(view);
+
+        return view;
+
+    }
+
+
+    /**
+     * 入力イベント
+     */
+    function bind() {
+
+        document.addEventListener(
+
+            "input",
+
+            function (e) {
+
+                if (
+
+                    e.target.matches(
+
+                        "#invoiceForm input," +
+
+                        "#invoiceForm select," +
+
+                        "#invoiceForm textarea"
+
+                    )
+
+                ) {
+
+                    update();
+
+                }
+
+            }
+
+        );
+
+
+        document.addEventListener(
+
+            "change",
+
+            function (e) {
+
+                if (
+
+                    e.target.matches(
+
+                        "#invoiceForm input," +
+
+                        "#invoiceForm select," +
+
+                        "#invoiceForm textarea"
+
+                    )
+
+                ) {
+
+                    update();
+
+                }
+
+            }
+
+        );
+
+    }
+
+
+    /**
+     * 最終結果の合計だけ取得
+     */
+    function total() {
+
+        return calculate().total;
+
+    }
+
+
+    /**
+     * 公開API
+     */
     return {
 
         bind,
 
+        calculate,
+
         update,
 
-        subtotal,
-
-        tax,
+        result,
 
         total,
 
-        detail
+        getSubtotal,
+
+        getDiscount,
+
+        getShipping,
+
+        getTaxable,
+
+        getTax
 
     };
+
 
 })();
