@@ -1,8 +1,8 @@
 /**
  * ==========================================================
  * COCOA TOOLS v2.0
- * invoice/js/profile.js
- * 発行者情報管理
+ * invoice-pdf-generator_15/js/profile.js
+ * 発行者情報の保存・読み込み
  * ==========================================================
  */
 
@@ -10,129 +10,128 @@ window.Invoice = window.Invoice || {};
 
 Invoice.Profile = (() => {
 
-    const KEY = "invoice_profile";
+    const STORAGE_KEY =
+        "cocoa_invoice_profile";
+
+
+    let bound = false;
 
 
     /**
-     * 対象フィールド
+     * ======================================================
+     * 初期化
+     * ======================================================
      */
-    const FIELDS = [
 
-        "company",
+    function init() {
 
-        "address",
+        if (bound) {
 
-        "tel",
+            return;
 
-        "mail",
+        }
 
-        "bank"
+        bound = true;
 
-    ];
+        bindEvents();
+
+    }
 
 
     /**
-     * プロフィール取得
+     * ======================================================
+     * ボタンイベント
+     * ======================================================
      */
-    function collect() {
 
-        const data = {};
+    function bindEvents() {
 
-        FIELDS.forEach(id => {
+        document.addEventListener(
 
-            const element =
+            "click",
 
-                COCOA.id(id);
+            function (e) {
+
+                const saveButton =
+                    e.target.closest(
+                        "#profileSaveBtn"
+                    );
 
 
-            if (element) {
+                if (saveButton) {
 
-                data[id] =
+                    e.preventDefault();
 
-                    element.value || "";
+                    save();
+
+                    return;
+
+                }
+
+
+                const loadButton =
+                    e.target.closest(
+                        "#profileLoadBtn"
+                    );
+
+
+                if (loadButton) {
+
+                    e.preventDefault();
+
+                    load(true);
+
+                    return;
+
+                }
+
+
+                const resetButton =
+                    e.target.closest(
+                        "#profileResetBtn"
+                    );
+
+
+                if (resetButton) {
+
+                    e.preventDefault();
+
+                    reset();
+
+                }
 
             }
 
-        });
-
-
-        return data;
+        );
 
     }
 
 
     /**
-     * プロフィール保存
+     * ======================================================
+     * 発行者情報を保存
+     * ======================================================
      */
+
     function save() {
 
-        const data = collect();
-
-
-        localStorage.setItem(
-
-            KEY,
-
-            JSON.stringify(data)
-
-        );
-
-
-        toast(
-
-            "発行者情報を保存しました"
-
-        );
-
-    }
-
-
-    /**
-     * プロフィール読込
-     */
-    function load() {
-
-        const raw =
-
-            localStorage.getItem(KEY);
-
-
-        if (!raw) {
-
-            return false;
-
-        }
+        const profile = collect();
 
 
         try {
 
-            const data =
+            localStorage.setItem(
 
-                JSON.parse(raw);
+                STORAGE_KEY,
 
+                JSON.stringify(profile)
 
-            FIELDS.forEach(id => {
-
-                const element =
-
-                    COCOA.id(id);
+            );
 
 
-                if (
-
-                    element &&
-
-                    data[id] !== undefined
-
-                ) {
-
-                    element.value =
-
-                        data[id];
-
-                }
-
-            });
+            notify(
+                "発行者情報を保存しました"
+            );
 
 
             return true;
@@ -141,10 +140,15 @@ Invoice.Profile = (() => {
 
             console.error(
 
-                "Invoice.Profile.load error:",
+                "Invoice.Profile.save:",
 
                 error
 
+            );
+
+
+            notify(
+                "発行者情報の保存に失敗しました"
             );
 
 
@@ -156,82 +160,372 @@ Invoice.Profile = (() => {
 
 
     /**
-     * プロフィール削除
+     * ======================================================
+     * 発行者情報を読み込み
+     * ======================================================
      */
-    function reset() {
 
-        localStorage.removeItem(KEY);
+    function load(showMessage = false) {
 
-
-        FIELDS.forEach(id => {
-
-            const element =
-
-                COCOA.id(id);
+        let raw;
 
 
-            if (element) {
+        try {
 
-                element.value = "";
+            raw = localStorage.getItem(
+
+                STORAGE_KEY
+
+            );
+
+        } catch (error) {
+
+            console.error(
+
+                "Invoice.Profile.load:",
+
+                error
+
+            );
+
+            return false;
+
+        }
+
+
+        if (!raw) {
+
+            if (showMessage) {
+
+                notify(
+                    "保存された発行者情報がありません"
+                );
 
             }
 
-        });
+            return false;
+
+        }
 
 
-        toast(
+        try {
 
-            "発行者情報を削除しました"
+            const profile =
 
-        );
+                JSON.parse(raw);
+
+
+            apply(profile);
+
+
+            if (showMessage) {
+
+                notify(
+                    "発行者情報を読み込みました"
+                );
+
+            }
+
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+
+                "Invoice.Profile.load:",
+                
+                error
+
+            );
+
+
+            if (showMessage) {
+
+                notify(
+                    "発行者情報の読み込みに失敗しました"
+                );
+
+            }
+
+
+            return false;
+
+        }
 
     }
 
 
     /**
-     * 保存されているか
+     * ======================================================
+     * 保存データが存在するか
+     * ======================================================
      */
+
     function exists() {
 
-        return Boolean(
+        try {
 
-            localStorage.getItem(KEY)
+            return Boolean(
 
-        );
+                localStorage.getItem(
+
+                    STORAGE_KEY
+
+                )
+
+            );
+
+        } catch (error) {
+
+            return false;
+
+        }
 
     }
 
 
     /**
-     * 通知
+     * ======================================================
+     * フォームから収集
+     * ======================================================
      */
-    function toast(message) {
+
+    function collect() {
+
+        return {
+
+            company:
+                getValue("company"),
+
+            address:
+                getValue("address"),
+
+            tel:
+                getValue("tel"),
+
+            mail:
+                getValue("mail"),
+
+            bank:
+                getValue("bank")
+
+        };
+
+    }
+
+
+    /**
+     * ======================================================
+     * フォームへ適用
+     * ======================================================
+     */
+
+    function apply(profile) {
 
         if (
-
-            window.CocoaToast &&
-
-            typeof CocoaToast.show ===
-
-                "function"
-
+            !profile ||
+            typeof profile !== "object"
         ) {
 
-            CocoaToast.show(message);
+            return false;
+
+        }
+
+
+        setValue(
+            "company",
+            profile.company
+        );
+
+        setValue(
+            "address",
+            profile.address
+        );
+
+        setValue(
+            "tel",
+            profile.tel
+        );
+
+        setValue(
+            "mail",
+            profile.mail
+        );
+
+        setValue(
+            "bank",
+            profile.bank
+        );
+
+
+        /*
+         * 金額計算には影響しないが、
+         * 保存処理との整合性を保つ
+         */
+
+        if (
+            Invoice.Save &&
+            typeof Invoice.Save.autoSave ===
+                "function"
+        ) {
+
+            Invoice.Save.autoSave();
+
+        }
+
+
+        return true;
+
+    }
+
+
+    /**
+     * ======================================================
+     * 削除
+     * ======================================================
+     */
+
+    function reset() {
+
+        if (!exists()) {
+
+            notify(
+                "保存された発行者情報がありません"
+            );
+
+            return false;
+
+        }
+
+
+        const confirmed =
+
+            window.confirm(
+
+                "保存した発行者情報を削除します。\nよろしいですか？"
+
+            );
+
+
+        if (!confirmed) {
+
+            return false;
+
+        }
+
+
+        try {
+
+            localStorage.removeItem(
+
+                STORAGE_KEY
+
+            );
+
+
+            notify(
+                "発行者情報を削除しました"
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+
+                "Invoice.Profile.reset:",
+
+                error
+
+            );
+
+
+            notify(
+                "発行者情報の削除に失敗しました"
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /**
+     * ======================================================
+     * 値取得
+     * ======================================================
+     */
+
+    function getValue(id) {
+
+        const element =
+            document.getElementById(id);
+
+
+        if (!element) {
+
+            return "";
+
+        }
+
+
+        return String(
+
+            element.value || ""
+
+        ).trim();
+
+    }
+
+
+    /**
+     * ======================================================
+     * 値設定
+     * ======================================================
+     */
+
+    function setValue(id, value) {
+
+        const element =
+            document.getElementById(id);
+
+
+        if (!element) {
 
             return;
 
         }
 
 
+        if (value === undefined) {
+
+            return;
+
+        }
+
+
+        element.value = value;
+
+    }
+
+
+    /**
+     * ======================================================
+     * 通知
+     * ======================================================
+     */
+
+    function notify(message) {
+
         if (
 
             window.COCOA &&
-
             COCOA.UI &&
-
             typeof COCOA.UI.toast ===
-
                 "function"
 
         ) {
@@ -243,25 +537,38 @@ Invoice.Profile = (() => {
         }
 
 
-        console.log(message);
+        console.log(
+
+            "Invoice.Profile:",
+
+            message
+
+        );
 
     }
 
 
     /**
+     * ======================================================
      * 公開API
+     * ======================================================
      */
+
     return {
 
-        collect,
+        init,
 
         save,
 
         load,
 
-        reset,
+        exists,
 
-        exists
+        collect,
+
+        apply,
+
+        reset
 
     };
 
