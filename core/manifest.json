@@ -1,0 +1,26 @@
+{
+  "name": "だるい見積書・請求書 一瞬PDFジェネレーター",
+  "short_name": "見積・請求PDF",
+  "description": "見積書・請求書をブラウザだけで作成できる無料ツール - COCOA TOOLS",
+  "lang": "ja",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d0f12",
+  "theme_color": "#0d0f12",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
