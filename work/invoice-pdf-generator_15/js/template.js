@@ -1,8 +1,8 @@
 /**
  * ==========================================================
  * COCOA TOOLS v2.0
- * invoice/js/template.js
- * 明細テンプレート管理
+ * invoice-pdf-generator_15/js/template.js
+ * 見積書・請求書テンプレート生成
  * ==========================================================
  */
 
@@ -10,148 +10,67 @@ window.Invoice = window.Invoice || {};
 
 Invoice.Template = (() => {
 
-    const KEY = "invoice_templates";
-
-    const DEFAULT_TEMPLATES = {
-
-        wallpaper: {
-            name: "クロス工事",
-            items: [
-                {
-                    name: "クロス施工",
-                    qty: 1,
-                    price: 0
-                },
-                {
-                    name: "クロス材料",
-                    qty: 1,
-                    price: 0
-                }
-            ]
-        },
-
-        floor: {
-            name: "床工事",
-            items: [
-                {
-                    name: "床材施工",
-                    qty: 1,
-                    price: 0
-                },
-                {
-                    name: "床材",
-                    qty: 1,
-                    price: 0
-                }
-            ]
-        },
-
-        repair: {
-            name: "補修工事",
-            items: [
-                {
-                    name: "補修作業",
-                    qty: 1,
-                    price: 0
-                }
-            ]
-        },
-
-        cleaning: {
-            name: "清掃",
-            items: [
-                {
-                    name: "清掃作業",
-                    qty: 1,
-                    price: 0
-                }
-            ]
-        },
-
-        general: {
-            name: "一般工事",
-            items: [
-                {
-                    name: "工事一式",
-                    qty: 1,
-                    price: 0
-                }
-            ]
-        }
-
-    };
-
-
     /**
      * ======================================================
-     * テンプレート取得
+     * 初期化
      * ======================================================
      */
 
-    function list() {
+    function init() {
 
-        const custom = loadCustom();
-
-        return {
-
-            ...clone(DEFAULT_TEMPLATES),
-
-            ...custom
-
-        };
+        bindEvents();
 
     }
 
 
     /**
      * ======================================================
-     * カスタムテンプレート取得
+     * イベント
      * ======================================================
      */
 
-    function loadCustom() {
+    function bindEvents() {
 
-        try {
+        document.addEventListener(
 
-            const raw =
+            "click",
 
-                localStorage.getItem(KEY);
+            function (e) {
 
-            if (!raw) {
+                const button =
+                    e.target.closest(
+                        "#templateEstimateBtn"
+                    );
 
-                return {};
+
+                if (button) {
+
+                    e.preventDefault();
+
+                    apply("estimate");
+
+                    return;
+
+                }
+
+
+                const invoiceButton =
+                    e.target.closest(
+                        "#templateInvoiceBtn"
+                    );
+
+
+                if (invoiceButton) {
+
+                    e.preventDefault();
+
+                    apply("invoice");
+
+                }
 
             }
 
-            const data =
-
-                JSON.parse(raw);
-
-            return (
-
-                data &&
-
-                typeof data === "object"
-
-            )
-
-                ? data
-
-                : {};
-
-        } catch (error) {
-
-            console.error(
-
-                "Invoice.Template.loadCustom error:",
-
-                error
-
-            );
-
-            return {};
-
-        }
+        );
 
     }
 
@@ -162,58 +81,63 @@ Invoice.Template = (() => {
      * ======================================================
      */
 
-    function apply(name) {
-
-        const templates = list();
+    function apply(type) {
 
         const template =
-
-            templates[name];
+            create(type);
 
 
         if (!template) {
 
-            toast(
-
-                "テンプレートが見つかりません"
-
-            );
-
             return false;
 
         }
 
 
-        if (
+        setValue(
+            "docType",
+            template.docType
+        );
 
-            !Invoice.Items ||
+        setValue(
+            "subject",
+            template.subject
+        );
 
-            typeof Invoice.Items.load !==
+        setValue(
+            "taxRate",
+            template.taxRate
+        );
 
-                "function"
-
-        ) {
-
-            return false;
-
-        }
-
-
-        Invoice.Items.load(
-
-            clone(template.items)
-
+        setValue(
+            "memo",
+            template.memo
         );
 
 
+        /*
+         * 明細をテンプレート化
+         */
+
         if (
+            Invoice.Items &&
+            typeof Invoice.Items.load === "function"
+        ) {
 
+            Invoice.Items.load(
+                template.items
+            );
+
+        }
+
+
+        /*
+         * 再計算
+         */
+
+        if (
             Invoice.Calc &&
-
-            typeof Invoice.Calc.update ===
-
-                "function"
-
+            typeof Invoice.Calc.update === "function"
         ) {
 
             Invoice.Calc.update();
@@ -221,14 +145,13 @@ Invoice.Template = (() => {
         }
 
 
+        /*
+         * 保存
+         */
+
         if (
-
             Invoice.Save &&
-
-            typeof Invoice.Save.autoSave ===
-
-                "function"
-
+            typeof Invoice.Save.autoSave === "function"
         ) {
 
             Invoice.Save.autoSave();
@@ -236,10 +159,10 @@ Invoice.Template = (() => {
         }
 
 
-        toast(
-
-            `${template.name}を適用しました`
-
+        notify(
+            type === "invoice"
+                ? "請求書テンプレートを適用しました"
+                : "見積書テンプレートを適用しました"
         );
 
 
@@ -250,227 +173,101 @@ Invoice.Template = (() => {
 
     /**
      * ======================================================
-     * 現在の明細からテンプレート作成
+     * テンプレート作成
      * ======================================================
      */
 
-    function create(
+    function create(type) {
 
-        key,
+        if (type === "invoice") {
 
-        name
+            return {
 
-    ) {
+                docType: "invoice",
 
-        if (
+                subject: "ご請求",
 
-            !key ||
+                taxRate: "10",
 
-            !name
+                memo:
+                    "お支払期限までに下記振込先へお振込みください。\n振込手数料はご負担くださいますようお願いいたします。",
 
-        ) {
+                items: [
 
-            return false;
+                    {
 
-        }
+                        name: "作業費",
 
+                        qty: 1,
 
-        if (
+                        price: 0
 
-            !Invoice.Items ||
+                    }
 
-            typeof Invoice.Items.data !==
+                ]
 
-                "function"
-
-        ) {
-
-            return false;
+            };
 
         }
 
 
-        const items =
+        return {
 
-            Invoice.Items.data();
+            docType: "estimate",
 
+            subject: "お見積り",
 
-        if (!items.length) {
+            taxRate: "10",
 
-            toast(
+            memo:
+                "本見積書の有効期限は発行日より30日です。\n内容変更がある場合は別途お見積りとなります。",
 
-                "明細がありません"
+            items: [
 
-            );
+                {
 
-            return false;
+                    name: "作業費",
 
-        }
+                    qty: 1,
 
+                    price: 0
 
-        const custom =
+                }
 
-            loadCustom();
-
-
-        custom[key] = {
-
-            name,
-
-            items:
-
-                clone(items)
+            ]
 
         };
 
-
-        try {
-
-            localStorage.setItem(
-
-                KEY,
-
-                JSON.stringify(custom)
-
-            );
-
-
-            toast(
-
-                "テンプレートを保存しました"
-
-            );
-
-
-            return true;
-
-        } catch (error) {
-
-            console.error(
-
-                "Invoice.Template.create error:",
-
-                error
-
-            );
-
-            return false;
-
-        }
-
     }
 
 
     /**
      * ======================================================
-     * カスタムテンプレート削除
+     * 値設定
      * ======================================================
      */
 
-    function remove(key) {
+    function setValue(id, value) {
 
-        const custom =
+        const element =
+            document.getElementById(id);
 
-            loadCustom();
 
+        if (!element) {
 
-        if (!custom[key]) {
-
-            return false;
+            return;
 
         }
 
 
-        delete custom[key];
+        if (value === undefined) {
+
+            return;
+
+        }
 
 
-        localStorage.setItem(
-
-            KEY,
-
-            JSON.stringify(custom)
-
-        );
-
-
-        toast(
-
-            "テンプレートを削除しました"
-
-        );
-
-
-        return true;
-
-    }
-
-
-    /**
-     * ======================================================
-     * テンプレート名一覧
-     * ======================================================
-     */
-
-    function names() {
-
-        const templates = list();
-
-        return Object.keys(templates);
-
-    }
-
-
-    /**
-     * ======================================================
-     * テンプレート1件取得
-     * ======================================================
-     */
-
-    function get(key) {
-
-        const templates = list();
-
-        return templates[key]
-
-            ? clone(templates[key])
-
-            : null;
-
-    }
-
-
-    /**
-     * ======================================================
-     * 全カスタムテンプレート削除
-     * ======================================================
-     */
-
-    function clear() {
-
-        localStorage.removeItem(KEY);
-
-        toast(
-
-            "カスタムテンプレートを削除しました"
-
-        );
-
-    }
-
-
-    /**
-     * ======================================================
-     * ディープコピー
-     * ======================================================
-     */
-
-    function clone(value) {
-
-        return JSON.parse(
-
-            JSON.stringify(value)
-
-        );
+        element.value = value;
 
     }
 
@@ -481,35 +278,12 @@ Invoice.Template = (() => {
      * ======================================================
      */
 
-    function toast(message) {
+    function notify(message) {
 
         if (
-
-            window.CocoaToast &&
-
-            typeof CocoaToast.show ===
-
-                "function"
-
-        ) {
-
-            CocoaToast.show(message);
-
-            return;
-
-        }
-
-
-        if (
-
             window.COCOA &&
-
             COCOA.UI &&
-
-            typeof COCOA.UI.toast ===
-
-                "function"
-
+            typeof COCOA.UI.toast === "function"
         ) {
 
             COCOA.UI.toast(message);
@@ -519,7 +293,10 @@ Invoice.Template = (() => {
         }
 
 
-        console.log(message);
+        console.log(
+            "Invoice.Template:",
+            message
+        );
 
     }
 
@@ -532,19 +309,11 @@ Invoice.Template = (() => {
 
     return {
 
-        list,
-
-        names,
-
-        get,
+        init,
 
         apply,
 
-        create,
-
-        remove,
-
-        clear
+        create
 
     };
 
