@@ -38,62 +38,41 @@
 
         :root {
 
-            --bg:
-                #0d0f12;
-
-            --panel:
-                #1a1f26;
-
-            --panel-2:
-                #20262e;
-
-            --border:
-                #303740;
-
-            --text:
-                #f4f4f5;
-
-            --muted:
-                #a1a1aa;
-
-            --accent:
-                #a3e635;
-
-            --danger:
-                #ef4444;
+            --bg: #0d0f12;
+            --panel: #1a1f26;
+            --panel-2: #20262e;
+            --border: #303740;
+            --text: #f4f4f5;
+            --muted: #a1a1aa;
+            --accent: #a3e635;
+            --danger: #ef4444;
 
         }
 
 
         * {
 
-            box-sizing:
-                border-box;
+            box-sizing: border-box;
 
         }
 
 
         html {
 
-            scroll-behavior:
-                smooth;
+            scroll-behavior: smooth;
 
         }
 
 
         body {
 
-            margin:
-                0;
+            margin: 0;
 
-            min-height:
-                100vh;
+            min-height: 100vh;
 
-            background:
-                var(--bg);
+            background: var(--bg);
 
-            color:
-                var(--text);
+            color: var(--text);
 
             font-family:
                 -apple-system,
@@ -101,8 +80,7 @@
                 "Segoe UI",
                 sans-serif;
 
-            line-height:
-                1.6;
+            line-height: 1.6;
 
         }
 
@@ -112,120 +90,95 @@
         textarea,
         select {
 
-            font:
-                inherit;
+            font: inherit;
 
         }
 
 
         button {
 
-            cursor:
-                pointer;
+            cursor: pointer;
 
         }
 
 
         .app {
 
-            width:
-                100%;
+            width: 100%;
 
-            max-width:
-                480px;
+            max-width: 480px;
 
-            margin:
-                0 auto;
+            margin: 0 auto;
 
-            padding:
-                16px;
+            padding: 16px;
 
         }
 
 
         header {
 
-            margin-bottom:
-                20px;
+            margin-bottom: 20px;
 
         }
 
 
         .brand {
 
-            font-size:
-                12px;
+            font-size: 12px;
 
-            color:
-                var(--accent);
+            color: var(--accent);
 
-            font-weight:
-                800;
+            font-weight: 800;
 
-            letter-spacing:
-                .08em;
+            letter-spacing: .08em;
 
         }
 
 
         h1 {
 
-            margin:
-                4px 0 0;
+            margin: 4px 0 0;
 
-            font-size:
-                22px;
+            font-size: 22px;
 
-            line-height:
-                1.35;
+            line-height: 1.35;
 
         }
 
 
         h2 {
 
-            margin:
-                22px 0 10px;
+            margin: 22px 0 10px;
 
-            font-size:
-                16px;
+            font-size: 16px;
 
         }
 
 
         .card {
 
-            background:
-                var(--panel);
+            background: var(--panel);
 
-            border:
-                1px solid var(--border);
+            border: 1px solid var(--border);
 
-            border-radius:
-                14px;
+            border-radius: 14px;
 
-            padding:
-                16px;
+            padding: 16px;
 
-            margin-bottom:
-                14px;
+            margin-bottom: 14px;
 
         }
 
 
         label {
 
-            display:
-                block;
+            display: block;
 
-            margin:
-                12px 0 6px;
+            margin: 12px 0 6px;
 
-            font-size:
-                13px;
+            font-size: 13px;
 
-            font-weight:
-                700;
+            font-weight: 700;
 
         }
 
@@ -234,26 +187,19 @@
         textarea,
         select {
 
-            width:
-                100%;
+            width: 100%;
 
-            border:
-                1px solid var(--border);
+            border: 1px solid var(--border);
 
-            border-radius:
-                9px;
+            border-radius: 9px;
 
-            background:
-                var(--panel-2);
+            background: var(--panel-2);
 
-            color:
-                var(--text);
+            color: var(--text);
 
-            padding:
-                11px 12px;
+            padding: 11px 12px;
 
-            outline:
-                none;
+            outline: none;
 
         }
 
@@ -262,63 +208,52 @@
         textarea:focus,
         select:focus {
 
-            border-color:
-                var(--accent);
+            border-color: var(--accent);
 
         }
 
 
         textarea {
 
-            resize:
-                vertical;
+            resize: vertical;
 
         }
 
 
         .row {
 
-            display:
-                grid;
+            display: grid;
 
-            grid-template-columns:
-                1fr 1fr;
+            grid-template-columns: 1fr 1fr;
 
-            gap:
-                10px;
+            gap: 10px;
 
         }
 
 
         .col {
 
-            min-width:
-                0;
+            min-width: 0;
 
         }
 
 
         .table-responsive {
 
-            width:
-                100%;
+            width: 100%;
 
-            overflow-x:
-                auto;
+            overflow-x: auto;
 
         }
 
 
         table {
 
-            width:
-                100%;
+            width: 100%;
 
-            min-width:
-                430px;
+            min-width: 430px;
 
-            border-collapse:
-                collapse;
+            border-collapse: collapse;
 
         }
 
@@ -326,93 +261,72 @@
         th,
         td {
 
-            border-bottom:
-                1px solid var(--border);
+            border-bottom: 1px solid var(--border);
 
-            padding:
-                7px 4px;
+            padding: 7px 4px;
 
-            font-size:
-                12px;
+            font-size: 12px;
 
-            vertical-align:
-                middle;
+            vertical-align: middle;
 
         }
 
 
         th {
 
-            color:
-                var(--muted);
+            color: var(--muted);
 
-            text-align:
-                left;
+            text-align: left;
 
         }
 
 
         .item-actions {
 
-            display:
-                flex;
+            display: flex;
 
-            gap:
-                3px;
+            gap: 3px;
 
         }
 
 
         .item-actions button {
 
-            width:
-                28px;
+            width: 28px;
 
-            height:
-                28px;
+            height: 28px;
 
-            padding:
-                0;
+            padding: 0;
 
-            border:
-                1px solid var(--border);
+            border: 1px solid var(--border);
 
-            border-radius:
-                6px;
+            border-radius: 6px;
 
-            background:
-                var(--panel-2);
+            background: var(--panel-2);
 
-            color:
-                var(--text);
+            color: var(--text);
 
         }
 
 
         .summary {
 
-            border-top:
-                1px solid var(--border);
+            border-top: 1px solid var(--border);
 
         }
 
 
         .summary-row {
 
-            display:
-                flex;
+            display: flex;
 
-            justify-content:
-                space-between;
+            justify-content: space-between;
 
-            align-items:
-                center;
+            align-items: center;
 
-            gap:
-                12px;
+            gap: 12px;
 
-            padding:
-                9px 0;
+            padding: 9px 0;
 
         }
 
@@ -420,186 +334,144 @@
         .summary-row input,
         .summary-row select {
 
-            width:
-                120px;
+            width: 120px;
 
         }
 
 
         .summary-total {
 
-            margin-top:
-                6px;
+            margin-top: 6px;
 
-            padding:
-                14px 0;
+            padding: 14px 0;
 
-            border-top:
-                1px solid var(--border);
+            border-top: 1px solid var(--border);
 
-            font-size:
-                18px;
+            font-size: 18px;
 
         }
 
 
         .btn-grid {
 
-            display:
-                grid;
+            display: grid;
 
-            grid-template-columns:
-                1fr 1fr;
+            grid-template-columns: 1fr 1fr;
 
-            gap:
-                8px;
+            gap: 8px;
 
         }
 
 
         .btn {
 
-            min-height:
-                44px;
+            min-height: 44px;
 
-            border:
-                1px solid var(--border);
+            border: 1px solid var(--border);
 
-            border-radius:
-                9px;
+            border-radius: 9px;
 
-            padding:
-                10px 12px;
+            padding: 10px 12px;
 
-            background:
-                var(--panel-2);
+            background: var(--panel-2);
 
-            color:
-                var(--text);
+            color: var(--text);
 
-            font-weight:
-                700;
+            font-weight: 700;
 
         }
 
 
         .btn-primary {
 
-            border-color:
-                var(--accent);
+            border-color: var(--accent);
 
-            background:
-                var(--accent);
+            background: var(--accent);
 
-            color:
-                #111;
+            color: #111;
 
         }
 
 
         .btn-danger {
 
-            border-color:
-                var(--danger);
+            border-color: var(--danger);
 
-            color:
-                #fff;
+            color: #fff;
 
         }
 
 
         .notice {
 
-            padding:
-                12px;
+            padding: 12px;
 
-            border:
-                1px solid var(--border);
+            border: 1px solid var(--border);
 
-            border-radius:
-                10px;
+            border-radius: 10px;
 
-            color:
-                var(--muted);
+            color: var(--muted);
 
-            font-size:
-                12px;
+            font-size: 12px;
 
         }
 
 
         .ad-space {
 
-            min-height:
-                90px;
+            min-height: 90px;
 
-            margin:
-                18px 0;
+            margin: 18px 0;
 
-            display:
-                flex;
+            display: flex;
 
-            align-items:
-                center;
+            align-items: center;
 
-            justify-content:
-                center;
+            justify-content: center;
 
-            border:
-                1px dashed var(--border);
+            border: 1px dashed var(--border);
 
-            border-radius:
-                10px;
+            border-radius: 10px;
 
-            color:
-                var(--muted);
+            color: var(--muted);
 
-            font-size:
-                11px;
+            font-size: 11px;
 
         }
 
 
         footer {
 
-            padding:
-                20px 0 10px;
+            padding: 20px 0 10px;
 
-            text-align:
-                center;
+            text-align: center;
 
-            color:
-                var(--muted);
+            color: var(--muted);
 
-            font-size:
-                12px;
+            font-size: 12px;
 
         }
 
 
         footer a {
 
-            color:
-                var(--accent);
+            color: var(--accent);
 
-            text-decoration:
-                none;
+            text-decoration: none;
 
         }
 
 
         .input-error {
 
-            border-color:
-                var(--danger) !important;
+            border-color: var(--danger) !important;
 
         }
 
 
         .print-only {
 
-            display:
-                none;
+            display: none;
 
         }
 
@@ -608,8 +480,7 @@
 
             body {
 
-                padding:
-                    30px 0;
+                padding: 30px 0;
 
             }
 
@@ -620,11 +491,21 @@
 
             body {
 
-                background:
-                    #fff;
+                background: #fff;
 
-                color:
-                    #000;
+                color: #000;
+
+            }
+
+            .no-print {
+
+                display: none !important;
+
+            }
+
+            .print-only {
+
+                display: block !important;
 
             }
 
@@ -781,7 +662,7 @@
                 <button
                     type="button"
                     class="btn"
-                    id="jsonExportBtn">
+                    id="exportJsonBtn">
 
                     JSON保存
 
@@ -791,17 +672,7 @@
                 <button
                     type="button"
                     class="btn"
-                    id="csvBtn">
-
-                    CSV保存
-
-                </button>
-
-
-                <button
-                    type="button"
-                    class="btn"
-                    id="copyTextBtn">
+                    id="copyDocumentBtn">
 
                     テキストコピー
 
@@ -847,6 +718,16 @@
 
 
     </main>
+
+
+    <!-- =================================================
+         印刷用プレビュー
+    ================================================== -->
+
+    <section
+        id="printPreview"
+        class="print-only">
+    </section>
 
 
     <footer>
@@ -904,11 +785,6 @@
 <script src="./js/print.js"></script>
 
 <script src="./js/ui.js"></script>
-
-
-<!-- =========================================================
-     App
-========================================================== -->
 
 <script src="./js/app.js"></script>
 
