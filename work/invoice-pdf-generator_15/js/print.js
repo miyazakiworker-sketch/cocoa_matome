@@ -1,8 +1,8 @@
 /**
  * ==========================================================
  * COCOA TOOLS v2.0
- * invoice/js/print.js
- * A4印刷・PDF保存
+ * invoice-pdf-generator_15/js/print.js
+ * 印刷・PDF出力
  * ==========================================================
  */
 
@@ -12,10 +12,12 @@ Invoice.Print = (() => {
 
     let initialized = false;
 
-
     /**
+     * ======================================================
      * 初期化
+     * ======================================================
      */
+
     function init() {
 
         if (initialized) {
@@ -26,127 +28,57 @@ Invoice.Print = (() => {
 
         initialized = true;
 
-        window.addEventListener(
+        bindEvents();
 
-            "beforeprint",
+    }
 
-            prepare
 
-        );
+    /**
+     * ======================================================
+     * イベント登録
+     * ======================================================
+     */
 
-        window.addEventListener(
+    function bindEvents() {
 
-            "afterprint",
+        document.addEventListener(
+            "click",
+            function (e) {
 
-            cleanup
+                const button =
+                    e.target.closest("#printBtn");
 
+                if (!button) {
+
+                    return;
+
+                }
+
+                e.preventDefault();
+
+                print();
+
+            }
         );
 
     }
 
 
     /**
-     * 印刷前処理
+     * ======================================================
+     * 印刷
+     * ======================================================
      */
-    function prepare() {
 
-        updateDocumentTitle();
-
-        document.body.classList.add(
-
-            "printing"
-
-        );
-
-    }
-
-
-    /**
-     * 印刷後処理
-     */
-    function cleanup() {
-
-        document.body.classList.remove(
-
-            "printing"
-
-        );
-
-        updateDocumentTitle();
-
-    }
-
-
-    /**
-     * 書類タイトル更新
-     */
-    function updateDocumentTitle() {
-
-        const type =
-
-            COCOA.id("docType")?.value ||
-
-            "estimate";
-
-
-        const title =
-
-            type === "invoice"
-
-                ? "請求書"
-
-                : "見積書";
-
-
-        const titleElement =
-
-            COCOA.id("documentTitle");
-
-
-        if (titleElement) {
-
-            titleElement.textContent =
-
-                title;
-
-        }
-
-
-        document.title =
-
-            title +
-
-            " - COCOA TOOLS";
-
-    }
-
-
-    /**
-     * 印刷実行
-     */
     function print() {
 
-        if (
-
-            Invoice.Validation &&
-
-            Invoice.Validation.beforePrint &&
-
-            !Invoice.Validation.beforePrint()
-
-        ) {
-
-            return;
-
-        }
-
+        /*
+         * 印刷前に計算を最新状態へ
+         */
 
         if (
-
             Invoice.Calc &&
-
-            Invoice.Calc.update
-
+            typeof Invoice.Calc.update === "function"
         ) {
 
             Invoice.Calc.update();
@@ -154,212 +86,602 @@ Invoice.Print = (() => {
         }
 
 
-        updateDocumentTitle();
+        /*
+         * 入力チェック
+         */
 
+        if (
+            Invoice.Validation &&
+            typeof Invoice.Validation.check === "function"
+        ) {
 
-        window.print();
+            if (!Invoice.Validation.check()) {
 
-    }
+                notify(
+                    "入力内容を確認してください"
+                );
 
+                return false;
 
-    /**
-     * 印刷用プレビューHTML生成
-     */
-    function createPreview() {
-
-        const form =
-
-            COCOA.id("invoiceForm");
-
-
-        if (!form) {
-
-            return null;
+            }
 
         }
 
 
-        const preview =
+        /*
+         * 印刷専用プレビューを更新
+         */
 
-            document.createElement("div");
-
-
-        preview.id =
-
-            "printPreview";
+        renderPreview();
 
 
-        preview.className =
+        /*
+         * 少し待ってから印刷
+         *
+         * DOM反映を確実にするため
+         */
 
-            "print-preview";
+        setTimeout(
+            () => {
+
+                window.print();
+
+            },
+            50
+        );
 
 
-        preview.innerHTML =
-
-            form.innerHTML;
-
-
-        return preview;
+        return true;
 
     }
 
 
     /**
-     * A4設定
+     * ======================================================
+     * 印刷プレビュー生成
+     * ======================================================
      */
-    function setupA4() {
 
-        let style =
+    function renderPreview() {
 
+        const preview =
             document.getElementById(
-
-                "invoice-print-style"
-
+                "printPreview"
             );
 
 
-        if (style) {
+        if (!preview) {
 
             return;
 
         }
 
 
-        style =
-
-            document.createElement("style");
-
-
-        style.id =
-
-            "invoice-print-style";
+        const type =
+            getValue("docType") === "invoice"
+                ? "請求書"
+                : "見積書";
 
 
-        style.textContent = `
-
-            @page {
-
-                size: A4 portrait;
-
-                margin: 12mm;
-
-            }
+        const result =
+            getCalculation();
 
 
-            @media print {
+        const items =
+            getItems();
 
-                html,
-                body {
 
-                    width: 210mm;
+        preview.innerHTML = `
 
-                    min-height: 297mm;
+            <div class="print-document">
 
-                    margin: 0;
+                <header class="print-header">
 
-                    padding: 0;
+                    <h1>
+                        ${escapeHTML(type)}
+                    </h1>
 
-                    background: #fff !important;
+                    <div class="print-meta">
 
+                        ${row(
+                            "書類番号",
+                            getValue("docNo")
+                        )}
+
+                        ${row(
+                            "発行日",
+                            getValue("issueDate")
+                        )}
+
+                        ${row(
+                            "支払期限",
+                            getValue("dueDate")
+                        )}
+
+                    </div>
+
+                </header>
+
+
+                <section class="print-client">
+
+                    <h2>
+                        ${escapeHTML(
+                            getValue("client")
+                        )}
+                        御中
+                    </h2>
+
+                    ${row(
+                        "件名",
+                        getValue("subject")
+                    )}
+
+                </section>
+
+
+                <section class="print-company">
+
+                    <strong>
+                        ${escapeHTML(
+                            getValue("company")
+                        )}
+                    </strong>
+
+                    ${multiline(
+                        getValue("address")
+                    )}
+
+                    ${row(
+                        "TEL",
+                        getValue("tel")
+                    )}
+
+                    ${row(
+                        "MAIL",
+                        getValue("mail")
+                    )}
+
+                </section>
+
+
+                <table class="print-items">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>内容</th>
+
+                            <th>数量</th>
+
+                            <th>単価</th>
+
+                            <th>金額</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        ${renderItems(items)}
+
+                    </tbody>
+
+                </table>
+
+
+                <section class="print-summary">
+
+                    ${summaryRow(
+                        "小計",
+                        yen(result.subtotal)
+                    )}
+
+                    ${summaryRow(
+                        `消費税 (${result.taxRate}%)`,
+                        yen(result.tax)
+                    )}
+
+                    ${summaryRow(
+                        "合計",
+                        yen(result.total),
+                        true
+                    )}
+
+                </section>
+
+
+                ${
+                    getValue("bank")
+                        ? `
+                            <section class="print-bank">
+
+                                <h3>
+                                    振込先
+                                </h3>
+
+                                ${multiline(
+                                    getValue("bank")
+                                )}
+
+                            </section>
+                        `
+                        : ""
                 }
 
 
-                body {
+                ${
+                    getValue("memo")
+                        ? `
+                            <section class="print-memo">
 
-                    -webkit-print-color-adjust: exact;
+                                <h3>
+                                    備考
+                                </h3>
 
-                    print-color-adjust: exact;
+                                ${multiline(
+                                    getValue("memo")
+                                )}
 
+                            </section>
+                        `
+                        : ""
                 }
 
-
-                .no-print {
-
-                    display: none !important;
-
-                }
-
-
-                .print-only {
-
-                    display: block !important;
-
-                }
-
-
-                input,
-                textarea,
-                select {
-
-                    color: #000 !important;
-
-                    background: transparent !important;
-
-                }
-
-
-                button {
-
-                    display: none !important;
-
-                }
-
-
-                table {
-
-                    width: 100%;
-
-                    border-collapse: collapse;
-
-                }
-
-
-                tr {
-
-                    break-inside: avoid;
-
-                    page-break-inside: avoid;
-
-                }
-
-
-                thead {
-
-                    display: table-header-group;
-
-                }
-
-
-                th,
-                td {
-
-                    border: 1px solid #333;
-
-                    padding: 5px;
-
-                }
-
-
-                .summary {
-
-                    break-inside: avoid;
-
-                    page-break-inside: avoid;
-
-                }
-
-            }
+            </div>
 
         `;
-
-
-        document.head.appendChild(style);
 
     }
 
 
-    setupA4();
+    /**
+     * ======================================================
+     * 明細HTML
+     * ======================================================
+     */
 
+    function renderItems(items) {
+
+        if (!Array.isArray(items) || !items.length) {
+
+            return `
+
+                <tr>
+
+                    <td colspan="4">
+                        明細なし
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+
+        return items.map(
+            item => {
+
+                const name =
+                    String(
+                        item.name || ""
+                    );
+
+
+                const qty =
+                    toNumber(item.qty);
+
+
+                const price =
+                    toNumber(item.price);
+
+
+                const amount =
+                    qty * price;
+
+
+                return `
+
+                    <tr>
+
+                        <td>
+                            ${escapeHTML(name)}
+                        </td>
+
+                        <td>
+                            ${formatNumber(qty)}
+                        </td>
+
+                        <td>
+                            ${yen(price)}
+                        </td>
+
+                        <td>
+                            ${yen(amount)}
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        ).join("");
+
+    }
+
+
+    /**
+     * ======================================================
+     * 計算結果
+     * ======================================================
+     */
+
+    function getCalculation() {
+
+        if (
+            Invoice.Calc &&
+            typeof Invoice.Calc.getResult === "function"
+        ) {
+
+            return Invoice.Calc.getResult();
+
+        }
+
+
+        return {
+
+            subtotal: 0,
+
+            taxRate: 0,
+
+            tax: 0,
+
+            total: 0
+
+        };
+
+    }
+
+
+    /**
+     * ======================================================
+     * 明細取得
+     * ======================================================
+     */
+
+    function getItems() {
+
+        if (
+            Invoice.Items &&
+            typeof Invoice.Items.data === "function"
+        ) {
+
+            return Invoice.Items.data();
+
+        }
+
+        return [];
+
+    }
+
+
+    /**
+     * ======================================================
+     * 値取得
+     * ======================================================
+     */
+
+    function getValue(id) {
+
+        const element =
+            document.getElementById(id);
+
+
+        if (!element) {
+
+            return "";
+
+        }
+
+
+        return String(
+            element.value || ""
+        ).trim();
+
+    }
+
+
+    /**
+     * ======================================================
+     * 行
+     * ======================================================
+     */
+
+    function row(label, value) {
+
+        if (!value) {
+
+            return "";
+
+        }
+
+
+        return `
+
+            <div class="print-row">
+
+                <span>
+                    ${escapeHTML(label)}
+                </span>
+
+                <span>
+                    ${escapeHTML(value)}
+                </span>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /**
+     * ======================================================
+     * 集計行
+     * ======================================================
+     */
+
+    function summaryRow(
+        label,
+        value,
+        total = false
+    ) {
+
+        return `
+
+            <div class="
+                print-summary-row
+                ${total ? "is-total" : ""}
+            ">
+
+                <span>
+                    ${escapeHTML(label)}
+                </span>
+
+                <strong>
+                    ${escapeHTML(value)}
+                </strong>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /**
+     * ======================================================
+     * 改行
+     * ======================================================
+     */
+
+    function multiline(value) {
+
+        return escapeHTML(value)
+            .replace(/\r?\n/g, "<br>");
+
+    }
+
+
+    /**
+     * ======================================================
+     * 円
+     * ======================================================
+     */
+
+    function yen(value) {
+
+        return (
+            "¥" +
+            formatNumber(value)
+        );
+
+    }
+
+
+    /**
+     * ======================================================
+     * 数値
+     * ======================================================
+     */
+
+    function toNumber(value) {
+
+        const number =
+            Number(
+                String(value ?? "")
+                    .replace(/,/g, "")
+                    .trim()
+            );
+
+
+        return Number.isFinite(number)
+            ? number
+            : 0;
+
+    }
+
+
+    /**
+     * ======================================================
+     * 数値フォーマット
+     * ======================================================
+     */
+
+    function formatNumber(value) {
+
+        return Math.round(
+            toNumber(value)
+        ).toLocaleString("ja-JP");
+
+    }
+
+
+    /**
+     * ======================================================
+     * HTMLエスケープ
+     * ======================================================
+     */
+
+    function escapeHTML(value) {
+
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+    }
+
+
+    /**
+     * ======================================================
+     * 通知
+     * ======================================================
+     */
+
+    function notify(message) {
+
+        if (
+            window.COCOA &&
+            COCOA.UI &&
+            typeof COCOA.UI.toast === "function"
+        ) {
+
+            COCOA.UI.toast(message);
+
+            return;
+
+        }
+
+
+        console.log(
+            "Invoice.Print:",
+            message
+        );
+
+    }
+
+
+    /**
+     * ======================================================
+     * 公開API
+     * ======================================================
+     */
 
     return {
 
@@ -367,15 +689,7 @@ Invoice.Print = (() => {
 
         print,
 
-        prepare,
-
-        cleanup,
-
-        updateDocumentTitle,
-
-        createPreview,
-
-        setupA4
+        renderPreview
 
     };
 
