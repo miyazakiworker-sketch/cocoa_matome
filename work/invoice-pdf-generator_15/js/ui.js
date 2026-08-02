@@ -1,8 +1,8 @@
 /**
  * ==========================================================
  * COCOA TOOLS v2.0
- * invoice/js/ui.js
- * UI・ボタン接続
+ * invoice-pdf-generator_15/js/ui.js
+ * UI操作・ボタン制御
  * ==========================================================
  */
 
@@ -29,192 +29,342 @@ Invoice.UI = (() => {
 
         initialized = true;
 
-
-        bindMainButtons();
-
-        bindProfileButtons();
-
-        bindHistoryButtons();
-
-        bindTemplateButtons();
-
-        bindExportButtons();
-
-        bindDocumentType();
+        bindEvents();
 
     }
 
 
     /**
      * ======================================================
-     * メインボタン
+     * イベント
      * ======================================================
      */
 
-    function bindMainButtons() {
+    function bindEvents() {
 
-        bindClick(
+        document.addEventListener(
 
-            "printBtn",
+            "click",
 
-            () => {
+            function (e) {
 
-                if (
+                /*
+                 * 保存
+                 */
 
-                    Invoice.Print &&
+                const saveButton =
+                    e.target.closest("#saveBtn");
 
-                    Invoice.Print.print
+                if (saveButton) {
 
-                ) {
-
-                    Invoice.Print.print();
-
-                }
-
-            }
-
-        );
-
-
-        bindClick(
-
-            "saveBtn",
-
-            () => {
-
-                if (
-
-                    Invoice.Save &&
-
-                    Invoice.Save.save
-
-                ) {
-
-                    Invoice.Save.save();
-
-                }
-
-                if (
-
-                    Invoice.History &&
-
-                    Invoice.History.save
-
-                ) {
-
-                    Invoice.History.save();
-
-                }
-
-            }
-
-        );
-
-
-        bindClick(
-
-            "loadBtn",
-
-            () => {
-
-                if (
-
-                    Invoice.Save &&
-
-                    Invoice.Save.importJSON
-
-                ) {
-
-                    Invoice.Save.importJSON();
-
-                }
-
-            }
-
-        );
-
-
-        bindClick(
-
-            "resetBtn",
-
-            () => {
-
-                if (
-
-                    Invoice.Save &&
-
-                    Invoice.Save.reset
-
-                ) {
-
-                    Invoice.Save.reset();
-
-                }
-
-            }
-
-        );
-
-    }
-
-
-    /**
-     * ======================================================
-     * 発行者情報
-     * ======================================================
-     */
-
-    function bindProfileButtons() {
-
-        bindClick(
-
-            "profileSaveBtn",
-
-            () => {
-
-                if (
-
-                    Invoice.Profile &&
-
-                    Invoice.Profile.save
-
-                ) {
-
-                    Invoice.Profile.save();
-
-                }
-
-            }
-
-        );
-
-
-        bindClick(
-
-            "profileLoadBtn",
-
-            () => {
-
-                if (
-
-                    Invoice.Profile &&
-
-                    Invoice.Profile.load
-
-                ) {
-
-                    Invoice.Profile.load();
+                    e.preventDefault();
 
                     if (
-
-                        Invoice.Calc &&
-
-                        Invoice.Calc.update
-
+                        Invoice.Save &&
+                        typeof Invoice.Save.save === "function"
                     ) {
 
-                        Invoice.Calc.update();
+                        Invoice.Save.save();
+
+                    }
+
+                    return;
+
+                }
+
+
+                /*
+                 * 履歴保存
+                 */
+
+                const historySave =
+                    e.target.closest("#historySaveBtn");
+
+                if (historySave) {
+
+                    e.preventDefault();
+
+                    if (
+                        Invoice.History &&
+                        typeof Invoice.History.save === "function"
+                    ) {
+
+                        Invoice.History.save();
+
+                    }
+
+                    return;
+
+                }
+
+
+                /*
+                 * JSON書き出し
+                 */
+
+                const exportJson =
+                    e.target.closest("#exportJsonBtn");
+
+                if (exportJson) {
+
+                    e.preventDefault();
+
+                    if (
+                        Invoice.Save &&
+                        typeof Invoice.Save.exportJSON === "function"
+                    ) {
+
+                        Invoice.Save.exportJSON();
+
+                    }
+
+                    return;
+
+                }
+
+
+                /*
+                 * JSON読み込み
+                 */
+
+                const importJson =
+                    e.target.closest("#importJsonBtn");
+
+                if (importJson) {
+
+                    e.preventDefault();
+
+                    if (
+                        Invoice.Save &&
+                        typeof Invoice.Save.importJSON === "function"
+                    ) {
+
+                        Invoice.Save.importJSON();
+
+                    }
+
+                    return;
+
+                }
+
+
+                /*
+                 * リセット
+                 */
+
+                const resetButton =
+                    e.target.closest("#resetBtn");
+
+                if (resetButton) {
+
+                    e.preventDefault();
+
+                    if (
+                        Invoice.Save &&
+                        typeof Invoice.Save.reset === "function"
+                    ) {
+
+                        Invoice.Save.reset();
+
+                    }
+
+                    return;
+
+                }
+
+
+                /*
+                 * 発行者情報保存
+                 */
+
+                const profileSave =
+                    e.target.closest("#profileSaveBtn");
+
+                if (profileSave) {
+
+                    e.preventDefault();
+
+                    if (
+                        Invoice.Profile &&
+                        typeof Invoice.Profile.save === "function"
+                    ) {
+
+                        Invoice.Profile.save();
+
+                    }
+
+                    return;
+
+                }
+
+
+                /*
+                 * 発行者情報読み込み
+                 */
+
+                const profileLoad =
+                    e.target.closest("#profileLoadBtn");
+
+                if (profileLoad) {
+
+                    e.preventDefault();
+
+                    if (
+                        Invoice.Profile &&
+                        typeof Invoice.Profile.load === "function"
+                    ) {
+
+                        Invoice.Profile.load(true);
+
+                    }
+
+                    return;
+
+                }
+
+
+                /*
+                 * 発行者情報削除
+                 */
+
+                const profileReset =
+                    e.target.closest("#profileResetBtn");
+
+                if (profileReset) {
+
+                    e.preventDefault();
+
+                    if (
+                        Invoice.Profile &&
+                        typeof Invoice.Profile.reset === "function"
+                    ) {
+
+                        Invoice.Profile.reset();
+
+                    }
+
+                    return;
+
+                }
+
+
+                /*
+                 * 履歴全削除
+                 */
+
+                const historyClear =
+                    e.target.closest("#historyClearBtn");
+
+                if (historyClear) {
+
+                    e.preventDefault();
+
+                    if (
+                        Invoice.History &&
+                        typeof Invoice.History.clear === "function"
+                    ) {
+
+                        Invoice.History.clear();
+
+                    }
+
+                    return;
+
+                }
+
+
+                /*
+                 * テンプレート：見積書
+                 */
+
+                const estimateTemplate =
+                    e.target.closest("#templateEstimateBtn");
+
+                if (estimateTemplate) {
+
+                    e.preventDefault();
+
+                    if (
+                        Invoice.Template &&
+                        typeof Invoice.Template.apply === "function"
+                    ) {
+
+                        Invoice.Template.apply("estimate");
+
+                    }
+
+                    return;
+
+                }
+
+
+                /*
+                 * テンプレート：請求書
+                 */
+
+                const invoiceTemplate =
+                    e.target.closest("#templateInvoiceBtn");
+
+                if (invoiceTemplate) {
+
+                    e.preventDefault();
+
+                    if (
+                        Invoice.Template &&
+                        typeof Invoice.Template.apply === "function"
+                    ) {
+
+                        Invoice.Template.apply("invoice");
+
+                    }
+
+                    return;
+
+                }
+
+
+                /*
+                 * 内容コピー
+                 */
+
+                const copyButton =
+                    e.target.closest("#copyDocumentBtn");
+
+                if (copyButton) {
+
+                    e.preventDefault();
+
+                    if (
+                        Invoice.Export &&
+                        typeof Invoice.Export.copyDocument === "function"
+                    ) {
+
+                        Invoice.Export.copyDocument();
+
+                    }
+
+                    return;
+
+                }
+
+
+                /*
+                 * 印刷・PDF
+                 */
+
+                const printButton =
+                    e.target.closest("#printBtn");
+
+                if (printButton) {
+
+                    e.preventDefault();
+
+                    if (
+                        Invoice.Print &&
+                        typeof Invoice.Print.print === "function"
+                    ) {
+
+                        Invoice.Print.print();
 
                     }
 
@@ -224,295 +374,19 @@ Invoice.UI = (() => {
 
         );
 
-
-        bindClick(
-
-            "profileResetBtn",
-
-            () => {
-
-                if (
-
-                    Invoice.Profile &&
-
-                    Invoice.Profile.reset
-
-                ) {
-
-                    Invoice.Profile.reset();
-
-                }
-
-            }
-
-        );
-
     }
 
 
     /**
      * ======================================================
-     * 履歴
+     * 要素表示
      * ======================================================
      */
 
-    function bindHistoryButtons() {
-
-        bindClick(
-
-            "historySaveBtn",
-
-            () => {
-
-                if (
-
-                    Invoice.History &&
-
-                    Invoice.History.save
-
-                ) {
-
-                    Invoice.History.save();
-
-                }
-
-            }
-
-        );
-
-
-        bindClick(
-
-            "historyClearBtn",
-
-            () => {
-
-                if (
-
-                    Invoice.History &&
-
-                    Invoice.History.clear
-
-                ) {
-
-                    Invoice.History.clear();
-
-                }
-
-            }
-
-        );
-
-    }
-
-
-    /**
-     * ======================================================
-     * テンプレート
-     * ======================================================
-     */
-
-    function bindTemplateButtons() {
-
-        document.addEventListener(
-
-            "click",
-
-            function (e) {
-
-                const button =
-
-                    e.target.closest(
-
-                        "[data-template]"
-
-                    );
-
-
-                if (!button) {
-
-                    return;
-
-                }
-
-
-                const key =
-
-                    button.dataset.template;
-
-
-                if (
-
-                    Invoice.Template &&
-
-                    Invoice.Template.apply
-
-                ) {
-
-                    Invoice.Template.apply(
-
-                        key
-
-                    );
-
-                }
-
-            }
-
-        );
-
-    }
-
-
-    /**
-     * ======================================================
-     * 出力
-     * ======================================================
-     */
-
-    function bindExportButtons() {
-
-        bindClick(
-
-            "csvBtn",
-
-            () => {
-
-                if (
-
-                    Invoice.Export &&
-
-                    Invoice.Export.csv
-
-                ) {
-
-                    Invoice.Export.csv();
-
-                }
-
-            }
-
-        );
-
-
-        bindClick(
-
-            "copyTextBtn",
-
-            () => {
-
-                if (
-
-                    Invoice.Export &&
-
-                    Invoice.Export.copyText
-
-                ) {
-
-                    Invoice.Export.copyText();
-
-                }
-
-            }
-
-        );
-
-
-        bindClick(
-
-            "jsonExportBtn",
-
-            () => {
-
-                if (
-
-                    Invoice.Save &&
-
-                    Invoice.Save.exportJSON
-
-                ) {
-
-                    Invoice.Save.exportJSON();
-
-                }
-
-            }
-
-        );
-
-    }
-
-
-    /**
-     * ======================================================
-     * 見積書 / 請求書
-     * ======================================================
-     */
-
-    function bindDocumentType() {
-
-        const select =
-
-            COCOA.id("docType");
-
-
-        if (!select) {
-
-            return;
-
-        }
-
-
-        select.addEventListener(
-
-            "change",
-
-            function () {
-
-                if (
-
-                    Invoice.Print &&
-
-                    Invoice.Print.updateDocumentTitle
-
-                ) {
-
-                    Invoice.Print.updateDocumentTitle();
-
-                }
-
-
-                if (
-
-                    Invoice.Save &&
-
-                    Invoice.Save.autoSave
-
-                ) {
-
-                    Invoice.Save.autoSave();
-
-                }
-
-            }
-
-        );
-
-    }
-
-
-    /**
-     * ======================================================
-     * click共通
-     * ======================================================
-     */
-
-    function bindClick(id, callback) {
+    function show(selector) {
 
         const element =
-
-            COCOA.id(id);
-
+            getElement(selector);
 
         if (!element) {
 
@@ -520,20 +394,101 @@ Invoice.UI = (() => {
 
         }
 
+        element.hidden = false;
 
-        element.addEventListener(
+        element.removeAttribute("aria-hidden");
 
-            "click",
+    }
 
-            function (e) {
 
-                e.preventDefault();
+    /**
+     * ======================================================
+     * 要素非表示
+     * ======================================================
+     */
 
-                callback();
+    function hide(selector) {
 
-            }
+        const element =
+            getElement(selector);
 
+        if (!element) {
+
+            return;
+
+        }
+
+        element.hidden = true;
+
+        element.setAttribute(
+            "aria-hidden",
+            "true"
         );
+
+    }
+
+
+    /**
+     * ======================================================
+     * 表示切替
+     * ======================================================
+     */
+
+    function toggle(selector) {
+
+        const element =
+            getElement(selector);
+
+        if (!element) {
+
+            return;
+
+        }
+
+        if (element.hidden) {
+
+            show(selector);
+
+        } else {
+
+            hide(selector);
+
+        }
+
+    }
+
+
+    /**
+     * ======================================================
+     * 要素取得
+     * ======================================================
+     */
+
+    function getElement(selector) {
+
+        if (!selector) {
+
+            return null;
+
+        }
+
+        if (
+            typeof selector === "string"
+        ) {
+
+            return document.querySelector(selector);
+
+        }
+
+        if (
+            selector instanceof Element
+        ) {
+
+            return selector;
+
+        }
+
+        return null;
 
     }
 
@@ -548,17 +503,11 @@ Invoice.UI = (() => {
 
         init,
 
-        bindMainButtons,
+        show,
 
-        bindProfileButtons,
+        hide,
 
-        bindHistoryButtons,
-
-        bindTemplateButtons,
-
-        bindExportButtons,
-
-        bindDocumentType
+        toggle
 
     };
 
