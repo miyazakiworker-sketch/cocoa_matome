@@ -1,7 +1,7 @@
 /**
  * ==========================================================
  * COCOA TOOLS v2.0
- * invoice-pdf-generator_15/js/calc.js
+ * js/calc.js
  * 金額計算
  * ==========================================================
  */
@@ -10,41 +10,52 @@ window.Invoice = window.Invoice || {};
 
 Invoice.Calc = (() => {
 
-    let bound = false;
+    let initialized = false;
+
+    let result = {
+        subtotal: 0,
+        taxRate: 10,
+        tax: 0,
+        total: 0
+    };
 
 
     /**
      * ======================================================
-     * イベント登録
+     * 初期化
      * ======================================================
      */
 
     function bind() {
 
-        if (bound) {
+        if (initialized) {
 
             return;
 
         }
 
-        bound = true;
+        initialized = true;
 
 
         document.addEventListener(
-
             "input",
-
             handleChange
-
         );
 
 
         document.addEventListener(
-
             "change",
-
             handleChange
+        );
 
+
+        document.addEventListener(
+            "invoice:items-change",
+            function () {
+
+                update();
+
+            }
         );
 
     }
@@ -58,109 +69,71 @@ Invoice.Calc = (() => {
 
     function handleChange(e) {
 
-        if (!e.target.closest("#invoiceForm")) {
+        if (
+            e.target.closest(
+                "#invoiceForm"
+            )
+        ) {
 
-            return;
+            update();
 
         }
-
-
-        update();
 
     }
 
 
     /**
      * ======================================================
-     * 計算更新
+     * 計算
      * ======================================================
      */
 
     function update() {
 
-        const items = getItems();
+        const items =
+            getItems();
 
 
-        const subtotal =
+        let subtotal = 0;
 
-            calculateSubtotal(items);
+
+        items.forEach(
+            function (item) {
+
+                const qty =
+                    COCOA.number(
+                        item.qty
+                    );
+
+
+                const price =
+                    COCOA.number(
+                        item.price
+                    );
+
+
+                subtotal +=
+                    qty * price;
+
+            }
+        );
 
 
         const taxRate =
-
             getTaxRate();
 
 
         const tax =
-
-            calculateTax(
-
-                subtotal,
-
-                taxRate
-
+            Math.floor(
+                subtotal * taxRate / 100
             );
 
 
         const total =
-
             subtotal + tax;
 
 
-        setMoney(
-
-            "subtotal",
-
-            subtotal
-
-        );
-
-
-        setMoney(
-
-            "tax",
-
-            tax
-
-        );
-
-
-        setMoney(
-
-            "total",
-
-            total
-
-        );
-
-
-        /*
-         * フォームにも計算結果を保持
-         */
-
-        const form =
-
-            COCOA.id("invoiceForm");
-
-
-        if (form) {
-
-            form.dataset.subtotal =
-
-                String(subtotal);
-
-            form.dataset.tax =
-
-                String(tax);
-
-            form.dataset.total =
-
-                String(total);
-
-        }
-
-
-        return {
+        result = {
 
             subtotal,
 
@@ -171,6 +144,14 @@ Invoice.Calc = (() => {
             total
 
         };
+
+
+        render();
+
+        updateItemAmounts();
+
+
+        return result;
 
     }
 
@@ -184,13 +165,9 @@ Invoice.Calc = (() => {
     function getItems() {
 
         if (
-
             Invoice.Items &&
-
             typeof Invoice.Items.data ===
-
                 "function"
-
         ) {
 
             return Invoice.Items.data();
@@ -205,48 +182,6 @@ Invoice.Calc = (() => {
 
     /**
      * ======================================================
-     * 小計計算
-     * ======================================================
-     */
-
-    function calculateSubtotal(items) {
-
-        if (!Array.isArray(items)) {
-
-            return 0;
-
-        }
-
-
-        return items.reduce(
-
-            (sum, item) => {
-
-                const qty =
-
-                    toNumber(item.qty);
-
-
-                const price =
-
-                    toNumber(item.price);
-
-
-                return sum +
-
-                    qty * price;
-
-            },
-
-            0
-
-        );
-
-    }
-
-
-    /**
-     * ======================================================
      * 税率取得
      * ======================================================
      */
@@ -254,7 +189,6 @@ Invoice.Calc = (() => {
     function getTaxRate() {
 
         const element =
-
             COCOA.id("taxRate");
 
 
@@ -266,71 +200,23 @@ Invoice.Calc = (() => {
 
 
         const rate =
-
-            toNumber(element.value);
-
-
-        return Math.max(
-
-            0,
-
-            rate
-
-        );
-
-    }
+            COCOA.number(
+                element.value
+            );
 
 
-    /**
-     * ======================================================
-     * 消費税計算
-     *
-     * 端数は切り捨て
-     * ======================================================
-     */
+        if (
+            rate !== 0 &&
+            rate !== 8 &&
+            rate !== 10
+        ) {
 
-    function calculateTax(
+            return 10;
 
-        subtotal,
-
-        taxRate
-
-    ) {
-
-        return Math.floor(
-
-            toNumber(subtotal) *
-
-            toNumber(taxRate) /
-
-            100
-
-        );
-
-    }
+        }
 
 
-    /**
-     * ======================================================
-     * 合計計算
-     * ======================================================
-     */
-
-    function calculateTotal(
-
-        subtotal,
-
-        tax
-
-    ) {
-
-        return (
-
-            toNumber(subtotal) +
-
-            toNumber(tax)
-
-        );
+        return rate;
 
     }
 
@@ -341,87 +227,94 @@ Invoice.Calc = (() => {
      * ======================================================
      */
 
-    function setMoney(
+    function render() {
 
-        id,
-
-        value
-
-    ) {
-
-        const element =
-
-            COCOA.id(id);
+        const subtotal =
+            COCOA.id("subtotal");
 
 
-        if (!element) {
+        const tax =
+            COCOA.id("tax");
 
-            return;
+
+        const total =
+            COCOA.id("total");
+
+
+        if (subtotal) {
+
+            subtotal.textContent =
+                COCOA.money(
+                    result.subtotal
+                );
 
         }
 
 
-        element.textContent =
+        if (tax) {
 
-            formatMoney(value);
+            tax.textContent =
+                COCOA.money(
+                    result.tax
+                );
+
+        }
+
+
+        if (total) {
+
+            total.textContent =
+                COCOA.money(
+                    result.total
+                );
+
+        }
 
     }
 
 
     /**
      * ======================================================
-     * 現在の計算結果取得
+     * 明細金額更新
+     * ======================================================
+     */
+
+    function updateItemAmounts() {
+
+        if (
+            Invoice.Items &&
+            typeof Invoice.Items.updateAmounts ===
+                "function"
+        ) {
+
+            Invoice.Items.updateAmounts();
+
+        }
+
+    }
+
+
+    /**
+     * ======================================================
+     * 計算結果取得
      * ======================================================
      */
 
     function getResult() {
 
-        const items =
-
-            getItems();
-
-
-        const subtotal =
-
-            calculateSubtotal(items);
-
-
-        const taxRate =
-
-            getTaxRate();
-
-
-        const tax =
-
-            calculateTax(
-
-                subtotal,
-
-                taxRate
-
-            );
-
-
-        const total =
-
-            calculateTotal(
-
-                subtotal,
-
-                tax
-
-            );
-
-
         return {
 
-            subtotal,
+            subtotal:
+                result.subtotal,
 
-            taxRate,
+            taxRate:
+                result.taxRate,
 
-            tax,
+            tax:
+                result.tax,
 
-            total
+            total:
+                result.total
 
         };
 
@@ -430,81 +323,45 @@ Invoice.Calc = (() => {
 
     /**
      * ======================================================
-     * 数値変換
+     * 計算結果セット
      * ======================================================
      */
 
-    function toNumber(value) {
+    function setResult(value) {
 
-        if (
+        if (!value || typeof value !== "object") {
 
-            window.COCOA &&
-
-            typeof COCOA.number ===
-
-                "function"
-
-        ) {
-
-            return COCOA.number(value);
+            return;
 
         }
 
 
-        const number = Number(
+        result = {
 
-            String(value ?? "")
+            subtotal:
+                COCOA.number(
+                    value.subtotal
+                ),
 
-                .replace(/,/g, "")
+            taxRate:
+                COCOA.number(
+                    value.taxRate
+                ),
 
-                .trim()
+            tax:
+                COCOA.number(
+                    value.tax
+                ),
 
-        );
+            total:
+                COCOA.number(
+                    value.total
+                )
 
-
-        return Number.isFinite(number)
-
-            ? number
-
-            : 0;
-
-    }
-
-
-    /**
-     * ======================================================
-     * 金額フォーマット
-     * ======================================================
-     */
-
-    function formatMoney(value) {
-
-        if (
-
-            window.COCOA &&
-
-            typeof COCOA.money ===
-
-                "function"
-
-        ) {
-
-            return COCOA.money(value);
-
-        }
+        };
 
 
-        return (
-
-            "¥" +
-
-            Math.round(
-
-                toNumber(value)
-
-            ).toLocaleString("ja-JP")
-
-        );
+        render();
 
     }
 
@@ -521,13 +378,11 @@ Invoice.Calc = (() => {
 
         update,
 
+        render,
+
         getResult,
 
-        calculateSubtotal,
-
-        calculateTax,
-
-        calculateTotal
+        setResult
 
     };
 
