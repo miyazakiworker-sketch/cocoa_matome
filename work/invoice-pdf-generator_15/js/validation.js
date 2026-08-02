@@ -1,7 +1,7 @@
 /**
  * ==========================================================
  * COCOA TOOLS v2.0
- * invoice/js/validation.js
+ * invoice-pdf-generator_15/js/validation.js
  * 入力チェック
  * ==========================================================
  */
@@ -11,338 +11,266 @@ window.Invoice = window.Invoice || {};
 Invoice.Validation = (() => {
 
     /**
-     * エラー表示
+     * ======================================================
+     * 必須項目チェック
+     * ======================================================
      */
-    function showError(message, target) {
 
-        if (target) {
+    function validate() {
 
-            target.focus();
+        clearErrors();
 
-            target.classList.add(
-                "input-error"
-            );
+        const errors = [];
 
-            setTimeout(() => {
 
-                target.classList.remove(
+        /*
+         * 宛名
+         */
+
+        const client = getValue("client");
+
+        if (!client) {
+
+            errors.push({
+                id: "client",
+                message: "宛名を入力してください。"
+            });
+
+        }
+
+
+        /*
+         * 件名
+         */
+
+        const subject = getValue("subject");
+
+        if (!subject) {
+
+            errors.push({
+                id: "subject",
+                message: "件名を入力してください。"
+            });
+
+        }
+
+
+        /*
+         * 発行者名
+         */
+
+        const company = getValue("company");
+
+        if (!company) {
+
+            errors.push({
+                id: "company",
+                message: "御社名を入力してください。"
+            });
+
+        }
+
+
+        /*
+         * 明細チェック
+         */
+
+        if (
+            Invoice.Items &&
+            typeof Invoice.Items.data === "function"
+        ) {
+
+            const items = Invoice.Items.data();
+
+            items.forEach((item, index) => {
+
+                const hasName =
+                    String(item.name || "").trim() !== "";
+
+                const qty =
+                    Number(item.qty);
+
+                const price =
+                    Number(item.price);
+
+
+                if (
+                    !hasName &&
+                    qty === 0 &&
+                    price === 0
+                ) {
+
+                    return;
+
+                }
+
+
+                if (!hasName) {
+
+                    errors.push({
+
+                        id: null,
+
+                        itemIndex: index,
+
+                        message:
+                            `明細 ${index + 1} の内容を入力してください。`
+
+                    });
+
+                }
+
+
+                if (
+                    !Number.isFinite(qty) ||
+                    qty <= 0
+                ) {
+
+                    errors.push({
+
+                        id: null,
+
+                        itemIndex: index,
+
+                        message:
+                            `明細 ${index + 1} の数量を確認してください。`
+
+                    });
+
+                }
+
+
+                if (
+                    !Number.isFinite(price) ||
+                    price < 0
+                ) {
+
+                    errors.push({
+
+                        id: null,
+
+                        itemIndex: index,
+
+                        message:
+                            `明細 ${index + 1} の単価を確認してください。`
+
+                    });
+
+                }
+
+            });
+
+        }
+
+
+        /*
+         * エラー表示
+         */
+
+        errors.forEach(showError);
+
+
+        return {
+
+            valid: errors.length === 0,
+
+            errors
+
+        };
+
+    }
+
+
+    /**
+     * ======================================================
+     * 軽量チェック
+     *
+     * PDF出力前などに使用
+     * ======================================================
+     */
+
+    function check() {
+
+        const result = validate();
+
+        return result.valid;
+
+    }
+
+
+    /**
+     * ======================================================
+     * エラー表示
+     * ======================================================
+     */
+
+    function showError(error) {
+
+        if (error.id) {
+
+            const element =
+                document.getElementById(error.id);
+
+            if (element) {
+
+                element.classList.add(
                     "input-error"
                 );
 
-            }, 2500);
-
-        }
-
-        if (
-            window.CocoaToast &&
-            typeof CocoaToast.error === "function"
-        ) {
-
-            CocoaToast.error(message);
-
-            return false;
-
-        }
-
-        if (
-            COCOA.UI &&
-            typeof COCOA.UI.toast === "function"
-        ) {
-
-            COCOA.UI.toast(message);
-
-            return false;
-
-        }
-
-        alert(message);
-
-        return false;
-
-    }
-
-
-    /**
-     * 必須項目チェック
-     */
-    function required(id, label) {
-
-        const element = COCOA.id(id);
-
-        if (!element) {
-
-            return true;
-
-        }
-
-        if (
-            String(element.value || "")
-                .trim() === ""
-        ) {
-
-            return showError(
-                `${label}を入力してください。`,
-                element
-            );
-
-        }
-
-        return true;
-
-    }
-
-
-    /**
-     * 日付チェック
-     */
-    function dates() {
-
-        const issue =
-
-            COCOA.id("issueDate");
-
-        const due =
-
-            COCOA.id("dueDate");
-
-
-        if (
-            !issue ||
-            !due ||
-            !issue.value ||
-            !due.value
-        ) {
-
-            return true;
-
-        }
-
-
-        if (due.value < issue.value) {
-
-            return showError(
-                "支払期限は発行日以降にしてください。",
-                due
-            );
-
-        }
-
-        return true;
-
-    }
-
-
-    /**
-     * 明細チェック
-     */
-    function items() {
-
-        if (
-            !Invoice.Items ||
-            typeof Invoice.Items.data !== "function"
-        ) {
-
-            return true;
-
-        }
-
-
-        const rows =
-
-            Invoice.Items.data();
-
-
-        if (!rows.length) {
-
-            return showError(
-                "明細を1件以上追加してください。"
-            );
-
-        }
-
-
-        for (
-            let i = 0;
-            i < rows.length;
-            i++
-        ) {
-
-            const item = rows[i];
-
-
-            /*
-             * 空行は許可
-             * 完全な空行はスキップ
-             */
-
-            if (
-                !String(item.name || "").trim() &&
-                Number(item.qty || 0) === 0 &&
-                Number(item.price || 0) === 0
-            ) {
-
-                continue;
-
-            }
-
-
-            if (
-                !String(item.name || "").trim()
-            ) {
-
-                return showError(
-                    `明細${i + 1}行目の内容を入力してください。`
-                );
-
-            }
-
-
-            if (
-                Number(item.qty) <= 0
-            ) {
-
-                return showError(
-                    `明細${i + 1}行目の数量を確認してください。`
-                );
-
-            }
-
-
-            if (
-                Number(item.price) < 0
-            ) {
-
-                return showError(
-                    `明細${i + 1}行目の単価を確認してください。`
+                element.setAttribute(
+                    "aria-invalid",
+                    "true"
                 );
 
             }
 
         }
 
-        return true;
 
-    }
-
-
-    /**
-     * 税率チェック
-     */
-    function taxRate() {
-
-        const element =
-
-            COCOA.id("taxRate");
-
-
-        if (!element) {
-
-            return true;
-
-        }
-
-
-        const rate =
-
-            Number(element.value);
-
+        /*
+         * 明細エラーの場合
+         */
 
         if (
-            Number.isNaN(rate) ||
-            rate < 0 ||
-            rate > 100
+            Number.isInteger(error.itemIndex)
         ) {
 
-            return showError(
-                "消費税率を正しく入力してください。",
-                element
-            );
+            const input =
+                document.querySelector(
+                    `[data-item-index="${error.itemIndex}"][data-item-field="name"]`
+                );
+
+            if (input) {
+
+                input.classList.add(
+                    "input-error"
+                );
+
+            }
 
         }
-
-        return true;
 
     }
 
 
     /**
-     * 全体チェック
+     * ======================================================
+     * エラー解除
+     * ======================================================
      */
-    function validate() {
 
-        if (
-            !required(
-                "client",
-                "宛名"
-            )
-        ) {
-
-            return false;
-
-        }
-
-
-        if (
-            !required(
-                "subject",
-                "件名"
-            )
-        ) {
-
-            return false;
-
-        }
-
-
-        if (!dates()) {
-
-            return false;
-
-        }
-
-
-        if (!items()) {
-
-            return false;
-
-        }
-
-
-        if (!taxRate()) {
-
-            return false;
-
-        }
-
-
-        return true;
-
-    }
-
-
-    /**
-     * 印刷前チェック
-     */
-    function beforePrint() {
-
-        return validate();
-
-    }
-
-
-    /**
-     * 入力エラーを全部解除
-     */
     function clearErrors() {
 
         document
-            .querySelectorAll(
-                ".input-error"
-            )
+            .querySelectorAll(".input-error")
             .forEach(element => {
 
                 element.classList.remove(
                     "input-error"
+                );
+
+                element.removeAttribute(
+                    "aria-invalid"
                 );
 
             });
@@ -350,19 +278,41 @@ Invoice.Validation = (() => {
     }
 
 
+    /**
+     * ======================================================
+     * 値取得
+     * ======================================================
+     */
+
+    function getValue(id) {
+
+        const element =
+            document.getElementById(id);
+
+        if (!element) {
+
+            return "";
+
+        }
+
+        return String(
+            element.value || ""
+        ).trim();
+
+    }
+
+
+    /**
+     * ======================================================
+     * 公開API
+     * ======================================================
+     */
+
     return {
-
-        required,
-
-        dates,
-
-        items,
-
-        taxRate,
 
         validate,
 
-        beforePrint,
+        check,
 
         clearErrors
 
