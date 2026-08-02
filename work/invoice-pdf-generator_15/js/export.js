@@ -1,8 +1,8 @@
 /**
  * ==========================================================
  * COCOA TOOLS v2.0
- * invoice/js/export.js
- * データ出力
+ * invoice-pdf-generator_15/js/export.js
+ * 書類データの書き出し・コピー
  * ==========================================================
  */
 
@@ -10,452 +10,163 @@ window.Invoice = window.Invoice || {};
 
 Invoice.Export = (() => {
 
+    let initialized = false;
+
+
     /**
      * ======================================================
-     * 現在のデータ取得
+     * 初期化
      * ======================================================
      */
 
-    function collect() {
+    function init() {
 
-        if (
-            Invoice.Save &&
-            typeof Invoice.Save.collect === "function"
-        ) {
+        if (initialized) {
 
-            return Invoice.Save.collect();
+            return;
 
         }
 
-        return {
+        initialized = true;
 
-            version:
-                Invoice.VERSION || "2.0.0",
-
-            form: {},
-
-            items: []
-
-        };
+        bindEvents();
 
     }
 
 
     /**
      * ======================================================
-     * CSV用エスケープ
+     * イベント
      * ======================================================
      */
 
-    function escapeCSV(value) {
+    function bindEvents() {
 
-        const text =
+        document.addEventListener(
 
-            String(value ?? "");
+            "click",
 
-        return '"' +
+            function (e) {
 
-            text
-                .replace(/"/g, '""')
-                .replace(/\r?\n/g, " ")
+                const copyButton =
+                    e.target.closest(
+                        "#copyDocumentBtn"
+                    );
 
-            +
+                if (copyButton) {
 
-            '"';
+                    e.preventDefault();
 
-    }
+                    copyDocument();
 
+                    return;
 
-    /**
-     * ======================================================
-     * CSV生成
-     * ======================================================
-     */
+                }
 
-    function createCSV() {
 
-        const data = collect();
+                const jsonButton =
+                    e.target.closest(
+                        "#exportJsonBtn"
+                    );
 
-        const form =
+                if (jsonButton) {
 
-            data.form || {};
+                    e.preventDefault();
 
-        const items =
+                    exportJSON();
 
-            Array.isArray(data.items)
-
-                ? data.items
-
-                : [];
-
-
-        const rows = [];
-
-
-        rows.push([
-
-            "書類種類",
-
-            form.docType === "invoice"
-
-                ? "請求書"
-
-                : "見積書"
-
-        ]);
-
-
-        rows.push([
-
-            "書類番号",
-
-            form.docNo || ""
-
-        ]);
-
-
-        rows.push([
-
-            "発行日",
-
-            form.issueDate || ""
-
-        ]);
-
-
-        rows.push([
-
-            "支払期限",
-
-            form.dueDate || ""
-
-        ]);
-
-
-        rows.push([
-
-            "宛名",
-
-            form.client || ""
-
-        ]);
-
-
-        rows.push([
-
-            "件名",
-
-            form.subject || ""
-
-        ]);
-
-
-        rows.push([]);
-
-
-        rows.push([
-
-            "内容",
-
-            "数量",
-
-            "単価",
-
-            "金額"
-
-        ]);
-
-
-        items.forEach(item => {
-
-            const qty =
-
-                Number(item.qty) || 0;
-
-            const price =
-
-                Number(item.price) || 0;
-
-
-            rows.push([
-
-                item.name || "",
-
-                qty,
-
-                price,
-
-                qty * price
-
-            ]);
-
-        });
-
-
-        rows.push([]);
-
-
-        const result =
-
-            Invoice.Calc &&
-
-            typeof Invoice.Calc.result ===
-
-                "function"
-
-                ? Invoice.Calc.result()
-
-                : null;
-
-
-        if (result) {
-
-            rows.push([
-
-                "小計",
-
-                "",
-
-                "",
-
-                result.subtotal
-
-            ]);
-
-
-            rows.push([
-
-                "値引き",
-
-                "",
-
-                "",
-
-                result.discount
-
-            ]);
-
-
-            rows.push([
-
-                "送料・諸経費",
-
-                "",
-
-                "",
-
-                result.shipping
-
-            ]);
-
-
-            rows.push([
-
-                "課税対象額",
-
-                "",
-
-                "",
-
-                result.taxable
-
-            ]);
-
-
-            rows.push([
-
-                "税額",
-
-                "",
-
-                "",
-
-                result.tax
-
-            ]);
-
-
-            rows.push([
-
-                "合計",
-
-                "",
-
-                "",
-
-                result.total
-
-            ]);
-
-        }
-
-
-        return rows
-
-            .map(row =>
-
-                row.map(escapeCSV).join(",")
-
-            )
-
-            .join("\r\n");
-
-    }
-
-
-    /**
-     * ======================================================
-     * CSVダウンロード
-     * ======================================================
-     */
-
-    function csv() {
-
-        const csvData =
-
-            createCSV();
-
-
-        /*
-         * BOM付きUTF-8
-         * Excelで日本語が文字化けしにくい
-         */
-
-        const blob = new Blob(
-
-            [
-
-                "\uFEFF",
-
-                csvData
-
-            ],
-
-            {
-
-                type:
-
-                    "text/csv;charset=utf-8"
+                }
 
             }
 
         );
 
-
-        download(
-
-            blob,
-
-            createFileName("csv")
-
-        );
-
-
-        toast(
-
-            "CSVを書き出しました"
-
-        );
-
     }
 
 
     /**
      * ======================================================
-     * テキスト生成
+     * 書類内容をテキスト化
      * ======================================================
      */
 
-    function text() {
+    function createText() {
 
-        const data = collect();
-
-        const form =
-
-            data.form || {};
-
-        const items =
-
-            Array.isArray(data.items)
-
-                ? data.items
-
-                : [];
-
-
-        const result =
-
-            Invoice.Calc &&
-
-            typeof Invoice.Calc.result ===
-
-                "function"
-
-                ? Invoice.Calc.result()
-
-                : null;
+        const type =
+            getValue("docType") === "invoice"
+                ? "請求書"
+                : "見積書";
 
 
         const lines = [];
 
 
-        lines.push(
+        lines.push(type);
 
-            form.docType === "invoice"
+        lines.push("");
 
-                ? "請求書"
 
-                : "見積書"
+        addLine(
+            lines,
+            "書類番号",
+            getValue("docNo")
+        );
 
+        addLine(
+            lines,
+            "発行日",
+            getValue("issueDate")
+        );
+
+        addLine(
+            lines,
+            "支払期限",
+            getValue("dueDate")
         );
 
 
-        lines.push(
+        lines.push("");
 
-            "書類番号：" +
 
-            (form.docNo || "")
+        addLine(
+            lines,
+            "宛名",
+            getValue("client")
+        );
 
+        addLine(
+            lines,
+            "件名",
+            getValue("subject")
         );
 
 
-        lines.push(
+        lines.push("");
 
-            "発行日：" +
+        lines.push("【発行者】");
 
-            (form.issueDate || "")
-
+        addLine(
+            lines,
+            "会社名",
+            getValue("company")
         );
 
-
-        if (form.dueDate) {
-
-            lines.push(
-
-                "支払期限：" +
-
-                form.dueDate
-
-            );
-
-        }
-
-
-        lines.push(
-
-            "宛名：" +
-
-            (form.client || "")
-
+        addLine(
+            lines,
+            "住所",
+            getValue("address")
         );
 
+        addLine(
+            lines,
+            "電話番号",
+            getValue("tel")
+        );
 
-        lines.push(
-
-            "件名：" +
-
-            (form.subject || "")
-
+        addLine(
+            lines,
+            "メール",
+            getValue("mail")
         );
 
 
@@ -464,96 +175,107 @@ Invoice.Export = (() => {
         lines.push("【明細】");
 
 
-        items.forEach((item, index) => {
-
-            const qty =
-
-                Number(item.qty) || 0;
-
-            const price =
-
-                Number(item.price) || 0;
+        const items =
+            getItems();
 
 
-            lines.push(
+        if (!items.length) {
 
-                `${index + 1}. ` +
+            lines.push("明細なし");
 
-                `${item.name || ""} ` +
+        } else {
 
-                `${qty} × ` +
+            items.forEach(
 
-                `¥${price.toLocaleString("ja-JP")} = ` +
+                (item, index) => {
 
-                `¥${(
-
-                    qty * price
-
-                ).toLocaleString("ja-JP")}`
-
-            );
-
-        });
+                    const name =
+                        String(
+                            item.name || ""
+                        ).trim();
 
 
-        if (result) {
-
-            lines.push("");
-
-            lines.push(
-
-                "小計：¥" +
-
-                result.subtotal.toLocaleString("ja-JP")
-
-            );
+                    const qty =
+                        toNumber(item.qty);
 
 
-            lines.push(
-
-                "値引き：¥" +
-
-                result.discount.toLocaleString("ja-JP")
-
-            );
+                    const price =
+                        toNumber(item.price);
 
 
-            lines.push(
-
-                "送料・諸経費：¥" +
-
-                result.shipping.toLocaleString("ja-JP")
-
-            );
+                    const amount =
+                        qty * price;
 
 
-            lines.push(
+                    lines.push(
 
-                "税額：¥" +
+                        `${index + 1}. ` +
+                        `${name || "未入力"} / ` +
+                        `数量: ${qty} / ` +
+                        `単価: ${formatNumber(price)} / ` +
+                        `金額: ${formatNumber(amount)}`
 
-                result.tax.toLocaleString("ja-JP")
+                    );
 
-            );
-
-
-            lines.push(
-
-                "合計：¥" +
-
-                result.total.toLocaleString("ja-JP")
+                }
 
             );
 
         }
 
 
-        if (form.memo) {
+        lines.push("");
+
+
+        const result =
+            getCalculation();
+
+
+        addLine(
+            lines,
+            "小計",
+            formatYen(result.subtotal)
+        );
+
+        addLine(
+            lines,
+            "消費税",
+            `${result.taxRate}% / ${formatYen(result.tax)}`
+        );
+
+        addLine(
+            lines,
+            "合計",
+            formatYen(result.total)
+        );
+
+
+        const bank =
+            getValue("bank");
+
+
+        if (bank) {
+
+            lines.push("");
+
+            lines.push("【振込先】");
+
+            lines.push(bank);
+
+        }
+
+
+        const memo =
+            getValue("memo");
+
+
+        if (memo) {
 
             lines.push("");
 
             lines.push("【備考】");
 
-            lines.push(form.memo);
+            lines.push(memo);
 
         }
 
@@ -565,188 +287,292 @@ Invoice.Export = (() => {
 
     /**
      * ======================================================
-     * テキストコピー
+     * 書類内容コピー
      * ======================================================
      */
 
-    async function copyText() {
+    async function copyDocument() {
 
-        const value = text();
+        const text =
+            createText();
+
+
+        const success =
+            await copy(text);
+
+
+        if (success) {
+
+            notify(
+                "書類内容をコピーしました"
+            );
+
+        } else {
+
+            notify(
+                "コピーに失敗しました"
+            );
+
+        }
+
+
+        return success;
+
+    }
+
+
+    /**
+     * ======================================================
+     * JSON書き出し
+     * ======================================================
+     */
+
+    function exportJSON() {
+
+        if (
+            Invoice.Save &&
+            typeof Invoice.Save.exportJSON ===
+                "function"
+        ) {
+
+            Invoice.Save.exportJSON();
+
+            return true;
+
+        }
+
+
+        notify(
+            "JSON書き出し機能を利用できません"
+        );
+
+
+        return false;
+
+    }
+
+
+    /**
+     * ======================================================
+     * クリップボード
+     * ======================================================
+     */
+
+    async function copy(text) {
+
+        if (
+            navigator.clipboard &&
+            window.isSecureContext
+        ) {
+
+            try {
+
+                await navigator.clipboard.writeText(
+                    text
+                );
+
+                return true;
+
+            } catch (error) {
+
+                console.warn(
+                    "Clipboard API failed:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /*
+         * Clipboard APIが使えない環境用
+         */
+
+        const textarea =
+            document.createElement("textarea");
+
+
+        textarea.value = text;
+
+        textarea.style.position = "fixed";
+
+        textarea.style.left = "-9999px";
+
+        textarea.style.top = "0";
+
+
+        document.body.appendChild(
+            textarea
+        );
+
+
+        textarea.focus();
+
+        textarea.select();
+
+
+        let success = false;
 
 
         try {
 
-            await navigator.clipboard.writeText(
-
-                value
-
-            );
-
-
-            toast(
-
-                "テキストをコピーしました"
-
-            );
-
-
-            return true;
+            success =
+                document.execCommand(
+                    "copy"
+                );
 
         } catch (error) {
 
-            /*
-             * Clipboard APIが使えない環境用
-             */
-
-            const textarea =
-
-                document.createElement("textarea");
-
-
-            textarea.value = value;
-
-            textarea.style.position = "fixed";
-
-            textarea.style.opacity = "0";
-
-
-            document.body.appendChild(
-
-                textarea
-
+            console.error(
+                "Invoice.Export.copy:",
+                error
             );
-
-
-            textarea.select();
-
-
-            let success = false;
-
-
-            try {
-
-                success =
-
-                    document.execCommand(
-
-                        "copy"
-
-                    );
-
-            } catch (e) {
-
-                success = false;
-
-            }
-
-
-            textarea.remove();
-
-
-            toast(
-
-                success
-
-                    ? "テキストをコピーしました"
-
-                    : "コピーに失敗しました"
-
-            );
-
-
-            return success;
 
         }
 
-    }
+
+        textarea.remove();
 
 
-    /**
-     * ======================================================
-     * ファイルダウンロード
-     * ======================================================
-     */
-
-    function download(blob, filename) {
-
-        const url =
-
-            URL.createObjectURL(blob);
-
-
-        const link =
-
-            document.createElement("a");
-
-
-        link.href = url;
-
-        link.download = filename;
-
-
-        document.body.appendChild(link);
-
-        link.click();
-
-        link.remove();
-
-
-        setTimeout(() => {
-
-            URL.revokeObjectURL(url);
-
-        }, 1000);
+        return success;
 
     }
 
 
     /**
      * ======================================================
-     * ファイル名
+     * 明細取得
      * ======================================================
      */
 
-    function createFileName(extension) {
+    function getItems() {
 
-        const type =
+        if (
+            Invoice.Items &&
+            typeof Invoice.Items.data ===
+                "function"
+        ) {
 
-            COCOA.id("docType")?.value ===
+            return Invoice.Items.data();
 
-                "invoice"
-
-                ? "請求書"
-
-                : "見積書";
-
-
-        const docNo =
-
-            COCOA.id("docNo")?.value
-
-                .trim();
+        }
 
 
-        const suffix =
+        return [];
 
-            docNo
+    }
 
-                ? "-" + sanitize(docNo)
 
-                : "";
+    /**
+     * ======================================================
+     * 計算結果取得
+     * ======================================================
+     */
 
+    function getCalculation() {
+
+        if (
+            Invoice.Calc &&
+            typeof Invoice.Calc.getResult ===
+                "function"
+        ) {
+
+            return Invoice.Calc.getResult();
+
+        }
+
+
+        return {
+
+            subtotal: 0,
+
+            taxRate: 0,
+
+            tax: 0,
+
+            total: 0
+
+        };
+
+    }
+
+
+    /**
+     * ======================================================
+     * 値取得
+     * ======================================================
+     */
+
+    function getValue(id) {
+
+        const element =
+            document.getElementById(id);
+
+
+        if (!element) {
+
+            return "";
+
+        }
+
+
+        return String(
+            element.value || ""
+        ).trim();
+
+    }
+
+
+    /**
+     * ======================================================
+     * 数値
+     * ======================================================
+     */
+
+    function toNumber(value) {
+
+        const number =
+            Number(
+                String(value ?? "")
+                    .replace(/,/g, "")
+                    .trim()
+            );
+
+
+        return Number.isFinite(number)
+            ? number
+            : 0;
+
+    }
+
+
+    /**
+     * ======================================================
+     * 数値表示
+     * ======================================================
+     */
+
+    function formatNumber(value) {
+
+        return Math.round(
+            toNumber(value)
+        ).toLocaleString("ja-JP");
+
+    }
+
+
+    /**
+     * ======================================================
+     * 円表示
+     * ======================================================
+     */
+
+    function formatYen(value) {
 
         return (
-
-            "COCOA-" +
-
-            type +
-
-            suffix +
-
-            "." +
-
-            extension
-
+            "¥" +
+            formatNumber(value)
         );
 
     }
@@ -754,19 +580,36 @@ Invoice.Export = (() => {
 
     /**
      * ======================================================
-     * ファイル名に使えない文字除去
+     * ラベル付き行
      * ======================================================
      */
 
-    function sanitize(value) {
+    function addLine(
 
-        return String(value)
+        lines,
 
-            .replace(/[\\/:*?"<>|]/g, "_")
+        label,
 
-            .replace(/\s+/g, "_")
+        value
 
-            .slice(0, 80);
+    ) {
+
+        if (
+            value === undefined ||
+            value === null ||
+            value === ""
+        ) {
+
+            return;
+
+        }
+
+
+        lines.push(
+
+            `${label}: ${value}`
+
+        );
 
     }
 
@@ -777,35 +620,13 @@ Invoice.Export = (() => {
      * ======================================================
      */
 
-    function toast(message) {
+    function notify(message) {
 
         if (
-
-            window.CocoaToast &&
-
-            typeof CocoaToast.show ===
-
-                "function"
-
-        ) {
-
-            CocoaToast.show(message);
-
-            return;
-
-        }
-
-
-        if (
-
             window.COCOA &&
-
             COCOA.UI &&
-
             typeof COCOA.UI.toast ===
-
                 "function"
-
         ) {
 
             COCOA.UI.toast(message);
@@ -815,7 +636,10 @@ Invoice.Export = (() => {
         }
 
 
-        console.log(message);
+        console.log(
+            "Invoice.Export:",
+            message
+        );
 
     }
 
@@ -828,15 +652,13 @@ Invoice.Export = (() => {
 
     return {
 
-        collect,
+        init,
 
-        createCSV,
+        createText,
 
-        csv,
+        copyDocument,
 
-        text,
-
-        copyText
+        exportJSON
 
     };
 
