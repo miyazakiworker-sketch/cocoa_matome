@@ -14,6 +14,9 @@ Invoice.Calc = (() => {
 
     let result = {
         subtotal: 0,
+        discount: 0,
+        shipping: 0,
+        taxable: 0,
         taxRate: 10,
         tax: 0,
         total: 0
@@ -29,9 +32,7 @@ Invoice.Calc = (() => {
     function bind() {
 
         if (initialized) {
-
             return;
-
         }
 
         initialized = true;
@@ -70,9 +71,7 @@ Invoice.Calc = (() => {
     function handleChange(e) {
 
         if (
-            e.target.closest(
-                "#invoiceForm"
-            )
+            e.target.closest("#invoiceForm")
         ) {
 
             update();
@@ -119,23 +118,58 @@ Invoice.Calc = (() => {
         );
 
 
+        const discount =
+            getNumberValue("discount");
+
+
+        const shipping =
+            getNumberValue("shipping");
+
+
+        /*
+         * 課税対象額
+         *
+         * 小計 - 値引き + 送料
+         */
+
+        const taxable =
+            Math.max(
+                0,
+                subtotal -
+                discount +
+                shipping
+            );
+
+
         const taxRate =
             getTaxRate();
 
 
+        /*
+         * 消費税は端数切捨て
+         */
+
         const tax =
             Math.floor(
-                subtotal * taxRate / 100
+                taxable *
+                taxRate /
+                100
             );
 
 
         const total =
-            subtotal + tax;
+            taxable + tax;
 
 
         result = {
 
             subtotal,
+
+            discount,
+
+            shipping,
+
+            taxable,
 
             taxRate,
 
@@ -176,6 +210,35 @@ Invoice.Calc = (() => {
 
 
         return [];
+
+    }
+
+
+    /**
+     * ======================================================
+     * 数値入力取得
+     * ======================================================
+     */
+
+    function getNumberValue(id) {
+
+        const element =
+            COCOA.id(id);
+
+
+        if (!element) {
+
+            return 0;
+
+        }
+
+
+        return Math.max(
+            0,
+            COCOA.number(
+                element.value
+            )
+        );
 
     }
 
@@ -233,6 +296,10 @@ Invoice.Calc = (() => {
             COCOA.id("subtotal");
 
 
+        const taxable =
+            COCOA.id("taxable");
+
+
         const tax =
             COCOA.id("tax");
 
@@ -246,6 +313,16 @@ Invoice.Calc = (() => {
             subtotal.textContent =
                 COCOA.money(
                     result.subtotal
+                );
+
+        }
+
+
+        if (taxable) {
+
+            taxable.textContent =
+                COCOA.money(
+                    result.taxable
                 );
 
         }
@@ -307,6 +384,15 @@ Invoice.Calc = (() => {
             subtotal:
                 result.subtotal,
 
+            discount:
+                result.discount,
+
+            shipping:
+                result.shipping,
+
+            taxable:
+                result.taxable,
+
             taxRate:
                 result.taxRate,
 
@@ -329,7 +415,10 @@ Invoice.Calc = (() => {
 
     function setResult(value) {
 
-        if (!value || typeof value !== "object") {
+        if (
+            !value ||
+            typeof value !== "object"
+        ) {
 
             return;
 
@@ -341,6 +430,21 @@ Invoice.Calc = (() => {
             subtotal:
                 COCOA.number(
                     value.subtotal
+                ),
+
+            discount:
+                COCOA.number(
+                    value.discount
+                ),
+
+            shipping:
+                COCOA.number(
+                    value.shipping
+                ),
+
+            taxable:
+                COCOA.number(
+                    value.taxable
                 ),
 
             taxRate:
