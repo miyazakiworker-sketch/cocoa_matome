@@ -1,8 +1,8 @@
 /**
  * ==========================================================
  * COCOA TOOLS v2.0
- * invoice-pdf-generator_15/js/history.js
- * 作成履歴管理
+ * js/history.js
+ * 書類履歴管理
  * ==========================================================
  */
 
@@ -10,9 +10,9 @@ window.Invoice = window.Invoice || {};
 
 Invoice.History = (() => {
 
-    const STORAGE_KEY = "cocoa_invoice_history";
+    const STORAGE_KEY = "invoice_history";
 
-    const MAX_HISTORY = 30;
+    const MAX_HISTORY = 20;
 
     let initialized = false;
 
@@ -33,108 +33,16 @@ Invoice.History = (() => {
 
         initialized = true;
 
-        bindEvents();
-
     }
 
 
     /**
      * ======================================================
-     * イベント
+     * 現在の書類を履歴へ保存
      * ======================================================
      */
 
-    function bindEvents() {
-
-        document.addEventListener(
-
-            "click",
-
-            function (e) {
-
-                const saveButton =
-                    e.target.closest(
-                        "#historySaveBtn"
-                    );
-
-                if (saveButton) {
-
-                    e.preventDefault();
-
-                    save();
-
-                    return;
-
-                }
-
-
-                const clearButton =
-                    e.target.closest(
-                        "#historyClearBtn"
-                    );
-
-                if (clearButton) {
-
-                    e.preventDefault();
-
-                    clear();
-
-                    return;
-
-                }
-
-
-                const deleteButton =
-                    e.target.closest(
-                        "[data-history-delete]"
-                    );
-
-                if (deleteButton) {
-
-                    e.preventDefault();
-
-                    remove(
-                        Number(
-                            deleteButton.dataset.historyDelete
-                        )
-                    );
-
-                    return;
-
-                }
-
-
-                const loadButton =
-                    e.target.closest(
-                        "[data-history-load]"
-                    );
-
-                if (loadButton) {
-
-                    e.preventDefault();
-
-                    load(
-                        Number(
-                            loadButton.dataset.historyLoad
-                        )
-                    );
-
-                }
-
-            }
-
-        );
-
-    }
-
-
-    /**
-     * ======================================================
-     * 現在の書類を履歴保存
-     * ======================================================
-     */
-
-    function save() {
+    function add() {
 
         if (
             !Invoice.Save ||
@@ -154,140 +62,80 @@ Invoice.History = (() => {
             getAll();
 
 
-        const record = {
+        const item = {
 
-            id: createId(),
-
-            docType:
-                data.docType || "estimate",
-
-            docNo:
-                data.docNo || "",
-
-            client:
-                data.client || "",
-
-            subject:
-                data.subject || "",
-
-            company:
-                data.company || "",
-
-            issueDate:
-                data.issueDate || "",
-
-            total:
-                getTotal(),
+            id:
+                createId(),
 
             savedAt:
                 new Date().toISOString(),
 
-            data: data
+            docType:
+                data.document?.docType || "estimate",
+
+            docNo:
+                data.document?.docNo || "",
+
+            client:
+                data.document?.client || "",
+
+            subject:
+                data.document?.subject || "",
+
+            total:
+                data.calc?.total || 0,
+
+            data
 
         };
 
 
-        history.unshift(record);
+        history.unshift(item);
 
 
         /*
-         * 同じ書類番号がある場合は
-         * 古い履歴を残しすぎない
+         * 最大件数を超えた古い履歴を削除
          */
 
-        const filtered = history.filter(
+        if (
+            history.length >
+            MAX_HISTORY
+        ) {
 
-            (item, index, array) => {
-
-                if (!record.docNo) {
-
-                    return true;
-
-                }
-
-                if (item.id === record.id) {
-
-                    return true;
-
-                }
-
-                return !(
-                    item.docNo === record.docNo &&
-                    item.docType === record.docType
-                );
-
-            }
-
-        );
-
-
-        const limited =
-            filtered.slice(
-                0,
+            history.splice(
                 MAX_HISTORY
             );
 
-
-        setAll(limited);
-
-
-        notify(
-            "履歴に保存しました"
-        );
+        }
 
 
-        return true;
+        return saveAll(history);
 
     }
 
 
     /**
      * ======================================================
-     * 履歴取得
+     * 履歴一覧取得
      * ======================================================
      */
 
     function getAll() {
 
-        try {
-
-            const raw =
-                localStorage.getItem(
-                    STORAGE_KEY
-                );
-
-
-            if (!raw) {
-
-                return [];
-
-            }
-
-
-            const data =
-                JSON.parse(raw);
-
-
-            if (!Array.isArray(data)) {
-
-                return [];
-
-            }
-
-
-            return data;
-
-        } catch (error) {
-
-            console.error(
-                "Invoice.History.getAll:",
-                error
+        const data =
+            COCOA.storageGet(
+                STORAGE_KEY
             );
 
+
+        if (!Array.isArray(data)) {
 
             return [];
 
         }
+
+
+        return data;
 
     }
 
@@ -298,55 +146,57 @@ Invoice.History = (() => {
      * ======================================================
      */
 
-    function setAll(history) {
+    function saveAll(history) {
 
-        try {
-
-            localStorage.setItem(
-
-                STORAGE_KEY,
-
-                JSON.stringify(history)
-
-            );
-
-
-            return true;
-
-        } catch (error) {
-
-            console.error(
-                "Invoice.History.setAll:",
-                error
-            );
-
-
-            return false;
-
-        }
+        return COCOA.storageSet(
+            STORAGE_KEY,
+            history
+        );
 
     }
 
 
     /**
      * ======================================================
-     * 履歴読み込み
+     * 履歴取得
      * ======================================================
      */
 
-    function load(index) {
+    function get(id) {
 
         const history =
             getAll();
 
 
-        if (
-            !Number.isInteger(index) ||
-            !history[index]
-        ) {
+        return history.find(
+
+            function (item) {
+
+                return item.id === id;
+
+            }
+
+        ) || null;
+
+    }
+
+
+    /**
+     * ======================================================
+     * 履歴から復元
+     * ======================================================
+     */
+
+    function load(id) {
+
+        const item =
+            get(id);
+
+
+        if (!item) {
 
             notify(
-                "履歴が見つかりません"
+                "指定した履歴が見つかりません。"
             );
 
             return false;
@@ -354,15 +204,16 @@ Invoice.History = (() => {
         }
 
 
-        const record =
-            history[index];
-
-
         if (
-            !record.data ||
+            !item.data ||
             !Invoice.Save ||
-            typeof Invoice.Save.apply !== "function"
+            typeof Invoice.Save.apply !==
+                "function"
         ) {
+
+            notify(
+                "履歴データを読み込めません。"
+            );
 
             return false;
 
@@ -370,12 +221,12 @@ Invoice.History = (() => {
 
 
         Invoice.Save.apply(
-            record.data
+            item.data
         );
 
 
         notify(
-            "履歴を読み込みました"
+            "履歴を読み込みました。"
         );
 
 
@@ -390,15 +241,27 @@ Invoice.History = (() => {
      * ======================================================
      */
 
-    function remove(index) {
+    function remove(id) {
 
         const history =
             getAll();
 
 
+        const filtered =
+            history.filter(
+
+                function (item) {
+
+                    return item.id !== id;
+
+                }
+
+            );
+
+
         if (
-            !Number.isInteger(index) ||
-            !history[index]
+            filtered.length ===
+            history.length
         ) {
 
             return false;
@@ -406,17 +269,11 @@ Invoice.History = (() => {
         }
 
 
-        history.splice(
-            index,
-            1
-        );
-
-
-        setAll(history);
+        saveAll(filtered);
 
 
         notify(
-            "履歴を削除しました"
+            "履歴を削除しました。"
         );
 
 
@@ -433,24 +290,9 @@ Invoice.History = (() => {
 
     function clear() {
 
-        const history =
-            getAll();
-
-
-        if (!history.length) {
-
-            notify(
-                "履歴はありません"
-            );
-
-            return false;
-
-        }
-
-
         const confirmed =
             window.confirm(
-                "保存した履歴をすべて削除します。\nよろしいですか？"
+                "保存している履歴をすべて削除します。よろしいですか？"
             );
 
 
@@ -461,31 +303,17 @@ Invoice.History = (() => {
         }
 
 
-        try {
-
-            localStorage.removeItem(
-                STORAGE_KEY
-            );
+        COCOA.storageRemove(
+            STORAGE_KEY
+        );
 
 
-            notify(
-                "履歴を削除しました"
-            );
+        notify(
+            "履歴をすべて削除しました。"
+        );
 
 
-            return true;
-
-        } catch (error) {
-
-            console.error(
-                "Invoice.History.clear:",
-                error
-            );
-
-
-            return false;
-
-        }
+        return true;
 
     }
 
@@ -499,53 +327,6 @@ Invoice.History = (() => {
     function count() {
 
         return getAll().length;
-
-    }
-
-
-    /**
-     * ======================================================
-     * 合計金額取得
-     * ======================================================
-     */
-
-    function getTotal() {
-
-        if (
-            Invoice.Calc &&
-            typeof Invoice.Calc.getResult === "function"
-        ) {
-
-            const result =
-                Invoice.Calc.getResult();
-
-
-            return Number(
-                result.total || 0
-            );
-
-        }
-
-
-        const element =
-            document.getElementById("total");
-
-
-        if (!element) {
-
-            return 0;
-
-        }
-
-
-        return Number(
-
-            String(
-                element.textContent || ""
-            )
-                .replace(/[^\d.-]/g, "")
-
-        ) || 0;
 
     }
 
@@ -566,7 +347,7 @@ Invoice.History = (() => {
 
             Math.random()
                 .toString(36)
-                .slice(2, 10)
+                .slice(2, 9)
 
         );
 
@@ -583,21 +364,13 @@ Invoice.History = (() => {
 
         if (
             window.COCOA &&
-            COCOA.UI &&
-            typeof COCOA.UI.toast === "function"
+            typeof COCOA.toast ===
+                "function"
         ) {
 
-            COCOA.UI.toast(message);
-
-            return;
+            COCOA.toast(message);
 
         }
-
-
-        console.log(
-            "Invoice.History:",
-            message
-        );
 
     }
 
@@ -612,9 +385,11 @@ Invoice.History = (() => {
 
         init,
 
-        save,
+        add,
 
         getAll,
+
+        get,
 
         load,
 
