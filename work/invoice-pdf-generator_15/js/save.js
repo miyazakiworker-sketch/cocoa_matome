@@ -109,7 +109,13 @@ Invoice.Save = (() => {
                     getValue("memo"),
 
                 taxRate:
-                    getValue("taxRate")
+                    getValue("taxRate"),
+
+                discount:
+                    getValue("discount"),
+
+                shipping:
+                    getValue("shipping")
 
             },
 
@@ -130,6 +136,9 @@ Invoice.Save = (() => {
                     : {
 
                         subtotal: 0,
+                        discount: 0,
+                        shipping: 0,
+                        taxable: 0,
                         taxRate: 10,
                         tax: 0,
                         total: 0
@@ -185,20 +194,23 @@ Invoice.Save = (() => {
 
     function autoSave() {
 
-        clearTimeout(saveTimer);
-
-
-        saveTimer = setTimeout(
-
-            function () {
-
-                save(false);
-
-            },
-
-            350
-
+        clearTimeout(
+            saveTimer
         );
+
+
+        saveTimer =
+            setTimeout(
+
+                function () {
+
+                    save(false);
+
+                },
+
+                350
+
+            );
 
     }
 
@@ -326,6 +338,29 @@ Invoice.Save = (() => {
         setValue(
             "taxRate",
             documentData.taxRate
+        );
+
+        /*
+         * 値引き
+         */
+
+        setValue(
+            "discount",
+            documentData.discount !== undefined
+                ? documentData.discount
+                : 0
+        );
+
+
+        /*
+         * 送料・諸経費
+         */
+
+        setValue(
+            "shipping",
+            documentData.shipping !== undefined
+                ? documentData.shipping
+                : 0
         );
 
 
