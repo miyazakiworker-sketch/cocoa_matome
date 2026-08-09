@@ -32,7 +32,9 @@ Invoice.Calc = (() => {
     function bind() {
 
         if (initialized) {
+
             return;
+
         }
 
         initialized = true;
@@ -71,7 +73,9 @@ Invoice.Calc = (() => {
     function handleChange(e) {
 
         if (
-            e.target.closest("#invoiceForm")
+            e.target.closest(
+                "#invoiceForm"
+            )
         ) {
 
             update();
@@ -92,6 +96,10 @@ Invoice.Calc = (() => {
         const items =
             getItems();
 
+
+        /*
+         * 明細小計
+         */
 
         let subtotal = 0;
 
@@ -118,12 +126,24 @@ Invoice.Calc = (() => {
         );
 
 
-        const discount =
-            getNumberValue("discount");
+        /*
+         * 値引き
+         */
 
+        const discount =
+            getNumberValue(
+                "discount"
+            );
+
+
+        /*
+         * 送料・諸経費
+         */
 
         const shipping =
-            getNumberValue("shipping");
+            getNumberValue(
+                "shipping"
+            );
 
 
         /*
@@ -141,12 +161,18 @@ Invoice.Calc = (() => {
             );
 
 
+        /*
+         * 消費税率
+         */
+
         const taxRate =
             getTaxRate();
 
 
         /*
-         * 消費税は端数切捨て
+         * 消費税
+         *
+         * 端数は切り捨て
          */
 
         const tax =
@@ -157,8 +183,13 @@ Invoice.Calc = (() => {
             );
 
 
+        /*
+         * 合計
+         */
+
         const total =
-            taxable + tax;
+            taxable +
+            tax;
 
 
         result = {
@@ -233,11 +264,15 @@ Invoice.Calc = (() => {
         }
 
 
-        return Math.max(
-            0,
+        const value =
             COCOA.number(
                 element.value
-            )
+            );
+
+
+        return Math.max(
+            0,
+            value
         );
 
     }
