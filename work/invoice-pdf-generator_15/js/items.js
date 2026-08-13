@@ -12,6 +12,8 @@ Invoice.Items = (() => {
 
     let items = [];
 
+    let initialized = false;
+
 
     /**
      * ======================================================
@@ -21,7 +23,16 @@ Invoice.Items = (() => {
 
     function init() {
 
+        if (initialized) {
+
+            return;
+
+        }
+
+        initialized = true;
+
         bindEvents();
+
 
         /*
          * 保存データがなければ初期行を1行作る
@@ -48,19 +59,23 @@ Invoice.Items = (() => {
 
     function bindEvents() {
 
+        /*
+         * 明細追加・削除
+         */
+
         document.addEventListener(
-
             "click",
-
             function (e) {
 
                 /*
                  * 明細追加
                  */
 
-                if (
-                    e.target.closest("#addRow")
-                ) {
+                const addButton =
+                    e.target.closest("#addRow");
+
+
+                if (addButton) {
 
                     e.preventDefault();
 
@@ -96,7 +111,6 @@ Invoice.Items = (() => {
                 }
 
             }
-
         );
 
 
@@ -105,9 +119,7 @@ Invoice.Items = (() => {
          */
 
         document.addEventListener(
-
             "input",
-
             function (e) {
 
                 const input =
@@ -126,7 +138,6 @@ Invoice.Items = (() => {
                 updateFromElement(input);
 
             }
-
         );
 
     }
@@ -140,24 +151,9 @@ Invoice.Items = (() => {
 
     function add(item = {}) {
 
-        items.push({
-
-            name:
-                String(
-                    item.name ?? ""
-                ),
-
-            qty:
-                item.qty !== undefined
-                    ? item.qty
-                    : 1,
-
-            price:
-                item.price !== undefined
-                    ? item.price
-                    : 0
-
-        });
+        items.push(
+            normalizeItem(item)
+        );
 
 
         render();
@@ -171,34 +167,29 @@ Invoice.Items = (() => {
             COCOA.id("itemBody");
 
 
-        if (!body) {
+        if (body) {
 
-            return;
-
-        }
-
-
-        const rows =
-            body.querySelectorAll(
-                "tr"
-            );
+            const rows =
+                body.querySelectorAll("tr");
 
 
-        const lastRow =
-            rows[rows.length - 1];
+            const lastRow =
+                rows[rows.length - 1];
 
 
-        if (lastRow) {
+            if (lastRow) {
 
-            const input =
-                lastRow.querySelector(
-                    '[data-field="name"]'
-                );
+                const input =
+                    lastRow.querySelector(
+                        '[data-field="name"]'
+                    );
 
 
-            if (input) {
+                if (input) {
 
-                input.focus();
+                    input.focus();
+
+                }
 
             }
 
@@ -206,6 +197,38 @@ Invoice.Items = (() => {
 
 
         notifyChange();
+
+    }
+
+
+    /**
+     * ======================================================
+     * 明細データ正規化
+     * ======================================================
+     */
+
+    function normalizeItem(item = {}) {
+
+        return {
+
+            name:
+                String(
+                    item?.name ?? ""
+                ),
+
+            qty:
+                item?.qty !== undefined &&
+                item?.qty !== null
+                    ? item.qty
+                    : 1,
+
+            price:
+                item?.price !== undefined &&
+                item?.price !== null
+                    ? item.price
+                    : 0
+
+        };
 
     }
 
@@ -224,7 +247,7 @@ Invoice.Items = (() => {
             index >= items.length
         ) {
 
-            return;
+            return false;
 
         }
 
@@ -235,32 +258,31 @@ Invoice.Items = (() => {
 
         if (items.length === 1) {
 
-            items[0] = {
-
-                name: "",
-
-                qty: 1,
-
-                price: 0
-
-            };
+            items[0] =
+                normalizeItem();
 
 
             render();
 
             notifyChange();
 
-            return;
+            return true;
 
         }
 
 
-        items.splice(index, 1);
+        items.splice(
+            index,
+            1
+        );
 
 
         render();
 
         notifyChange();
+
+
+        return true;
 
     }
 
@@ -272,6 +294,13 @@ Invoice.Items = (() => {
      */
 
     function updateFromElement(element) {
+
+        if (!element) {
+
+            return;
+
+        }
+
 
         const index =
             Number(
@@ -294,29 +323,44 @@ Invoice.Items = (() => {
         }
 
 
-        if (field === "name") {
+        switch (field) {
 
-            items[index].name =
-                element.value;
+            case "name":
+
+                items[index].name =
+                    String(
+                        element.value ?? ""
+                    );
+
+                break;
+
+
+            case "qty":
+
+                items[index].qty =
+                    element.value;
+
+                break;
+
+
+            case "price":
+
+                items[index].price =
+                    element.value;
+
+                break;
+
+
+            default:
+
+                return;
 
         }
 
 
-        if (field === "qty") {
-
-            items[index].qty =
-                element.value;
-
-        }
-
-
-        if (field === "price") {
-
-            items[index].price =
-                element.value;
-
-        }
-
+        /*
+         * 入力変更を他モジュールへ通知
+         */
 
         notifyChange();
 
@@ -337,7 +381,7 @@ Invoice.Items = (() => {
 
         if (!body) {
 
-            return;
+            return false;
 
         }
 
@@ -346,7 +390,6 @@ Invoice.Items = (() => {
 
 
         items.forEach(
-
             function (item, index) {
 
                 const row =
@@ -439,25 +482,26 @@ Invoice.Items = (() => {
                 body.appendChild(row);
 
             }
-
         );
 
 
         updateAmounts();
+
+
+        return true;
 
     }
 
 
     /**
      * ======================================================
-     * 金額表示更新
+     * 明細金額表示更新
      * ======================================================
      */
 
     function updateAmounts() {
 
         items.forEach(
-
             function (item, index) {
 
                 const element =
@@ -479,7 +523,6 @@ Invoice.Items = (() => {
                     );
 
             }
-
         );
 
     }
@@ -522,26 +565,24 @@ Invoice.Items = (() => {
     function data() {
 
         return items.map(
-
             function (item) {
 
                 return {
 
                     name:
                         String(
-                            item.name ?? ""
+                            item?.name ?? ""
                         ),
 
                     qty:
-                        item.qty,
+                        item?.qty,
 
                     price:
-                        item.price
+                        item?.price
 
                 };
 
             }
-
         );
 
     }
@@ -557,51 +598,33 @@ Invoice.Items = (() => {
 
         if (!Array.isArray(value)) {
 
-            return;
+            return false;
 
         }
 
 
         items =
             value.map(
-
                 function (item) {
 
-                    return {
-
-                        name:
-                            String(
-                                item?.name ?? ""
-                            ),
-
-                        qty:
-                            item?.qty !== undefined
-                                ? item.qty
-                                : 1,
-
-                        price:
-                            item?.price !== undefined
-                                ? item.price
-                                : 0
-
-                    };
+                    return normalizeItem(
+                        item
+                    );
 
                 }
-
             );
 
 
+        /*
+         * 明細が0件になった場合も
+         * 最低1行を維持
+         */
+
         if (!items.length) {
 
-            items.push({
-
-                name: "",
-
-                qty: 1,
-
-                price: 0
-
-            });
+            items.push(
+                normalizeItem()
+            );
 
         }
 
@@ -609,6 +632,9 @@ Invoice.Items = (() => {
         render();
 
         notifyChange();
+
+
+        return true;
 
     }
 
@@ -621,18 +647,9 @@ Invoice.Items = (() => {
 
     function clear() {
 
-        items = [];
-
-
-        items.push({
-
-            name: "",
-
-            qty: 1,
-
-            price: 0
-
-        });
+        items = [
+            normalizeItem()
+        ];
 
 
         render();
@@ -651,11 +668,9 @@ Invoice.Items = (() => {
     function notifyChange() {
 
         document.dispatchEvent(
-
             new CustomEvent(
                 "invoice:items-change"
             )
-
         );
 
     }
@@ -671,7 +686,8 @@ Invoice.Items = (() => {
 
         if (
             window.COCOA &&
-            typeof COCOA.toast === "function"
+            typeof COCOA.toast ===
+                "function"
         ) {
 
             COCOA.toast(message);
