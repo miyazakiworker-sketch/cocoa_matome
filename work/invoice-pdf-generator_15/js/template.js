@@ -73,11 +73,14 @@ Invoice.Template = (() => {
             data?.calc || {
 
                 subtotal: 0,
+
                 taxRate:
                     COCOA.number(
                         documentData.taxRate
                     ),
+
                 tax: 0,
+
                 total: 0
 
             };
@@ -86,6 +89,10 @@ Invoice.Template = (() => {
         const title =
             getTitle(data);
 
+
+        /*
+         * 明細HTML
+         */
 
         const itemRows =
             items
@@ -115,6 +122,22 @@ Invoice.Template = (() => {
                             qty * price;
 
 
+                        /*
+                         * 完全な空行は
+                         * 印刷書類から除外
+                         */
+
+                        if (
+                            !name &&
+                            qty === 1 &&
+                            price === 0
+                        ) {
+
+                            return "";
+
+                        }
+
+
                         return `
 
                             <tr>
@@ -124,15 +147,27 @@ Invoice.Template = (() => {
                                 </td>
 
                                 <td class="text-right">
-                                    ${qty.toLocaleString("ja-JP")}
+
+                                    ${qty.toLocaleString(
+                                        "ja-JP"
+                                    )}
+
                                 </td>
 
                                 <td class="text-right">
-                                    ${COCOA.money(price)}
+
+                                    ${COCOA.money(
+                                        price
+                                    )}
+
                                 </td>
 
                                 <td class="text-right">
-                                    ${COCOA.money(amount)}
+
+                                    ${COCOA.money(
+                                        amount
+                                    )}
+
                                 </td>
 
                             </tr>
@@ -145,6 +180,31 @@ Invoice.Template = (() => {
                 .join("");
 
 
+        /*
+         * 明細がない場合
+         */
+
+        const renderedItems =
+            itemRows ||
+            `
+
+                <tr>
+
+                    <td colspan="4">
+                        明細なし
+                    </td>
+
+                </tr>
+
+            `;
+
+
+        /*
+         * ==================================================
+         * 書類HTML
+         * ==================================================
+         */
+
         return `
 
             <div class="invoice-document">
@@ -155,9 +215,7 @@ Invoice.Template = (() => {
 
                         width: 100%;
 
-                        max-width: 794px;
-
-                        margin: 0 auto;
+                        margin: 0;
 
                         padding: 32px;
 
@@ -192,6 +250,9 @@ Invoice.Template = (() => {
                         justify-content:
                             space-between;
 
+                        align-items:
+                            flex-start;
+
                         gap: 24px;
 
                         margin-bottom: 30px;
@@ -204,6 +265,8 @@ Invoice.Template = (() => {
                         margin: 0;
 
                         font-size: 30px;
+
+                        line-height: 1.3;
 
                         letter-spacing: .08em;
 
@@ -292,6 +355,13 @@ Invoice.Template = (() => {
                     }
 
 
+                    .invoice-items tr {
+
+                        page-break-inside: avoid;
+
+                    }
+
+
                     .text-right {
 
                         text-align: right;
@@ -316,10 +386,15 @@ Invoice.Template = (() => {
                         justify-content:
                             space-between;
 
+                        align-items:
+                            center;
+
                         padding: 7px 0;
 
                         border-bottom:
                             1px solid #ddd;
+
+                        gap: 20px;
 
                     }
 
@@ -350,11 +425,11 @@ Invoice.Template = (() => {
 
                     .invoice-company-name {
 
+                        margin-bottom: 5px;
+
                         font-size: 16px;
 
                         font-weight: 800;
-
-                        margin-bottom: 5px;
 
                     }
 
@@ -394,21 +469,18 @@ Invoice.Template = (() => {
                     }
 
 
-                    @media print {
+                    .no-print {
 
-                        .invoice-document {
-
-                            width: 100%;
-
-                            max-width: none;
-
-                            padding: 20mm;
-
-                        }
+                        display: none !important;
 
                     }
 
                 </style>
+
+
+                <!-- ========================================
+                     ヘッダー
+                ========================================= -->
 
 
                 <div class="invoice-header">
@@ -416,7 +488,9 @@ Invoice.Template = (() => {
                     <div>
 
                         <h1 class="invoice-title">
+
                             ${title}
+
                         </h1>
 
                     </div>
@@ -425,29 +499,45 @@ Invoice.Template = (() => {
                     <div class="invoice-meta">
 
                         <div>
+
                             書類番号：
+
                             ${COCOA.escapeHTML(
                                 documentData.docNo || ""
                             )}
+
                         </div>
 
+
                         <div>
+
                             発行日：
+
                             ${COCOA.escapeHTML(
                                 documentData.issueDate || ""
                             )}
+
                         </div>
 
+
                         <div>
+
                             支払期限：
+
                             ${COCOA.escapeHTML(
                                 documentData.dueDate || ""
                             )}
+
                         </div>
 
                     </div>
 
                 </div>
+
+
+                <!-- ========================================
+                     宛名
+                ========================================= -->
 
 
                 <div class="invoice-client">
@@ -461,11 +551,19 @@ Invoice.Template = (() => {
                 </div>
 
 
+                <!-- ========================================
+                     件名
+                ========================================= -->
+
+
                 <div class="invoice-subject">
 
                     <div class="invoice-subject-label">
+
                         件名
+
                     </div>
+
 
                     <div class="invoice-subject-value">
 
@@ -478,6 +576,11 @@ Invoice.Template = (() => {
                 </div>
 
 
+                <!-- ========================================
+                     明細
+                ========================================= -->
+
+
                 <table class="invoice-items">
 
                     <thead>
@@ -488,6 +591,7 @@ Invoice.Template = (() => {
                                 内容
                             </th>
 
+
                             <th
                                 class="text-right"
                                 style="width:80px;">
@@ -496,6 +600,7 @@ Invoice.Template = (() => {
 
                             </th>
 
+
                             <th
                                 class="text-right"
                                 style="width:120px;">
@@ -503,6 +608,7 @@ Invoice.Template = (() => {
                                 単価
 
                             </th>
+
 
                             <th
                                 class="text-right"
@@ -519,20 +625,16 @@ Invoice.Template = (() => {
 
                     <tbody>
 
-                        ${
-                            itemRows ||
-                            `
-                                <tr>
-                                    <td colspan="4">
-                                        明細なし
-                                    </td>
-                                </tr>
-                            `
-                        }
+                        ${renderedItems}
 
                     </tbody>
 
                 </table>
+
+
+                <!-- ========================================
+                     金額
+                ========================================= -->
 
 
                 <div class="invoice-total">
@@ -540,13 +642,18 @@ Invoice.Template = (() => {
                     <div class="invoice-total-row">
 
                         <span>
+
                             小計
+
                         </span>
 
+
                         <strong>
+
                             ${COCOA.money(
-                                calc.subtotal
+                                calc.subtotal || 0
                             )}
+
                         </strong>
 
                     </div>
@@ -555,16 +662,21 @@ Invoice.Template = (() => {
                     <div class="invoice-total-row">
 
                         <span>
+
                             消費税
                             (${COCOA.number(
                                 calc.taxRate
                             )}%)
+
                         </span>
 
+
                         <strong>
+
                             ${COCOA.money(
-                                calc.tax
+                                calc.tax || 0
                             )}
+
                         </strong>
 
                     </div>
@@ -576,18 +688,28 @@ Invoice.Template = (() => {
                     ">
 
                         <span>
+
                             合計
+
                         </span>
 
+
                         <strong>
+
                             ${COCOA.money(
-                                calc.total
+                                calc.total || 0
                             )}
+
                         </strong>
 
                     </div>
 
                 </div>
+
+
+                <!-- ========================================
+                     振込先
+                ========================================= -->
 
 
                 ${
@@ -613,6 +735,11 @@ Invoice.Template = (() => {
                 }
 
 
+                <!-- ========================================
+                     備考
+                ========================================= -->
+
+
                 ${
                     documentData.memo
                         ? `
@@ -636,6 +763,11 @@ Invoice.Template = (() => {
                 }
 
 
+                <!-- ========================================
+                     発行者
+                ========================================= -->
+
+
                 <div class="invoice-company">
 
                     <div class="invoice-company-name">
@@ -650,11 +782,15 @@ Invoice.Template = (() => {
                     ${
                         documentData.address
                             ? `
+
                                 <div>
+
                                     ${COCOA.escapeHTML(
                                         documentData.address
                                     )}
+
                                 </div>
+
                             `
                             : ""
                     }
@@ -663,12 +799,16 @@ Invoice.Template = (() => {
                     ${
                         documentData.tel
                             ? `
+
                                 <div>
+
                                     TEL：
                                     ${COCOA.escapeHTML(
                                         documentData.tel
                                     )}
+
                                 </div>
+
                             `
                             : ""
                     }
@@ -677,12 +817,16 @@ Invoice.Template = (() => {
                     ${
                         documentData.mail
                             ? `
+
                                 <div>
+
                                     Email：
                                     ${COCOA.escapeHTML(
                                         documentData.mail
                                     )}
+
                                 </div>
+
                             `
                             : ""
                     }
@@ -690,11 +834,17 @@ Invoice.Template = (() => {
                 </div>
 
 
+                <!-- ========================================
+                     フッター
+                ========================================= -->
+
+
                 <div class="invoice-footer">
 
                     COCOA TOOLS v2.0
 
                 </div>
+
 
             </div>
 
