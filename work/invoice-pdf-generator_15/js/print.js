@@ -38,28 +38,30 @@ Invoice.Print = (() => {
      * ======================================================
      * イベント
      * ======================================================
- */
+     */
 
     function bind() {
 
         document.addEventListener(
-
             "click",
-
             function (e) {
 
-                if (
-                    e.target.closest("#printBtn")
-                ) {
+                const button =
+                    e.target.closest("#printBtn");
 
-                    e.preventDefault();
 
-                    print();
+                if (!button) {
+
+                    return;
 
                 }
 
-            }
 
+                e.preventDefault();
+
+                print();
+
+            }
         );
 
     }
@@ -110,15 +112,22 @@ Invoice.Print = (() => {
 
 
         /*
-         * 現在のデータから印刷用HTMLを生成
+         * 印刷用HTML生成
          */
 
-        const html =
+        let html = "";
+
+
+        if (
             Invoice.Template &&
             typeof Invoice.Template.renderCurrent ===
                 "function"
-                ? Invoice.Template.renderCurrent()
-                : "";
+        ) {
+
+            html =
+                Invoice.Template.renderCurrent();
+
+        }
 
 
         if (!html) {
@@ -133,7 +142,7 @@ Invoice.Print = (() => {
 
 
         /*
-         * 専用印刷ウィンドウを作成
+         * ポップアップウィンドウ
          */
 
         const printWindow =
@@ -156,7 +165,7 @@ Invoice.Print = (() => {
 
 
         /*
-         * 印刷用HTML
+         * 印刷ウィンドウのHTMLを書き込む
          */
 
         printWindow.document.open();
@@ -177,7 +186,7 @@ Invoice.Print = (() => {
     content="width=device-width, initial-scale=1.0">
 
 <title>
-    ${getDocumentTitle()}
+    ${escapeHTML(getDocumentTitle())}
 </title>
 
 
@@ -185,11 +194,9 @@ Invoice.Print = (() => {
 
     @page {
 
-        size:
-            A4;
+        size: A4;
 
-        margin:
-            0;
+        margin: 0;
 
     }
 
@@ -197,59 +204,54 @@ Invoice.Print = (() => {
     html,
     body {
 
-        margin:
-            0;
+        margin: 0;
 
-        padding:
-            0;
+        padding: 0;
 
-        background:
-            #fff;
+        width: 210mm;
 
-    }
+        min-height: 297mm;
 
-
-    body {
-
-        width:
-            210mm;
-
-        min-height:
-            297mm;
+        background: #fff;
 
     }
 
 
     * {
 
-        box-sizing:
-            border-box;
+        box-sizing: border-box;
+
+    }
+
+
+    body {
+
+        color: #111;
+
+        font-family:
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
 
     }
 
 
     .invoice-document {
 
-        width:
-            210mm !important;
+        width: 210mm !important;
 
-        min-height:
-            297mm;
+        min-height: 297mm;
 
-        max-width:
-            none !important;
+        max-width: none !important;
 
-        margin:
-            0 !important;
+        margin: 0 !important;
 
-        padding:
-            15mm !important;
+        padding: 15mm !important;
 
-        background:
-            #fff !important;
+        background: #fff !important;
 
-        color:
-            #111 !important;
+        color: #111 !important;
 
         font-family:
             -apple-system,
@@ -262,46 +264,43 @@ Invoice.Print = (() => {
 
     .invoice-document table {
 
-        width:
-            100%;
+        width: 100%;
 
     }
 
 
     .invoice-document tr {
 
-        page-break-inside:
-            avoid;
+        page-break-inside: avoid;
 
     }
 
 
     .invoice-document .invoice-header {
 
-        display:
-            flex;
+        display: flex;
 
-        justify-content:
-            space-between;
+        justify-content: space-between;
 
-        gap:
-            20px;
+        align-items: flex-start;
+
+        gap: 20px;
 
     }
 
 
     .invoice-document .invoice-title {
 
-        margin:
-            0;
+        margin: 0;
 
     }
 
 
     .invoice-document .invoice-items {
 
-        border-collapse:
-            collapse;
+        width: 100%;
+
+        border-collapse: collapse;
 
     }
 
@@ -309,19 +308,47 @@ Invoice.Print = (() => {
     .invoice-document .invoice-items th,
     .invoice-document .invoice-items td {
 
-        border:
-            1px solid #ccc;
+        border: 1px solid #ccc;
 
     }
 
 
     .no-print {
 
-        display:
-            none !important;
+        display: none !important;
 
     }
 
+
+    @media print {
+
+        html,
+        body {
+
+            width: 210mm;
+
+            min-height: 297mm;
+
+            margin: 0;
+
+            padding: 0;
+
+        }
+
+
+        .invoice-document {
+
+            width: 210mm !important;
+
+            min-height: 297mm;
+
+            margin: 0 !important;
+
+            padding: 15mm !important;
+
+        }
+
+    }
 
 </style>
 
@@ -330,46 +357,29 @@ Invoice.Print = (() => {
 
 <body>
 
-    ${html}
+${html}
 
 </body>
-
 
 </html>
 
         `);
 
 
+        /*
+         * 重要
+         *
+         * document.write() 完了後に
+         * print() を確実に実行する。
+         */
+
         printWindow.document.close();
 
 
         /*
-         * HTML描画完了後に印刷
-         */
-
-        printWindow.onload =
-            function () {
-
-                setTimeout(
-
-                    function () {
-
-                        printWindow.focus();
-
-                        printWindow.print();
-
-                    },
-
-                    250
-
-                );
-
-            };
-
-
-        /*
-         * 一部ブラウザでは onload が
-         * 発火済みになるため保険を入れる
+         * 描画完了待ち
+         *
+         * onloadだけに依存しない。
          */
 
         setTimeout(
@@ -379,17 +389,30 @@ Invoice.Print = (() => {
                 try {
 
                     if (
-                        !printWindow.closed
+                        printWindow.closed
                     ) {
 
-                        printWindow.focus();
+                        return;
 
                     }
 
+
+                    printWindow.focus();
+
+
+                    printWindow.print();
+
+
                 } catch (error) {
 
-                    console.warn(
+                    console.error(
+                        "Invoice.Print:",
                         error
+                    );
+
+
+                    notify(
+                        "印刷を開始できませんでした。"
                     );
 
                 }
@@ -429,6 +452,57 @@ Invoice.Print = (() => {
 
 
         return "見積書";
+
+    }
+
+
+    /**
+     * ======================================================
+     * HTMLエスケープ
+     * ======================================================
+     */
+
+    function escapeHTML(value) {
+
+        if (
+            window.COCOA &&
+            typeof COCOA.escapeHTML ===
+                "function"
+        ) {
+
+            return COCOA.escapeHTML(
+                value
+            );
+
+        }
+
+
+        return String(value ?? "")
+
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+
+            .replace(
+                /</g,
+                "&lt;"
+            )
+
+            .replace(
+                />/g,
+                "&gt;"
+            )
+
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+
+            .replace(
+                /'/g,
+                "&#039;"
+            );
 
     }
 
