@@ -38,11 +38,14 @@ Invoice.init = function () {
 
     }
 
+
     Invoice._initialized = true;
 
 
     /*
+     * ======================================================
      * COCOA Core確認
+     * ======================================================
      */
 
     if (!window.COCOA) {
@@ -60,14 +63,26 @@ Invoice.init = function () {
      * ======================================================
      * フォーム生成
      * ======================================================
+     *
+     * 必ず最初に実行する。
+     * 以降のモジュールがフォーム要素を参照するため。
      */
 
     if (
         Invoice.Form &&
-        typeof Invoice.Form.create === "function"
+        typeof Invoice.Form.create ===
+            "function"
     ) {
 
         Invoice.Form.create();
+
+    } else {
+
+        console.error(
+            "Invoice.Form.create が見つかりません。"
+        );
+
+        return;
 
     }
 
@@ -80,7 +95,8 @@ Invoice.init = function () {
 
     if (
         Invoice.Items &&
-        typeof Invoice.Items.init === "function"
+        typeof Invoice.Items.init ===
+            "function"
     ) {
 
         Invoice.Items.init();
@@ -96,7 +112,8 @@ Invoice.init = function () {
 
     if (
         Invoice.Calc &&
-        typeof Invoice.Calc.bind === "function"
+        typeof Invoice.Calc.bind ===
+            "function"
     ) {
 
         Invoice.Calc.bind();
@@ -112,7 +129,8 @@ Invoice.init = function () {
 
     if (
         Invoice.Validation &&
-        typeof Invoice.Validation.init === "function"
+        typeof Invoice.Validation.init ===
+            "function"
     ) {
 
         Invoice.Validation.init();
@@ -122,13 +140,14 @@ Invoice.init = function () {
 
     /*
      * ======================================================
-     * 保存機能初期化
+     * 保存初期化
      * ======================================================
-     */
+ */
 
     if (
         Invoice.Save &&
-        typeof Invoice.Save.init === "function"
+        typeof Invoice.Save.init ===
+            "function"
     ) {
 
         Invoice.Save.init();
@@ -138,13 +157,14 @@ Invoice.init = function () {
 
     /*
      * ======================================================
-     * 発行者情報初期化
+     * 発行者情報
      * ======================================================
-     */
+ */
 
     if (
         Invoice.Profile &&
-        typeof Invoice.Profile.init === "function"
+        typeof Invoice.Profile.init ===
+            "function"
     ) {
 
         Invoice.Profile.init();
@@ -154,13 +174,14 @@ Invoice.init = function () {
 
     /*
      * ======================================================
-     * 履歴初期化
+     * 履歴
      * ======================================================
-     */
+ */
 
     if (
         Invoice.History &&
-        typeof Invoice.History.init === "function"
+        typeof Invoice.History.init ===
+            "function"
     ) {
 
         Invoice.History.init();
@@ -170,13 +191,14 @@ Invoice.init = function () {
 
     /*
      * ======================================================
-     * テンプレート初期化
+     * テンプレート
      * ======================================================
-     */
+ */
 
     if (
         Invoice.Template &&
-        typeof Invoice.Template.init === "function"
+        typeof Invoice.Template.init ===
+            "function"
     ) {
 
         Invoice.Template.init();
@@ -186,13 +208,14 @@ Invoice.init = function () {
 
     /*
      * ======================================================
-     * 出力機能初期化
+     * データ出力
      * ======================================================
-     */
+ */
 
     if (
         Invoice.Export &&
-        typeof Invoice.Export.init === "function"
+        typeof Invoice.Export.init ===
+            "function"
     ) {
 
         Invoice.Export.init();
@@ -202,13 +225,14 @@ Invoice.init = function () {
 
     /*
      * ======================================================
-     * 印刷初期化
+     * 印刷
      * ======================================================
-     */
+ */
 
     if (
         Invoice.Print &&
-        typeof Invoice.Print.init === "function"
+        typeof Invoice.Print.init ===
+            "function"
     ) {
 
         Invoice.Print.init();
@@ -218,13 +242,14 @@ Invoice.init = function () {
 
     /*
      * ======================================================
-     * UI初期化
+     * UI
      * ======================================================
-     */
+ */
 
     if (
         Invoice.UI &&
-        typeof Invoice.UI.init === "function"
+        typeof Invoice.UI.init ===
+            "function"
     ) {
 
         Invoice.UI.init();
@@ -237,12 +262,13 @@ Invoice.init = function () {
      * 保存データ復元
      * ======================================================
      *
-     * フォーム生成・明細初期化後に実行する。
+     * フォーム・明細を生成した後に実行する。
      */
 
     if (
         Invoice.Save &&
-        typeof Invoice.Save.load === "function"
+        typeof Invoice.Save.load ===
+            "function"
     ) {
 
         Invoice.Save.load(false);
@@ -254,11 +280,14 @@ Invoice.init = function () {
      * ======================================================
      * 最終計算
      * ======================================================
+     *
+     * 復元されたデータを含めて再計算する。
      */
 
     if (
         Invoice.Calc &&
-        typeof Invoice.Calc.update === "function"
+        typeof Invoice.Calc.update ===
+            "function"
     ) {
 
         Invoice.Calc.update();
@@ -268,20 +297,27 @@ Invoice.init = function () {
 
     /*
      * ======================================================
-     * PWA初期化
+     * PWA
      * ======================================================
-     */
+ */
 
     if (
         window.COCOA &&
         COCOA.PWA &&
-        typeof COCOA.PWA.init === "function"
+        typeof COCOA.PWA.init ===
+            "function"
     ) {
 
         COCOA.PWA.init("./sw.js");
 
     }
 
+
+    /*
+     * ======================================================
+     * 起動完了
+     * ======================================================
+ */
 
     console.log(
         "COCOA TOOLS v2.0 Invoice initialized."
