@@ -35,6 +35,14 @@ Invoice.Profile = (() => {
 
         bindEvents();
 
+        /*
+         * 保存済み発行者情報を自動復元
+         *
+         * 起動時は通知を表示しない。
+         */
+
+        load(false);
+
     }
 
 
@@ -50,8 +58,14 @@ Invoice.Profile = (() => {
             "click",
             function (e) {
 
+                /*
+                 * 発行者情報保存
+                 */
+
                 if (
-                    e.target.closest("#profileSaveBtn")
+                    e.target.closest(
+                        "#profileSaveBtn"
+                    )
                 ) {
 
                     e.preventDefault();
@@ -63,21 +77,33 @@ Invoice.Profile = (() => {
                 }
 
 
+                /*
+                 * 発行者情報読込
+                 */
+
                 if (
-                    e.target.closest("#profileLoadBtn")
+                    e.target.closest(
+                        "#profileLoadBtn"
+                    )
                 ) {
 
                     e.preventDefault();
 
-                    load();
+                    load(true);
 
                     return;
 
                 }
 
 
+                /*
+                 * 発行者情報削除
+                 */
+
                 if (
-                    e.target.closest("#profileResetBtn")
+                    e.target.closest(
+                        "#profileResetBtn"
+                    )
                 ) {
 
                     e.preventDefault();
@@ -161,7 +187,9 @@ Invoice.Profile = (() => {
      * ======================================================
      */
 
-    function load() {
+    function load(
+        showMessage = true
+    ) {
 
         const data =
             COCOA.storageGet(
@@ -171,21 +199,41 @@ Invoice.Profile = (() => {
 
         if (!data) {
 
-            notify(
-                "保存された発行者情報がありません。"
-            );
+            if (showMessage) {
+
+                notify(
+                    "保存された発行者情報がありません。"
+                );
+
+            }
 
             return false;
 
         }
 
 
-        apply(data);
+        if (!apply(data)) {
+
+            if (showMessage) {
+
+                notify(
+                    "発行者情報を読み込めませんでした。"
+                );
+
+            }
+
+            return false;
+
+        }
 
 
-        notify(
-            "発行者情報を読み込みました。"
-        );
+        if (showMessage) {
+
+            notify(
+                "発行者情報を読み込みました。"
+            );
+
+        }
 
 
         return true;
@@ -238,8 +286,10 @@ Invoice.Profile = (() => {
 
 
         /*
-         * 発行者情報変更を
-         * 自動保存対象にも反映
+         * 現在の書類データにも反映
+         *
+         * 発行者情報を読み込んだ時点で
+         * 現在の見積書・請求書へ反映する。
          */
 
         if (
@@ -279,17 +329,22 @@ Invoice.Profile = (() => {
         }
 
 
-        COCOA.storageRemove(
-            STORAGE_KEY
-        );
+        const success =
+            COCOA.storageRemove(
+                STORAGE_KEY
+            );
 
 
-        notify(
-            "保存した発行者情報を削除しました。"
-        );
+        if (success) {
+
+            notify(
+                "保存した発行者情報を削除しました。"
+            );
+
+        }
 
 
-        return true;
+        return success;
 
     }
 
@@ -307,7 +362,9 @@ Invoice.Profile = (() => {
 
 
         return element
-            ? String(element.value || "")
+            ? String(
+                element.value || ""
+            )
             : "";
 
     }
@@ -317,7 +374,7 @@ Invoice.Profile = (() => {
      * ======================================================
      * 値設定
      * ======================================================
-     */
+    */
 
     function setValue(
         id,
