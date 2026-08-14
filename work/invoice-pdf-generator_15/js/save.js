@@ -11,10 +11,7 @@ window.Invoice = window.Invoice || {};
 Invoice.Save = (() => {
 
     const STORAGE_KEY =
-        Invoice.STORAGE_KEY || "invoice";
-
-    const FILE_NAME =
-        "invoice-data.json";
+        Invoice.STORAGE_KEY || "invoice_data";
 
 
     let initialized = false;
@@ -54,17 +51,49 @@ Invoice.Save = (() => {
             const element =
                 COCOA.id(id);
 
+
             return element
-                ? element.value
+                ? String(element.value ?? "")
                 : "";
 
         };
 
 
-        const data = {
+        const calc =
+            Invoice.Calc &&
+            typeof Invoice.Calc.getResult ===
+                "function"
+
+                ? Invoice.Calc.getResult()
+
+                : {
+
+                    subtotal: 0,
+                    discount: 0,
+                    shipping: 0,
+                    taxable: 0,
+                    taxRate: 10,
+                    tax: 0,
+                    total: 0
+
+                };
+
+
+        const items =
+            Invoice.Items &&
+            typeof Invoice.Items.data ===
+                "function"
+
+                ? Invoice.Items.data()
+
+                : [];
+
+
+        return {
 
             version:
                 Invoice.VERSION || "2.0.0",
+
 
             savedAt:
                 new Date().toISOString(),
@@ -120,35 +149,11 @@ Invoice.Save = (() => {
             },
 
 
-            items:
-                Invoice.Items &&
-                typeof Invoice.Items.data ===
-                    "function"
-                    ? Invoice.Items.data()
-                    : [],
+            items,
 
-
-            calc:
-                Invoice.Calc &&
-                typeof Invoice.Calc.getResult ===
-                    "function"
-                    ? Invoice.Calc.getResult()
-                    : {
-
-                        subtotal: 0,
-                        discount: 0,
-                        shipping: 0,
-                        taxable: 0,
-                        taxRate: 10,
-                        tax: 0,
-                        total: 0
-
-                    }
+            calc
 
         };
-
-
-        return data;
 
     }
 
@@ -172,7 +177,10 @@ Invoice.Save = (() => {
             );
 
 
-        if (success && showMessage) {
+        if (
+            success &&
+            showMessage
+        ) {
 
             notify(
                 "保存しました。"
@@ -204,6 +212,8 @@ Invoice.Save = (() => {
 
                 function () {
 
+                    saveTimer = null;
+
                     save(false);
 
                 },
@@ -211,6 +221,27 @@ Invoice.Save = (() => {
                 350
 
             );
+
+    }
+
+
+    /**
+     * ======================================================
+     * 自動保存タイマー停止
+     * ======================================================
+     */
+
+    function cancelAutoSave() {
+
+        if (saveTimer !== null) {
+
+            clearTimeout(
+                saveTimer
+            );
+
+            saveTimer = null;
+
+        }
 
     }
 
@@ -236,10 +267,27 @@ Invoice.Save = (() => {
         }
 
 
-        apply(data);
+        if (
+            !isValidData(data)
+        ) {
+
+            console.warn(
+                "Invoice.Save.load: 保存データの形式が不正です。"
+            );
+
+            return false;
+
+        }
 
 
-        if (showMessage) {
+        const success =
+            apply(data);
+
+
+        if (
+            success &&
+            showMessage
+        ) {
 
             notify(
                 "保存データを読み込みました。"
@@ -248,7 +296,53 @@ Invoice.Save = (() => {
         }
 
 
-        return true;
+        return success;
+
+    }
+
+
+    /**
+     * ======================================================
+     * データ形式チェック
+     * ======================================================
+     */
+
+    function isValidData(data) {
+
+        if (
+            !data ||
+            typeof data !== "object" ||
+            Array.isArray(data)
+        ) {
+
+            return false;
+
+        }
+
+
+        /*
+         * document が存在する新形式
+         */
+
+        if (
+            data.document &&
+            typeof data.document === "object"
+        ) {
+
+            return true;
+
+        }
+
+
+        /*
+         * 旧形式・簡易形式も許可
+         */
+
+        return (
+            "docType" in data ||
+            "client" in data ||
+            "subject" in data
+        );
 
     }
 
@@ -262,8 +356,7 @@ Invoice.Save = (() => {
     function apply(data) {
 
         if (
-            !data ||
-            typeof data !== "object"
+            !isValidData(data)
         ) {
 
             return false;
@@ -272,8 +365,17 @@ Invoice.Save = (() => {
 
 
         const documentData =
-            data.document || data;
+            data.document &&
+            typeof data.document === "object"
 
+                ? data.document
+
+                : data;
+
+
+        /*
+         * 書類情報
+         */
 
         setValue(
             "docType",
@@ -305,6 +407,11 @@ Invoice.Save = (() => {
             documentData.subject
         );
 
+
+        /*
+         * 発行者情報
+         */
+
         setValue(
             "company",
             documentData.company
@@ -325,6 +432,11 @@ Invoice.Save = (() => {
             documentData.mail
         );
 
+
+        /*
+         * その他
+         */
+
         setValue(
             "bank",
             documentData.bank
@@ -335,10 +447,23 @@ Invoice.Save = (() => {
             documentData.memo
         );
 
-        setValue(
-            "taxRate",
-            documentData.taxRate
-        );
+
+        /*
+         * 税率
+         */
+
+        if (
+            documentData.taxRate !== undefined &&
+            documentData.taxRate !== null
+        ) {
+
+            setValue(
+                "taxRate",
+                documentData.taxRate
+            );
+
+        }
+
 
         /*
          * 値引き
@@ -383,7 +508,7 @@ Invoice.Save = (() => {
 
 
         /*
-         * 税率・金額を再計算
+         * 再計算
          */
 
         if (
@@ -395,6 +520,29 @@ Invoice.Save = (() => {
             Invoice.Calc.update();
 
         }
+
+
+        /*
+         * エラー表示解除
+         */
+
+        if (
+            Invoice.Validation &&
+            typeof Invoice.Validation.clearAllErrors ===
+                "function"
+        ) {
+
+            Invoice.Validation.clearAllErrors();
+
+        }
+
+
+        /*
+         * 保存データからの復元時は
+         * 自動保存を発生させない
+         */
+
+        cancelAutoSave();
 
 
         return true;
@@ -461,13 +609,24 @@ Invoice.Save = (() => {
         }
 
 
+        /*
+         * 保留中の自動保存を停止
+         */
+
+        cancelAutoSave();
+
+
+        /*
+         * LocalStorage削除
+         */
+
         COCOA.storageRemove(
             STORAGE_KEY
         );
 
 
         /*
-         * フォームを初期化
+         * フォーム初期化
          */
 
         if (
@@ -482,7 +641,7 @@ Invoice.Save = (() => {
 
 
         /*
-         * 明細を初期化
+         * 明細初期化
          */
 
         if (
@@ -492,6 +651,21 @@ Invoice.Save = (() => {
         ) {
 
             Invoice.Items.clear();
+
+        }
+
+
+        /*
+         * バリデーションエラー解除
+         */
+
+        if (
+            Invoice.Validation &&
+            typeof Invoice.Validation.clearAllErrors ===
+                "function"
+        ) {
+
+            Invoice.Validation.clearAllErrors();
 
         }
 
@@ -543,13 +717,53 @@ Invoice.Save = (() => {
 
         download(
             json,
-            FILE_NAME,
+            createFileName(data),
             "application/json;charset=utf-8"
         );
 
 
         notify(
             "JSONを保存しました。"
+        );
+
+
+        return true;
+
+    }
+
+
+    /**
+     * ======================================================
+     * JSONファイル名
+     * ======================================================
+     */
+
+    function createFileName(data) {
+
+        const documentData =
+            data?.document || {};
+
+
+        const type =
+            documentData.docType === "invoice"
+                ? "請求書"
+                : "見積書";
+
+
+        const docNo =
+            String(
+                documentData.docNo || ""
+            ).trim();
+
+
+        const safeDocNo =
+            docNo
+                ? "-" + sanitizeFileName(docNo)
+                : "";
+
+
+        return (
+            `COCOA-TOOLS-${type}${safeDocNo}.json`
         );
 
     }
@@ -564,11 +778,14 @@ Invoice.Save = (() => {
     function importJSON() {
 
         const input =
-            document.createElement("input");
+            document.createElement(
+                "input"
+            );
 
 
         input.type =
             "file";
+
 
         input.accept =
             ".json,application/json";
@@ -608,9 +825,7 @@ Invoice.Save = (() => {
 
 
                             if (
-                                !data ||
-                                typeof data !==
-                                    "object"
+                                !isValidData(data)
                             ) {
 
                                 throw new Error(
@@ -620,7 +835,18 @@ Invoice.Save = (() => {
                             }
 
 
-                            apply(data);
+                            const success =
+                                apply(data);
+
+
+                            if (!success) {
+
+                                throw new Error(
+                                    "データを適用できませんでした。"
+                                );
+
+                            }
+
 
                             save(false);
 
@@ -632,6 +858,7 @@ Invoice.Save = (() => {
                         } catch (error) {
 
                             console.error(
+                                "Invoice.Save.importJSON:",
                                 error
                             );
 
@@ -672,6 +899,24 @@ Invoice.Save = (() => {
 
     /**
      * ======================================================
+     * ファイル名安全化
+     * ======================================================
+     */
+
+    function sanitizeFileName(value) {
+
+        return String(value)
+            .replace(
+                /[\\/:*?"<>|]/g,
+                "_"
+            )
+            .slice(0, 80);
+
+    }
+
+
+    /**
+     * ======================================================
      * ダウンロード
      * ======================================================
      */
@@ -698,11 +943,14 @@ Invoice.Save = (() => {
 
 
         const link =
-            document.createElement("a");
+            document.createElement(
+                "a"
+            );
 
 
         link.href =
             url;
+
 
         link.download =
             fileName;
@@ -750,7 +998,9 @@ Invoice.Save = (() => {
                 "function"
         ) {
 
-            COCOA.toast(message);
+            COCOA.toast(
+                message
+            );
 
         }
 
@@ -772,6 +1022,8 @@ Invoice.Save = (() => {
         save,
 
         autoSave,
+
+        cancelAutoSave,
 
         load,
 
