@@ -36,9 +36,9 @@ Invoice.UI = (() => {
 
     /**
      * ======================================================
-     * ボタンイベント
+     * ボタン・入力イベント
      * ======================================================
-     */
+ */
 
     function bindButtons() {
 
@@ -50,9 +50,10 @@ Invoice.UI = (() => {
                  * 保存
                  */
 
-                if (
-                    e.target.closest("#saveBtn")
-                ) {
+                const saveButton =
+                    e.target.closest("#saveBtn");
+
+                if (saveButton) {
 
                     e.preventDefault();
 
@@ -67,9 +68,10 @@ Invoice.UI = (() => {
                  * JSON読込
                  */
 
-                if (
-                    e.target.closest("#loadBtn")
-                ) {
+                const loadButton =
+                    e.target.closest("#loadBtn");
+
+                if (loadButton) {
 
                     e.preventDefault();
 
@@ -84,13 +86,16 @@ Invoice.UI = (() => {
                  * リセット
                  */
 
-                if (
-                    e.target.closest("#resetBtn")
-                ) {
+                const resetButton =
+                    e.target.closest("#resetBtn");
+
+                if (resetButton) {
 
                     e.preventDefault();
 
                     reset();
+
+                    return;
 
                 }
 
@@ -99,28 +104,50 @@ Invoice.UI = (() => {
 
 
         /*
-         * フォーム入力時の自動保存
+         * ==================================================
+         * フォーム入力
+         * ==================================================
          */
 
         document.addEventListener(
             "input",
             function (e) {
 
-                if (
-                    e.target.closest("#invoiceForm")
-                ) {
+                const form =
+                    e.target.closest(
+                        "#invoiceForm"
+                    );
 
-                    if (
-                        Invoice.Save &&
-                        typeof Invoice.Save.autoSave ===
-                            "function"
-                    ) {
 
-                        Invoice.Save.autoSave();
+                if (!form) {
 
-                    }
+                    return;
 
                 }
+
+
+                /*
+                 * 数値入力の整形
+                 */
+
+                if (
+                    e.target.matches(
+                        'input[type="number"]'
+                    )
+                ) {
+
+                    formatNumberInput(
+                        e.target
+                    );
+
+                }
+
+
+                /*
+                 * 自動保存
+                 */
+
+                requestAutoSave();
 
             }
         );
@@ -131,23 +158,41 @@ Invoice.UI = (() => {
             function (e) {
 
                 if (
-                    e.target.closest("#invoiceForm")
+                    !e.target.closest(
+                        "#invoiceForm"
+                    )
                 ) {
 
-                    if (
-                        Invoice.Save &&
-                        typeof Invoice.Save.autoSave ===
-                            "function"
-                    ) {
-
-                        Invoice.Save.autoSave();
-
-                    }
+                    return;
 
                 }
 
+
+                requestAutoSave();
+
             }
         );
+
+    }
+
+
+    /**
+     * ======================================================
+     * 自動保存要求
+     * ======================================================
+     */
+
+    function requestAutoSave() {
+
+        if (
+            Invoice.Save &&
+            typeof Invoice.Save.autoSave ===
+                "function"
+        ) {
+
+            Invoice.Save.autoSave();
+
+        }
 
     }
 
@@ -161,33 +206,41 @@ Invoice.UI = (() => {
     function save() {
 
         if (
-            Invoice.Save &&
-            typeof Invoice.Save.save ===
+            !Invoice.Save ||
+            typeof Invoice.Save.save !==
                 "function"
         ) {
 
-            Invoice.Save.save();
+            notify(
+                "保存機能を利用できません。"
+            );
 
-            /*
-             * 履歴にも保存
-             */
-
-            if (
-                Invoice.History &&
-                typeof Invoice.History.add ===
-                    "function"
-            ) {
-
-                Invoice.History.add();
-
-            }
-
-            return true;
+            return false;
 
         }
 
 
-        return false;
+        const success =
+            Invoice.Save.save();
+
+
+        /*
+         * 保存成功時のみ履歴追加
+         */
+
+        if (
+            success &&
+            Invoice.History &&
+            typeof Invoice.History.add ===
+                "function"
+        ) {
+
+            Invoice.History.add();
+
+        }
+
+
+        return success;
 
     }
 
@@ -211,6 +264,11 @@ Invoice.UI = (() => {
             return true;
 
         }
+
+
+        notify(
+            "JSON読込機能を利用できません。"
+        );
 
 
         return false;
@@ -237,6 +295,11 @@ Invoice.UI = (() => {
         }
 
 
+        notify(
+            "リセット機能を利用できません。"
+        );
+
+
         return false;
 
     }
@@ -257,21 +320,66 @@ Invoice.UI = (() => {
         }
 
 
+        /*
+         * type="number" の input では
+         * ブラウザ側の値管理を優先する。
+         *
+         * 不正な文字列を無理に書き換えると
+         * IMEや小数入力の途中状態を壊すため、
+         * 基本的にはここでは整形しない。
+         */
+
+        if (
+            element.type === "number"
+        ) {
+
+            return;
+
+        }
+
+
         const value =
             String(
                 element.value || ""
             );
 
 
-        /*
-         * 数字・小数点・マイナス以外を除去
-         */
-
         element.value =
             value.replace(
                 /[^0-9.-]/g,
                 ""
             );
+
+    }
+
+
+    /**
+     * ======================================================
+     * 通知
+     * ======================================================
+     */
+
+    function notify(message) {
+
+        if (
+            window.COCOA &&
+            typeof COCOA.toast ===
+                "function"
+        ) {
+
+            COCOA.toast(
+                message
+            );
+
+            return;
+
+        }
+
+
+        console.warn(
+            "Invoice.UI:",
+            message
+        );
 
     }
 
