@@ -38,7 +38,7 @@ Invoice.Print = (() => {
      * ======================================================
      * イベント
      * ======================================================
-     */
+ */
 
     function bind() {
 
@@ -112,22 +112,26 @@ Invoice.Print = (() => {
 
 
         /*
-         * 印刷用HTML生成
+         * 印刷HTML生成
          */
 
-        let html = "";
-
-
         if (
-            Invoice.Template &&
-            typeof Invoice.Template.renderCurrent ===
+            !Invoice.Template ||
+            typeof Invoice.Template.renderCurrent !==
                 "function"
         ) {
 
-            html =
-                Invoice.Template.renderCurrent();
+            notify(
+                "印刷テンプレートを利用できません。"
+            );
+
+            return false;
 
         }
+
+
+        const html =
+            Invoice.Template.renderCurrent();
 
 
         if (!html) {
@@ -142,7 +146,10 @@ Invoice.Print = (() => {
 
 
         /*
-         * ポップアップウィンドウ
+         * 印刷ウィンドウを開く
+         *
+         * ユーザークリック直後に開くことで
+         * ポップアップブロックを受けにくくする。
          */
 
         const printWindow =
@@ -156,7 +163,7 @@ Invoice.Print = (() => {
         if (!printWindow) {
 
             notify(
-                "印刷画面を開けませんでした。ブラウザのポップアップを許可してください。"
+                "印刷画面を開けませんでした。ブラウザのポップアップ設定を確認してください。"
             );
 
             return false;
@@ -165,15 +172,16 @@ Invoice.Print = (() => {
 
 
         /*
-         * 印刷ウィンドウのHTMLを書き込む
+         * 印刷HTML生成
          */
 
-        printWindow.document.open();
+        const title =
+            escapeHTML(
+                getDocumentTitle()
+            );
 
 
-        printWindow.document.write(`
-
-<!DOCTYPE html>
+        const printHTML = `<!DOCTYPE html>
 
 <html lang="ja">
 
@@ -185,10 +193,7 @@ Invoice.Print = (() => {
     name="viewport"
     content="width=device-width, initial-scale=1.0">
 
-<title>
-    ${escapeHTML(getDocumentTitle())}
-</title>
-
+<title>${title}</title>
 
 <style>
 
@@ -262,6 +267,13 @@ Invoice.Print = (() => {
     }
 
 
+    .invoice-document * {
+
+        box-sizing: border-box;
+
+    }
+
+
     .invoice-document table {
 
         width: 100%;
@@ -272,6 +284,8 @@ Invoice.Print = (() => {
     .invoice-document tr {
 
         page-break-inside: avoid;
+
+        break-inside: avoid;
 
     }
 
@@ -313,9 +327,38 @@ Invoice.Print = (() => {
     }
 
 
-    .no-print {
+    .invoice-document .invoice-total {
 
-        display: none !important;
+        page-break-inside: avoid;
+
+        break-inside: avoid;
+
+    }
+
+
+    .invoice-document .invoice-company {
+
+        page-break-inside: avoid;
+
+        break-inside: avoid;
+
+    }
+
+
+    .invoice-document .invoice-bank {
+
+        page-break-inside: avoid;
+
+        break-inside: avoid;
+
+    }
+
+
+    .invoice-document .invoice-memo {
+
+        page-break-inside: avoid;
+
+        break-inside: avoid;
 
     }
 
@@ -342,6 +385,8 @@ Invoice.Print = (() => {
 
             min-height: 297mm;
 
+            max-width: none !important;
+
             margin: 0 !important;
 
             padding: 15mm !important;
@@ -354,74 +399,89 @@ Invoice.Print = (() => {
 
 </head>
 
-
 <body>
 
 ${html}
 
-</body>
+<script>
 
-</html>
-
-        `);
-
-
-        /*
-         * 重要
-         *
-         * document.write() 完了後に
-         * print() を確実に実行する。
-         */
-
-        printWindow.document.close();
-
-
-        /*
-         * 描画完了待ち
-         *
-         * onloadだけに依存しない。
-         */
+window.addEventListener(
+    "load",
+    function () {
 
         setTimeout(
-
             function () {
 
-                try {
+                window.focus();
 
-                    if (
-                        printWindow.closed
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    printWindow.focus();
-
-
-                    printWindow.print();
-
-
-                } catch (error) {
-
-                    console.error(
-                        "Invoice.Print:",
-                        error
-                    );
-
-
-                    notify(
-                        "印刷を開始できませんでした。"
-                    );
-
-                }
+                window.print();
 
             },
-
-            500
-
+            150
         );
+
+    }
+);
+
+window.addEventListener(
+    "afterprint",
+    function () {
+
+        setTimeout(
+            function () {
+
+                window.close();
+
+            },
+            300
+        );
+
+    }
+);
+
+<\/script>
+
+</body>
+
+</html>`;
+
+
+        /*
+         * ウィンドウへ書き込み
+         */
+
+        try {
+
+            printWindow.document.open();
+
+            printWindow.document.write(
+                printHTML
+            );
+
+            printWindow.document.close();
+
+        } catch (error) {
+
+            console.error(
+                "Invoice.Print.write:",
+                error
+            );
+
+
+            try {
+
+                printWindow.close();
+
+            } catch (_) {}
+
+
+            notify(
+                "印刷画面の生成に失敗しました。"
+            );
+
+            return false;
+
+        }
 
 
         return true;
@@ -521,9 +581,19 @@ ${html}
                 "function"
         ) {
 
-            COCOA.toast(message);
+            COCOA.toast(
+                message
+            );
+
+            return;
 
         }
+
+
+        console.warn(
+            "Invoice.Print:",
+            message
+        );
 
     }
 
@@ -532,7 +602,7 @@ ${html}
      * ======================================================
      * 公開API
      * ======================================================
-     */
+ */
 
     return {
 
