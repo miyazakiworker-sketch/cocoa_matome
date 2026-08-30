@@ -3,7 +3,7 @@
 * ==========================================================
 * COCOA TOOLS v2.0
 * js/save.js
-* LocalStorage保存・復元
+* LocalStorage保存・復元・JSON入出力
 * ==========================================================
   */
 
@@ -19,6 +19,8 @@ const STORAGE_KEY =
 let initialized = false;
 
 let saveTimer = null;
+
+let applying = false;
 
 
 /**
@@ -37,6 +39,109 @@ function init() {
 
     initialized = true;
 
+    bindAutoSave();
+
+}
+
+
+/**
+ * ======================================================
+ * 自動保存イベント登録
+ * ======================================================
+ */
+
+function bindAutoSave() {
+
+    /*
+     * 通常フォーム入力
+     */
+
+    document.addEventListener(
+        "input",
+        function (e) {
+
+            if (applying) {
+
+                return;
+
+            }
+
+
+            const target =
+                e.target;
+
+
+            if (
+                !target ||
+                !target.closest("#invoiceForm")
+            ) {
+
+                return;
+
+            }
+
+
+            autoSave();
+
+        }
+    );
+
+
+    /*
+     * select変更
+     */
+
+    document.addEventListener(
+        "change",
+        function (e) {
+
+            if (applying) {
+
+                return;
+
+            }
+
+
+            const target =
+                e.target;
+
+
+            if (
+                !target ||
+                !target.closest("#invoiceForm")
+            ) {
+
+                return;
+
+            }
+
+
+            autoSave();
+
+        }
+    );
+
+
+    /*
+     * 明細変更
+     */
+
+    document.addEventListener(
+        "invoice:items-change",
+        function () {
+
+            if (applying) {
+
+                return;
+
+            }
+
+
+            autoSave();
+
+        }
+    );
+
 }
 
 
@@ -48,17 +153,20 @@ function init() {
 
 function collect() {
 
-    const getValue = function (id) {
+    const getValue =
+        function (id) {
 
-        const element =
-            COCOA.id(id);
+            const element =
+                COCOA.id(id);
 
 
-        return element
-            ? String(element.value ?? "")
-            : "";
+            return element
+                ? String(
+                    element.value ?? ""
+                )
+                : "";
 
-    };
+        };
 
 
     const calc =
@@ -71,11 +179,17 @@ function collect() {
             : {
 
                 subtotal: 0,
+
                 discount: 0,
+
                 shipping: 0,
+
                 taxable: 0,
+
                 taxRate: 10,
+
                 tax: 0,
+
                 total: 0
 
             };
@@ -162,11 +276,18 @@ function collect() {
 
 /**
  * ======================================================
- * LocalStorage 保存
+ * 保存
  * ======================================================
  */
 
 function save(showMessage = true) {
+
+    if (applying) {
+
+        return false;
+
+    }
+
 
     const data =
         collect();
@@ -204,9 +325,14 @@ function save(showMessage = true) {
 
 function autoSave() {
 
-    clearTimeout(
-        saveTimer
-    );
+    if (applying) {
+
+        return;
+
+    }
+
+
+    cancelAutoSave();
 
 
     saveTimer =
@@ -216,7 +342,12 @@ function autoSave() {
 
                 saveTimer = null;
 
-                save(false);
+
+                if (!applying) {
+
+                    save(false);
+
+                }
 
             },
 
@@ -250,11 +381,14 @@ function cancelAutoSave() {
 
 /**
  * ======================================================
- * LocalStorage 読み込み
+ * 読み込み
  * ======================================================
  */
 
 function load(showMessage = false) {
+
+    cancelAutoSave();
+
 
     const data =
         COCOA.storageGet(
@@ -323,12 +457,13 @@ function isValidData(data) {
 
 
     /*
-     * document が存在する新形式
+     * 新形式
      */
 
     if (
         data.document &&
-        typeof data.document === "object"
+        typeof data.document === "object" &&
+        !Array.isArray(data.document)
     ) {
 
         return true;
@@ -337,13 +472,15 @@ function isValidData(data) {
 
 
     /*
-     * 旧形式・簡易形式も許可
+     * 旧形式・簡易形式
      */
 
     return (
 
         "docType" in data ||
+
         "client" in data ||
+
         "subject" in data
 
     );
@@ -368,188 +505,243 @@ function apply(data) {
     }
 
 
-    const documentData =
-        data.document &&
-        typeof data.document === "object"
-
-            ? data.document
-
-            : data;
-
-
-    /*
-     * 書類情報
-     */
-
-    setValue(
-        "docType",
-        documentData.docType
-    );
-
-    setValue(
-        "docNo",
-        documentData.docNo
-    );
-
-    setValue(
-        "issueDate",
-        documentData.issueDate
-    );
-
-    setValue(
-        "dueDate",
-        documentData.dueDate
-    );
-
-    setValue(
-        "client",
-        documentData.client
-    );
-
-    setValue(
-        "subject",
-        documentData.subject
-    );
-
-
-    /*
-     * 発行者情報
-     */
-
-    setValue(
-        "company",
-        documentData.company
-    );
-
-    setValue(
-        "address",
-        documentData.address
-    );
-
-    setValue(
-        "tel",
-        documentData.tel
-    );
-
-    setValue(
-        "mail",
-        documentData.mail
-    );
-
-
-    /*
-     * その他
-     */
-
-    setValue(
-        "bank",
-        documentData.bank
-    );
-
-    setValue(
-        "memo",
-        documentData.memo
-    );
-
-
-    /*
-     * 税率
-     */
-
-    if (
-        documentData.taxRate !== undefined &&
-        documentData.taxRate !== null
-    ) {
-
-        setValue(
-            "taxRate",
-            documentData.taxRate
-        );
-
-    }
-
-
-    /*
-     * 値引き
-     */
-
-    setValue(
-        "discount",
-        documentData.discount !== undefined
-            ? documentData.discount
-            : 0
-    );
-
-
-    /*
-     * 送料・諸経費
-     */
-
-    setValue(
-        "shipping",
-        documentData.shipping !== undefined
-            ? documentData.shipping
-            : 0
-    );
-
-
-    /*
-     * 明細復元
-     */
-
-    if (
-        Array.isArray(data.items) &&
-        Invoice.Items &&
-        typeof Invoice.Items.setData ===
-            "function"
-    ) {
-
-        Invoice.Items.setData(
-            data.items
-        );
-
-    }
-
-
-    /*
-     * 再計算
-     */
-
-    if (
-        Invoice.Calc &&
-        typeof Invoice.Calc.update ===
-            "function"
-    ) {
-
-        Invoice.Calc.update();
-
-    }
-
-
-    /*
-     * エラー表示解除
-     */
-
-    if (
-        Invoice.Validation &&
-        typeof Invoice.Validation.clearAllErrors ===
-            "function"
-    ) {
-
-        Invoice.Validation.clearAllErrors();
-
-    }
-
-
-    /*
-     * 保存データからの復元時は
-     * 自動保存を発生させない
-     */
-
     cancelAutoSave();
 
 
-    return true;
+    applying = true;
+
+
+    try {
+
+
+        const documentData =
+
+            data.document &&
+            typeof data.document ===
+                "object"
+
+                ? data.document
+
+                : data;
+
+
+        /*
+         * 書類情報
+         */
+
+        setValue(
+            "docType",
+            documentData.docType
+        );
+
+        setValue(
+            "docNo",
+            documentData.docNo
+        );
+
+        setValue(
+            "issueDate",
+            documentData.issueDate
+        );
+
+        setValue(
+            "dueDate",
+            documentData.dueDate
+        );
+
+        setValue(
+            "client",
+            documentData.client
+        );
+
+        setValue(
+            "subject",
+            documentData.subject
+        );
+
+
+        /*
+         * 発行者情報
+         */
+
+        setValue(
+            "company",
+            documentData.company
+        );
+
+        setValue(
+            "address",
+            documentData.address
+        );
+
+        setValue(
+            "tel",
+            documentData.tel
+        );
+
+        setValue(
+            "mail",
+            documentData.mail
+        );
+
+
+        /*
+         * その他
+         */
+
+        setValue(
+            "bank",
+            documentData.bank
+        );
+
+        setValue(
+            "memo",
+            documentData.memo
+        );
+
+
+        /*
+         * 税率
+         */
+
+        if (
+            documentData.taxRate !==
+                undefined &&
+            documentData.taxRate !==
+                null
+        ) {
+
+            setValue(
+                "taxRate",
+                documentData.taxRate
+            );
+
+        }
+
+
+        /*
+         * 値引き
+         */
+
+        setValue(
+            "discount",
+
+            documentData.discount !==
+                undefined
+
+                ? documentData.discount
+
+                : 0
+        );
+
+
+        /*
+         * 送料・諸経費
+         */
+
+        setValue(
+            "shipping",
+
+            documentData.shipping !==
+                undefined
+
+                ? documentData.shipping
+
+                : 0
+        );
+
+
+        /*
+         * 明細復元
+         */
+
+        if (
+            Array.isArray(data.items) &&
+            Invoice.Items &&
+            typeof Invoice.Items.setData ===
+                "function"
+        ) {
+
+            Invoice.Items.setData(
+                data.items
+            );
+
+        }
+
+
+        /*
+         * 明細が存在しない旧データの場合
+         */
+
+        else if (
+
+            Invoice.Items &&
+            typeof Invoice.Items.clear ===
+                "function"
+
+        ) {
+
+            Invoice.Items.clear();
+
+        }
+
+
+        /*
+         * 再計算
+         */
+
+        if (
+            Invoice.Calc &&
+            typeof Invoice.Calc.update ===
+                "function"
+        ) {
+
+            Invoice.Calc.update();
+
+        }
+
+
+        /*
+         * バリデーション解除
+         */
+
+        if (
+            Invoice.Validation &&
+            typeof Invoice.Validation.clearAllErrors ===
+                "function"
+        ) {
+
+            Invoice.Validation.clearAllErrors();
+
+        }
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "Invoice.Save.apply:",
+            error
+        );
+
+
+        return false;
+
+
+    } finally {
+
+
+        /*
+         * 復元完了後に解除
+         */
+
+        applying = false;
+
+        cancelAutoSave();
+
+    }
 
 }
 
@@ -613,78 +805,87 @@ function reset() {
     }
 
 
-    /*
-     * 保留中の自動保存を停止
-     */
-
     cancelAutoSave();
 
 
-    /*
-     * LocalStorage削除
-     */
-
-    COCOA.storageRemove(
-        STORAGE_KEY
-    );
+    applying = true;
 
 
-    /*
-     * フォーム初期化
-     */
-
-    if (
-        Invoice.Form &&
-        typeof Invoice.Form.create ===
-            "function"
-    ) {
-
-        Invoice.Form.create();
-
-    }
+    try {
 
 
-    /*
-     * 明細初期化
-     */
+        /*
+         * LocalStorage削除
+         */
 
-    if (
-        Invoice.Items &&
-        typeof Invoice.Items.clear ===
-            "function"
-    ) {
-
-        Invoice.Items.clear();
-
-    }
+        COCOA.storageRemove(
+            STORAGE_KEY
+        );
 
 
-    /*
-     * バリデーションエラー解除
-     */
+        /*
+         * フォーム初期化
+         */
 
-    if (
-        Invoice.Validation &&
-        typeof Invoice.Validation.clearAllErrors ===
-            "function"
-    ) {
+        if (
+            Invoice.Form &&
+            typeof Invoice.Form.create ===
+                "function"
+        ) {
 
-        Invoice.Validation.clearAllErrors();
+            Invoice.Form.create();
 
-    }
+        }
 
 
-    /*
-     * 再計算
-     */
+        /*
+         * 明細初期化
+         */
 
-    if (
-        Invoice.Calc &&
-        typeof Invoice.Calc.update ===
-            "function"
-    ) {
+        if (
+            Invoice.Items &&
+            typeof Invoice.Items.clear ===
+                "function"
+        ) {
 
-        Invoice.Calc.update();
+            Invoice.Items.clear();
+
+        }
+
+
+        /*
+         * バリデーション解除
+         */
+
+        if (
+            Invoice.Validation &&
+            typeof Invoice.Validation.clearAllErrors ===
+                "function"
+        ) {
+
+            Invoice.Validation.clearAllErrors();
+
+        }
+
+
+        /*
+         * 再計算
+         */
+
+        if (
+            Invoice.Calc &&
+            typeof Invoice.Calc.update ===
+                "function"
+        ) {
+
+            Invoice.Calc.update();
+
+        }
+
+
+    } finally {
+
+        applying = false;
 
     }
 
@@ -695,6 +896,312 @@ function reset() {
 
 
     return true;
+
+}
+
+
+/**
+ * ======================================================
+ * JSON書き出し
+ * ======================================================
+ */
+
+function exportJSON() {
+
+    const data =
+        collect();
+
+
+    const json =
+        JSON.stringify(
+            data,
+            null,
+            2
+        );
+
+
+    download(
+        json,
+        createFileName(data),
+        "application/json;charset=utf-8"
+    );
+
+
+    notify(
+        "JSONを保存しました。"
+    );
+
+
+    return true;
+
+}
+
+
+/**
+ * ======================================================
+ * JSONファイル名
+ * ======================================================
+ */
+
+function createFileName(data) {
+
+    const documentData =
+        data?.document || {};
+
+
+    const type =
+        documentData.docType ===
+            "invoice"
+
+            ? "請求書"
+
+            : "見積書";
+
+
+    const docNo =
+        String(
+            documentData.docNo || ""
+        ).trim();
+
+
+    const safeDocNo =
+        docNo
+
+            ? "-" +
+                sanitizeFileName(docNo)
+
+            : "";
+
+
+    return (
+        `COCOA-TOOLS-${type}${safeDocNo}.json`
+    );
+
+}
+
+
+/**
+ * ======================================================
+ * JSON読み込み
+ * ======================================================
+ */
+
+function importJSON() {
+
+    const input =
+        document.createElement(
+            "input"
+        );
+
+
+    input.type =
+        "file";
+
+
+    input.accept =
+        ".json,application/json";
+
+
+    input.addEventListener(
+
+        "change",
+
+        function () {
+
+            const file =
+                input.files &&
+                input.files[0];
+
+
+            if (!file) {
+
+                return;
+
+            }
+
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload =
+                function () {
+
+                    try {
+
+                        const data =
+                            JSON.parse(
+                                reader.result
+                            );
+
+
+                        if (
+                            !isValidData(data)
+                        ) {
+
+                            throw new Error(
+                                "JSON形式が不正です。"
+                            );
+
+                        }
+
+
+                        const success =
+                            apply(data);
+
+
+                        if (!success) {
+
+                            throw new Error(
+                                "データを適用できませんでした。"
+                            );
+
+                        }
+
+
+                        /*
+                         * 読み込み成功後、
+                         * LocalStorageにも保存
+                         */
+
+                        save(false);
+
+
+                        notify(
+                            "JSONを読み込みました。"
+                        );
+
+
+                    } catch (error) {
+
+                        console.error(
+                            "Invoice.Save.importJSON:",
+                            error
+                        );
+
+
+                        notify(
+                            "JSONを読み込めませんでした。"
+                        );
+
+                    }
+
+                };
+
+
+            reader.onerror =
+                function () {
+
+                    notify(
+                        "ファイルの読み込みに失敗しました。"
+                    );
+
+                };
+
+
+            reader.readAsText(
+                file,
+                "utf-8"
+            );
+
+        }
+
+    );
+
+
+    input.click();
+
+}
+
+
+/**
+ * ======================================================
+ * ファイル名安全化
+ * ======================================================
+ */
+
+function sanitizeFileName(value) {
+
+    return String(value)
+
+        .replace(
+            /[\\/:*?"<>|]/g,
+            "_"
+        )
+
+        .slice(
+            0,
+            80
+        );
+
+}
+
+
+/**
+ * ======================================================
+ * ダウンロード
+ * ======================================================
+ */
+
+function download(
+    content,
+    fileName,
+    mimeType
+) {
+
+    const blob =
+        new Blob(
+            [content],
+            {
+                type: mimeType
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        url;
+
+
+    link.download =
+        fileName;
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    link.remove();
+
+
+    setTimeout(
+
+        function () {
+
+            URL.revokeObjectURL(
+                url
+            );
+
+        },
+
+        1000
+
+    );
 
 }
 
@@ -744,7 +1251,11 @@ return {
 
     apply,
 
-    reset
+    reset,
+
+    exportJSON,
+
+    importJSON
 
 };
 ```
