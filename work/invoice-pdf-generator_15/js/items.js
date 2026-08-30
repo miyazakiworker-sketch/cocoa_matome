@@ -149,33 +149,35 @@ Invoice.Items = (() => {
      * ======================================================
      */
 
-    function add(item = {}) {
+   function add(
+    item = {},
+    shouldFocus = true
+) {
 
-        items.push(
-            normalizeItem(item)
-        );
+    items.push(
+        normalizeItem(item)
+    );
+
+    render();
 
 
-        render();
+    /*
+     * ユーザー操作による追加時のみ
+     * 新しい行へフォーカス
+     */
 
-
-        /*
-         * 新しい行にフォーカス
-         */
+    if (shouldFocus) {
 
         const body =
             COCOA.id("itemBody");
-
 
         if (body) {
 
             const rows =
                 body.querySelectorAll("tr");
 
-
             const lastRow =
                 rows[rows.length - 1];
-
 
             if (lastRow) {
 
@@ -183,7 +185,6 @@ Invoice.Items = (() => {
                     lastRow.querySelector(
                         '[data-field="name"]'
                     );
-
 
                 if (input) {
 
@@ -195,10 +196,12 @@ Invoice.Items = (() => {
 
         }
 
-
-        notifyChange();
-
     }
+
+
+    notifyChange();
+
+}
 
 
     /**
