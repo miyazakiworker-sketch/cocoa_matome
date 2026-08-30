@@ -38,7 +38,7 @@ Invoice.Print = (() => {
      * ======================================================
      * イベント
      * ======================================================
- */
+     */
 
     function bind() {
 
@@ -59,7 +59,34 @@ Invoice.Print = (() => {
 
                 e.preventDefault();
 
-                print();
+
+                /*
+                 * クリック直後に
+                 * 印刷ウィンドウを確保
+                 */
+
+                const printWindow =
+                    window.open(
+                        "",
+                        "_blank",
+                        "width=900,height=1000"
+                    );
+
+
+                if (!printWindow) {
+
+                    notify(
+                        "印刷画面を開けませんでした。ブラウザのポップアップ設定を確認してください。"
+                    );
+
+                    return;
+
+                }
+
+
+                print(
+                    printWindow
+                );
 
             }
         );
@@ -73,7 +100,7 @@ Invoice.Print = (() => {
      * ======================================================
      */
 
-    function print() {
+    function print(printWindow = null) {
 
         /*
          * 入力チェック
@@ -88,6 +115,12 @@ Invoice.Print = (() => {
             if (
                 !Invoice.Validation.check()
             ) {
+
+                if (printWindow) {
+
+                    printWindow.close();
+
+                }
 
                 return false;
 
@@ -112,7 +145,7 @@ Invoice.Print = (() => {
 
 
         /*
-         * 印刷HTML生成
+         * 印刷テンプレート確認
          */
 
         if (
@@ -120,6 +153,13 @@ Invoice.Print = (() => {
             typeof Invoice.Template.renderCurrent !==
                 "function"
         ) {
+
+            if (printWindow) {
+
+                printWindow.close();
+
+            }
+
 
             notify(
                 "印刷テンプレートを利用できません。"
@@ -130,11 +170,22 @@ Invoice.Print = (() => {
         }
 
 
+        /*
+         * 印刷HTML生成
+         */
+
         const html =
             Invoice.Template.renderCurrent();
 
 
         if (!html) {
+
+            if (printWindow) {
+
+                printWindow.close();
+
+            }
+
 
             notify(
                 "印刷データを生成できませんでした。"
@@ -146,18 +197,19 @@ Invoice.Print = (() => {
 
 
         /*
-         * 印刷ウィンドウを開く
-         *
-         * ユーザークリック直後に開くことで
-         * ポップアップブロックを受けにくくする。
+         * 印刷ウィンドウがない場合
          */
 
-        const printWindow =
-            window.open(
-                "",
-                "_blank",
-                "width=900,height=1000"
-            );
+        if (!printWindow) {
+
+            printWindow =
+                window.open(
+                    "",
+                    "_blank",
+                    "width=900,height=1000"
+                );
+
+        }
 
 
         if (!printWindow) {
@@ -172,7 +224,7 @@ Invoice.Print = (() => {
 
 
         /*
-         * 印刷HTML生成
+         * 書類タイトル
          */
 
         const title =
@@ -180,6 +232,12 @@ Invoice.Print = (() => {
                 getDocumentTitle()
             );
 
+
+        /*
+         * ==================================================
+         * 印刷HTML
+         * ==================================================
+         */
 
         const printHTML = `<!DOCTYPE html>
 
@@ -194,6 +252,7 @@ Invoice.Print = (() => {
     content="width=device-width, initial-scale=1.0">
 
 <title>${title}</title>
+
 
 <style>
 
@@ -217,7 +276,7 @@ Invoice.Print = (() => {
 
         min-height: 297mm;
 
-        background: #fff;
+        background: #ffffff;
 
     }
 
@@ -231,12 +290,16 @@ Invoice.Print = (() => {
 
     body {
 
-        color: #111;
+        color: #111111;
 
         font-family:
+
             -apple-system,
+
             BlinkMacSystemFont,
+
             "Segoe UI",
+
             sans-serif;
 
     }
@@ -254,15 +317,9 @@ Invoice.Print = (() => {
 
         padding: 15mm !important;
 
-        background: #fff !important;
+        background: #ffffff !important;
 
-        color: #111 !important;
-
-        font-family:
-            -apple-system,
-            BlinkMacSystemFont,
-            "Segoe UI",
-            sans-serif;
+        color: #111111 !important;
 
     }
 
@@ -322,7 +379,7 @@ Invoice.Print = (() => {
     .invoice-document .invoice-items th,
     .invoice-document .invoice-items td {
 
-        border: 1px solid #ccc;
+        border: 1px solid #cccccc;
 
     }
 
@@ -399,17 +456,22 @@ Invoice.Print = (() => {
 
 </head>
 
+
 <body>
 
 ${html}
 
+
 <script>
 
 window.addEventListener(
+
     "load",
+
     function () {
 
         setTimeout(
+
             function () {
 
                 window.focus();
@@ -417,29 +479,40 @@ window.addEventListener(
                 window.print();
 
             },
-            150
+
+            300
+
         );
 
     }
+
 );
 
+
 window.addEventListener(
+
     "afterprint",
+
     function () {
 
         setTimeout(
+
             function () {
 
                 window.close();
 
             },
-            300
+
+            500
+
         );
 
     }
+
 );
 
 <\/script>
+
 
 </body>
 
@@ -447,7 +520,9 @@ window.addEventListener(
 
 
         /*
-         * ウィンドウへ書き込み
+         * ==================================================
+         * 印刷ウィンドウへ書き込み
+         * ==================================================
          */
 
         try {
@@ -602,7 +677,7 @@ window.addEventListener(
      * ======================================================
      * 公開API
      * ======================================================
- */
+     */
 
     return {
 
