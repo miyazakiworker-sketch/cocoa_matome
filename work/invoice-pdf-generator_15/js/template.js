@@ -783,13 +783,13 @@ Invoice.Template = (() => {
                         documentData.address
                             ? `
 
-                                <div>
+                               <div style="white-space: pre-line;">
 
-                                    ${COCOA.escapeHTML(
-                                        documentData.address
-                                    )}
+    ${COCOA.escapeHTML(
+        documentData.address
+    )}
 
-                                </div>
+</div>
 
                             `
                             : ""
