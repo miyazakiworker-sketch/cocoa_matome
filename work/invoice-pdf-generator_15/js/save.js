@@ -499,7 +499,9 @@ Invoice.Save = (() => {
 
 
         /*
+         * ==================================================
          * 現行形式
+         * ==================================================
          */
 
         if (
@@ -511,13 +513,46 @@ Invoice.Save = (() => {
             )
         ) {
 
-            return true;
+            const documentData =
+                data.document;
+
+
+            /*
+             * 完全に空の
+             * document:{} は拒否
+             *
+             * ただし通常の保存データでは
+             * docType等の文字列、
+             * またはitems配列が存在する。
+             */
+
+            return (
+
+                typeof documentData.docType ===
+                    "string" ||
+
+                typeof documentData.client ===
+                    "string" ||
+
+                typeof documentData.subject ===
+                    "string" ||
+
+                typeof documentData.company ===
+                    "string" ||
+
+                Array.isArray(
+                    data.items
+                )
+
+            );
 
         }
 
 
         /*
+         * ==================================================
          * 旧形式互換
+         * ==================================================
          */
 
         return (
@@ -526,7 +561,13 @@ Invoice.Save = (() => {
 
             "client" in data ||
 
-            "subject" in data
+            "subject" in data ||
+
+            "company" in data ||
+
+            Array.isArray(
+                data.items
+            )
 
         );
 
