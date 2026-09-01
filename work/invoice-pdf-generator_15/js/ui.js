@@ -36,9 +36,9 @@ Invoice.UI = (() => {
 
     /**
      * ======================================================
-     * ボタン・入力イベント
+     * ボタンイベント
      * ======================================================
- */
+     */
 
     function bindButtons() {
 
@@ -46,12 +46,18 @@ Invoice.UI = (() => {
             "click",
             function (e) {
 
+
                 /*
+                 * ==================================================
                  * 保存
+                 * ==================================================
                  */
 
                 const saveButton =
-                    e.target.closest("#saveBtn");
+                    e.target.closest(
+                        "#saveBtn"
+                    );
+
 
                 if (saveButton) {
 
@@ -65,29 +71,16 @@ Invoice.UI = (() => {
 
 
                 /*
-                 * JSON読込
-                 */
-
-                const loadButton =
-                    e.target.closest("#loadBtn");
-
-                if (loadButton) {
-
-                    e.preventDefault();
-
-                    load();
-
-                    return;
-
-                }
-
-
-                /*
+                 * ==================================================
                  * リセット
+                 * ==================================================
                  */
 
                 const resetButton =
-                    e.target.closest("#resetBtn");
+                    e.target.closest(
+                        "#resetBtn"
+                    );
+
 
                 if (resetButton) {
 
@@ -101,98 +94,6 @@ Invoice.UI = (() => {
 
             }
         );
-
-
-        /*
-         * ==================================================
-         * フォーム入力
-         * ==================================================
-         */
-
-        document.addEventListener(
-            "input",
-            function (e) {
-
-                const form =
-                    e.target.closest(
-                        "#invoiceForm"
-                    );
-
-
-                if (!form) {
-
-                    return;
-
-                }
-
-
-                /*
-                 * 数値入力の整形
-                 */
-
-                if (
-                    e.target.matches(
-                        'input[type="number"]'
-                    )
-                ) {
-
-                    formatNumberInput(
-                        e.target
-                    );
-
-                }
-
-
-                /*
-                 * 自動保存
-                 */
-
-                requestAutoSave();
-
-            }
-        );
-
-
-        document.addEventListener(
-            "change",
-            function (e) {
-
-                if (
-                    !e.target.closest(
-                        "#invoiceForm"
-                    )
-                ) {
-
-                    return;
-
-                }
-
-
-                requestAutoSave();
-
-            }
-        );
-
-    }
-
-
-    /**
-     * ======================================================
-     * 自動保存要求
-     * ======================================================
-     */
-
-    function requestAutoSave() {
-
-        if (
-            Invoice.Save &&
-            typeof Invoice.Save.autoSave ===
-                "function"
-        ) {
-
-            Invoice.Save.autoSave();
-
-        }
 
     }
 
@@ -225,7 +126,9 @@ Invoice.UI = (() => {
 
 
         /*
+         * ==================================================
          * 保存成功時のみ履歴追加
+         * ==================================================
          */
 
         if (
@@ -248,6 +151,11 @@ Invoice.UI = (() => {
     /**
      * ======================================================
      * JSON読込
+     *
+     * JSON読込ボタンのイベント処理は
+     * Invoice.Export が担当する。
+     *
+     * この関数は外部から呼び出す場合のみ残す。
      * ======================================================
      */
 
@@ -308,6 +216,9 @@ Invoice.UI = (() => {
     /**
      * ======================================================
      * 数値入力の整形
+     *
+     * 現在は type="number" のブラウザ標準動作を
+     * 壊さないため基本的に値変更しない。
      * ======================================================
      */
 
@@ -319,15 +230,6 @@ Invoice.UI = (() => {
 
         }
 
-
-        /*
-         * type="number" の input では
-         * ブラウザ側の値管理を優先する。
-         *
-         * 不正な文字列を無理に書き換えると
-         * IMEや小数入力の途中状態を壊すため、
-         * 基本的にはここでは整形しない。
-         */
 
         if (
             element.type === "number"
