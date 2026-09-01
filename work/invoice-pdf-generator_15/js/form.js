@@ -11,17 +11,20 @@ window.Invoice = window.Invoice || {};
 Invoice.Form = (() => {
 
     /**
+     * ======================================================
      * フォーム生成
+     * ======================================================
      */
+
     function create() {
 
         const root =
-
             COCOA.id("invoiceForm");
+
 
         if (!root) {
 
-            return;
+            return false;
 
         }
 
@@ -331,7 +334,9 @@ Invoice.Form = (() => {
                         <option
                             value="10"
                             selected>
+
                             10%
+
                         </option>
 
                     </select>
@@ -390,67 +395,71 @@ Invoice.Form = (() => {
 
         initDefault();
 
+
+        return true;
+
     }
 
 
     /**
+     * ======================================================
      * 初期値
+     * ======================================================
      */
+
     function initDefault() {
 
-        const today =
-
-            COCOA.today();
-
-
         const issue =
-
             COCOA.id("issueDate");
 
 
         const due =
-
             COCOA.id("dueDate");
 
 
+        /*
+         * ==================================================
+         * 発行日
+         * ==================================================
+         */
+
         if (
-
             issue &&
-
             !issue.value
-
         ) {
 
-            issue.value = today;
+            issue.value =
+                getLocalDateString(
+                    new Date()
+                );
 
         }
 
 
+        /*
+         * ==================================================
+         * 支払期限
+         * ==================================================
+         */
+
         if (
-
             due &&
-
             !due.value
-
         ) {
 
             const date =
-
                 new Date();
 
 
             date.setDate(
-
                 date.getDate() + 30
-
             );
 
 
             due.value =
-
-                date.toISOString()
-
-                    .slice(0, 10);
+                getLocalDateString(
+                    date
+                );
 
         }
 
@@ -458,59 +467,108 @@ Invoice.Form = (() => {
 
 
     /**
-     * 書類種類取得
+     * ======================================================
+     * ローカル日付文字列
+     *
+     * YYYY-MM-DD
+     * ======================================================
      */
-    function type() {
+
+    function getLocalDateString(date) {
+
+        const year =
+            date.getFullYear();
+
+
+        const month =
+            String(
+                date.getMonth() + 1
+            ).padStart(
+                2,
+                "0"
+            );
+
+
+        const day =
+            String(
+                date.getDate()
+            ).padStart(
+                2,
+                "0"
+            );
+
 
         return (
-
-            COCOA.id("docType")?.value ||
-
-            "estimate"
-
+            `${year}-${month}-${day}`
         );
 
     }
 
 
     /**
-     * 書類種類変更
+     * ======================================================
+     * 書類種類取得
+     * ======================================================
      */
-    function setType(value) {
 
-        const element =
+    function type() {
 
-            COCOA.id("docType");
-
-
-        if (!element) {
-
-            return;
-
-        }
-
-
-        if (
-
-            value !== "estimate" &&
-
-            value !== "invoice"
-
-        ) {
-
-            return;
-
-        }
-
-
-        element.value = value;
+        return (
+            COCOA.id(
+                "docType"
+            )?.value ||
+            "estimate"
+        );
 
     }
 
 
     /**
-     * 公開API
+     * ======================================================
+     * 書類種類変更
+     * ======================================================
      */
+
+    function setType(value) {
+
+        const element =
+            COCOA.id(
+                "docType"
+            );
+
+
+        if (!element) {
+
+            return false;
+
+        }
+
+
+        if (
+            value !== "estimate" &&
+            value !== "invoice"
+        ) {
+
+            return false;
+
+        }
+
+
+        element.value =
+            value;
+
+
+        return true;
+
+    }
+
+
+    /**
+     * ======================================================
+     * 公開API
+     * ======================================================
+     */
+
     return {
 
         create,
