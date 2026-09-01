@@ -31,30 +31,20 @@ COCOA.id = function (id) {
 
 COCOA.today = function () {
 
-    const date =
-        new Date();
-
+    const date = new Date();
 
     const year =
         date.getFullYear();
 
-
     const month =
         String(
             date.getMonth() + 1
-        ).padStart(
-            2,
-            "0"
-        );
-
+        ).padStart(2, "0");
 
     const day =
         String(
             date.getDate()
-        ).padStart(
-            2,
-            "0"
-        );
+        ).padStart(2, "0");
 
 
     return (
@@ -76,21 +66,13 @@ COCOA.today = function () {
 
 COCOA.number = function (value) {
 
-    const number =
-        Number(
+    const number = Number(
 
-            String(
-                value ?? ""
-            )
+        String(value ?? "")
+            .replace(/,/g, "")
+            .trim()
 
-                .replace(
-                    /,/g,
-                    ""
-                )
-
-                .trim()
-
-        );
+    );
 
 
     return Number.isFinite(number)
@@ -108,23 +90,13 @@ COCOA.number = function (value) {
 
 COCOA.money = function (value) {
 
-    const number =
-        COCOA.number(
-            value
-        );
-
-
     return (
 
         "¥" +
 
         Math.round(
-            number
-        )
-
-            .toLocaleString(
-                "ja-JP"
-            )
+            COCOA.number(value)
+        ).toLocaleString("ja-JP")
 
     );
 
@@ -139,34 +111,17 @@ COCOA.money = function (value) {
 
 COCOA.escapeHTML = function (value) {
 
-    return String(
-        value ?? ""
-    )
+    return String(value ?? "")
 
-        .replace(
-            /&/g,
-            "&amp;"
-        )
+        .replace(/&/g, "&amp;")
 
-        .replace(
-            /</g,
-            "&lt;"
-        )
+        .replace(/</g, "&lt;")
 
-        .replace(
-            />/g,
-            "&gt;"
-        )
+        .replace(/>/g, "&gt;")
 
-        .replace(
-            /"/g,
-            "&quot;"
-        )
+        .replace(/"/g, "&quot;")
 
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+        .replace(/'/g, "&#039;");
 
 };
 
@@ -177,34 +132,17 @@ COCOA.escapeHTML = function (value) {
  * ==========================================================
  */
 
-COCOA.storageSet = function (
-    key,
-    value
-) {
-
-    if (!key) {
-
-        console.error(
-            "COCOA.storageSet: key is required."
-        );
-
-        return false;
-
-    }
-
+COCOA.storageSet = function (key, value) {
 
     try {
 
         localStorage.setItem(
 
-            String(key),
+            key,
 
-            JSON.stringify(
-                value
-            )
+            JSON.stringify(value)
 
         );
-
 
         return true;
 
@@ -217,7 +155,6 @@ COCOA.storageSet = function (
             error
 
         );
-
 
         return false;
 
@@ -232,37 +169,22 @@ COCOA.storageSet = function (
  * ==========================================================
  */
 
-COCOA.storageGet = function (
-    key
-) {
-
-    if (!key) {
-
-        return null;
-
-    }
-
+COCOA.storageGet = function (key) {
 
     try {
 
         const value =
-            localStorage.getItem(
-                String(key)
-            );
+            localStorage.getItem(key);
 
 
-        if (
-            value === null
-        ) {
+        if (value === null) {
 
             return null;
 
         }
 
 
-        return JSON.parse(
-            value
-        );
+        return JSON.parse(value);
 
     } catch (error) {
 
@@ -273,7 +195,6 @@ COCOA.storageGet = function (
             error
 
         );
-
 
         return null;
 
@@ -288,23 +209,11 @@ COCOA.storageGet = function (
  * ==========================================================
  */
 
-COCOA.storageRemove = function (
-    key
-) {
-
-    if (!key) {
-
-        return false;
-
-    }
-
+COCOA.storageRemove = function (key) {
 
     try {
 
-        localStorage.removeItem(
-            String(key)
-        );
-
+        localStorage.removeItem(key);
 
         return true;
 
@@ -317,7 +226,6 @@ COCOA.storageRemove = function (
             error
 
         );
-
 
         return false;
 
@@ -332,9 +240,7 @@ COCOA.storageRemove = function (
  * ==========================================================
  */
 
-COCOA.toast = function (
-    message
-) {
+COCOA.toast = function (message) {
 
     let toast =
         document.getElementById(
@@ -345,10 +251,7 @@ COCOA.toast = function (
     if (!toast) {
 
         toast =
-            document.createElement(
-                "div"
-            );
-
+            document.createElement("div");
 
         toast.id =
             "cocoaToast";
@@ -363,97 +266,71 @@ COCOA.toast = function (
         toast.style.position =
             "fixed";
 
-
         toast.style.left =
             "50%";
-
 
         toast.style.bottom =
             "24px";
 
-
         toast.style.transform =
             "translateX(-50%)";
-
 
         toast.style.zIndex =
             "9999";
 
-
         toast.style.maxWidth =
             "calc(100vw - 32px)";
-
 
         toast.style.padding =
             "10px 16px";
 
-
         toast.style.border =
             "1px solid #303740";
-
 
         toast.style.borderRadius =
             "10px";
 
-
         toast.style.background =
             "#1a1f26";
-
 
         toast.style.color =
             "#f4f4f5";
 
-
         toast.style.fontSize =
             "13px";
-
 
         toast.style.fontWeight =
             "700";
 
-
         toast.style.boxShadow =
             "0 8px 30px rgba(0,0,0,.35)";
-
 
         toast.style.opacity =
             "0";
 
-
         toast.style.pointerEvents =
             "none";
-
 
         toast.style.transition =
             "opacity .2s ease";
 
 
-        document.body.appendChild(
-            toast
-        );
+        document.body.appendChild(toast);
 
     }
 
 
     toast.textContent =
-        String(
-            message ?? ""
-        );
+        String(message ?? "");
 
 
     toast.style.opacity =
         "1";
 
 
-    if (
+    clearTimeout(
         COCOA.toast.timer
-    ) {
-
-        clearTimeout(
-            COCOA.toast.timer
-        );
-
-    }
+    );
 
 
     COCOA.toast.timer =
@@ -479,15 +356,11 @@ COCOA.toast = function (
  * ==========================================================
  */
 
-COCOA.UI =
-    COCOA.UI || {};
+COCOA.UI = COCOA.UI || {};
 
 
-COCOA.UI.toast =
-    function (message) {
+COCOA.UI.toast = function (message) {
 
-        COCOA.toast(
-            message
-        );
+    COCOA.toast(message);
 
-    };
+};
