@@ -12,8 +12,6 @@ COCOA.PWA = (() => {
 
     let initialized = false;
 
-    let registrationPromise = null;
-
 
     /**
      * ======================================================
@@ -23,20 +21,12 @@ COCOA.PWA = (() => {
 
     function init(swPath = "./sw.js") {
 
-        /*
-         * 二重初期化防止
-         */
-
         if (initialized) {
 
-            return registrationPromise;
+            return;
 
         }
 
-
-        /*
-         * Service Worker対応確認
-         */
 
         if (!("serviceWorker" in navigator)) {
 
@@ -44,7 +34,7 @@ COCOA.PWA = (() => {
                 "PWA: Service Worker is not supported."
             );
 
-            return Promise.resolve(false);
+            return;
 
         }
 
@@ -65,7 +55,7 @@ COCOA.PWA = (() => {
                 "PWA: Service Worker registration skipped."
             );
 
-            return Promise.resolve(false);
+            return;
 
         }
 
@@ -74,74 +64,39 @@ COCOA.PWA = (() => {
 
 
         /*
-         * ==================================================
-         * すでにページ読込完了済みの場合
-         *
-         * loadイベントを待たず即登録
-         * ==================================================
+         * すでにページ読込完了後なら即登録
          */
 
         if (
-
-            document.readyState ===
-                "complete"
-
+            document.readyState === "complete"
         ) {
 
-            registrationPromise =
+            register(swPath);
+
+            return;
+
+        }
+
+
+        /*
+         * 読込前ならload後に登録
+         */
+
+        window.addEventListener(
+
+            "load",
+
+            function () {
+
                 register(swPath);
 
-        }
+            },
 
-        else {
+            {
+                once: true
+            }
 
-            /*
-             * ==================================================
-             * ページ読込前の場合
-             *
-             * load完了後に登録
-             * ==================================================
-             */
-
-            registrationPromise =
-                new Promise(
-
-                    function (
-                        resolve
-                    ) {
-
-                        window.addEventListener(
-
-                            "load",
-
-                            async function () {
-
-                                const result =
-                                    await register(
-                                        swPath
-                                    );
-
-
-                                resolve(
-                                    result
-                                );
-
-                            },
-
-                            {
-                                once: true
-                            }
-
-                        );
-
-                    }
-
-                );
-
-        }
-
-
-        return registrationPromise;
+        );
 
     }
 
@@ -152,40 +107,14 @@ COCOA.PWA = (() => {
      * ======================================================
      */
 
-    async function register(swPath = "./sw.js") {
-
-        /*
-         * 二重登録Promiseがある場合
-         */
-
-        if (
-
-            registrationPromise &&
-
-            document.readyState ===
-                "complete"
-
-        ) {
-
-            /*
-             * initから呼ばれたregister自身の場合は
-             * 再帰しないようそのまま処理続行
-             */
-
-        }
-
+    async function register(swPath) {
 
         try {
 
             const registration =
+
                 await navigator.serviceWorker.register(
-
-                    swPath,
-
-                    {
-                        scope: "./"
-                    }
-
+                    swPath
                 );
 
 
@@ -197,12 +126,6 @@ COCOA.PWA = (() => {
 
             );
 
-
-            /*
-             * ==================================================
-             * 更新検知
-             * ==================================================
-             */
 
             registration.addEventListener(
 
@@ -228,41 +151,31 @@ COCOA.PWA = (() => {
                         function () {
 
                             if (
-
-                                worker.state ===
-                                    "installed"
-
+                                worker.state !==
+                                "installed"
                             ) {
 
-                                /*
-                                 * controllerあり
-                                 * → 既存アプリ更新
-                                 */
+                                return;
 
-                                if (
+                            }
 
-                                    navigator.serviceWorker
-                                        .controller
 
-                                ) {
+                            if (
+                                navigator.serviceWorker
+                                    .controller
+                            ) {
 
-                                    console.log(
-                                        "PWA: New version available."
-                                    );
+                                console.log(
+                                    "PWA: New version available."
+                                );
 
-                                }
+                            }
 
-                                /*
-                                 * 初回インストール
-                                 */
+                            else {
 
-                                else {
-
-                                    console.log(
-                                        "PWA: Offline cache ready."
-                                    );
-
-                                }
+                                console.log(
+                                    "PWA: Offline cache ready."
+                                );
 
                             }
 
@@ -290,7 +203,7 @@ COCOA.PWA = (() => {
             );
 
 
-            return false;
+            return null;
 
         }
 
@@ -305,14 +218,8 @@ COCOA.PWA = (() => {
 
     async function update() {
 
-        /*
-         * Service Worker非対応
-         */
-
         if (
-
             !("serviceWorker" in navigator)
-
         ) {
 
             return false;
@@ -323,6 +230,7 @@ COCOA.PWA = (() => {
         try {
 
             const registration =
+
                 await navigator.serviceWorker
                     .getRegistration();
 
@@ -337,11 +245,6 @@ COCOA.PWA = (() => {
             await registration.update();
 
 
-            console.log(
-                "PWA: Update check completed."
-            );
-
-
             return true;
 
         }
@@ -349,81 +252,8 @@ COCOA.PWA = (() => {
         catch (error) {
 
             console.error(
-
                 "PWA: update failed.",
-
                 error
-
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /**
-     * ======================================================
-     * Service Worker登録解除
-     *
-     * 開発・デバッグ用
-     * ======================================================
-     */
-
-    async function unregister() {
-
-        if (
-
-            !("serviceWorker" in navigator)
-
-        ) {
-
-            return false;
-
-        }
-
-
-        try {
-
-            const registration =
-                await navigator.serviceWorker
-                    .getRegistration();
-
-
-            if (!registration) {
-
-                return false;
-
-            }
-
-
-            const success =
-                await registration.unregister();
-
-
-            if (success) {
-
-                console.log(
-                    "PWA: Service Worker unregistered."
-                );
-
-            }
-
-
-            return success;
-
-        }
-
-        catch (error) {
-
-            console.error(
-
-                "PWA: unregister failed.",
-
-                error
-
             );
 
 
@@ -446,9 +276,7 @@ COCOA.PWA = (() => {
 
         register,
 
-        update,
-
-        unregister
+        update
 
     };
 
