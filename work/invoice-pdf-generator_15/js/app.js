@@ -75,17 +75,56 @@ Invoice.init = function () {
      * ======================================================
      */
 
-    if (
-        !Invoice.Form ||
-        typeof Invoice.Form.create !==
-            "function"
+    const requiredModules = [
+
+        {
+            name: "Invoice.Form.create",
+            valid:
+                Invoice.Form &&
+                typeof Invoice.Form.create ===
+                    "function"
+        },
+
+        {
+            name: "Invoice.Items.init",
+            valid:
+                Invoice.Items &&
+                typeof Invoice.Items.init ===
+                    "function"
+        },
+
+        {
+            name: "Invoice.Calc.update",
+            valid:
+                Invoice.Calc &&
+                typeof Invoice.Calc.update ===
+                    "function"
+        },
+
+        {
+            name: "Invoice.Save.init",
+            valid:
+                Invoice.Save &&
+                typeof Invoice.Save.init ===
+                    "function"
+        }
+
+    ];
+
+
+    for (
+        const module of requiredModules
     ) {
 
-        console.error(
-            "Invoice.Form.create が見つかりません。"
-        );
+        if (!module.valid) {
 
-        return false;
+            console.error(
+                `${module.name} が見つかりません。`
+            );
+
+            return false;
+
+        }
 
     }
 
@@ -101,7 +140,7 @@ Invoice.init = function () {
 
         /*
          * ==================================================
-         * フォーム生成
+         * 1. フォーム生成
          * ==================================================
          */
 
@@ -110,53 +149,35 @@ Invoice.init = function () {
 
         /*
          * ==================================================
-         * 明細初期化
+         * 2. 明細初期化
+         *
+         * Form.create()後でないと
+         * itemBody が存在しない
          * ==================================================
          */
 
-        if (
-            Invoice.Items &&
-            typeof Invoice.Items.init ===
-                "function"
-        ) {
-
-            Invoice.Items.init();
-
-        } else {
-
-            console.warn(
-                "Invoice.Items.init が見つかりません。"
-            );
-
-        }
+        Invoice.Items.init();
 
 
         /*
          * ==================================================
-         * 金額計算初期化
+         * 3. 金額計算イベント初期化
          * ==================================================
          */
 
         if (
-            Invoice.Calc &&
             typeof Invoice.Calc.bind ===
                 "function"
         ) {
 
             Invoice.Calc.bind();
 
-        } else {
-
-            console.warn(
-                "Invoice.Calc.bind が見つかりません。"
-            );
-
         }
 
 
         /*
          * ==================================================
-         * バリデーション初期化
+         * 4. バリデーション初期化
          * ==================================================
          */
 
@@ -173,41 +194,19 @@ Invoice.init = function () {
 
         /*
          * ==================================================
-         * 保存機能初期化
+         * 5. 保存機能初期化
+         *
+         * Save.load()より前に
+         * autosaveイベントを準備
          * ==================================================
          */
 
-        if (
-            Invoice.Save &&
-            typeof Invoice.Save.init ===
-                "function"
-        ) {
-
-            Invoice.Save.init();
-
-        }
+        Invoice.Save.init();
 
 
         /*
          * ==================================================
-         * 発行者情報初期化
-         * ==================================================
-         */
-
-        if (
-            Invoice.Profile &&
-            typeof Invoice.Profile.init ===
-                "function"
-        ) {
-
-            Invoice.Profile.init();
-
-        }
-
-
-        /*
-         * ==================================================
-         * 履歴初期化
+         * 6. 履歴初期化
          * ==================================================
          */
 
@@ -224,7 +223,7 @@ Invoice.init = function () {
 
         /*
          * ==================================================
-         * テンプレート初期化
+         * 7. テンプレート初期化
          * ==================================================
          */
 
@@ -241,7 +240,7 @@ Invoice.init = function () {
 
         /*
          * ==================================================
-         * エクスポート初期化
+         * 8. エクスポート初期化
          * ==================================================
          */
 
@@ -258,7 +257,7 @@ Invoice.init = function () {
 
         /*
          * ==================================================
-         * 印刷機能初期化
+         * 9. 印刷機能初期化
          * ==================================================
          */
 
@@ -270,18 +269,12 @@ Invoice.init = function () {
 
             Invoice.Print.init();
 
-        } else {
-
-            console.warn(
-                "Invoice.Print.init が見つかりません。"
-            );
-
         }
 
 
         /*
          * ==================================================
-         * UI初期化
+         * 10. UI初期化
          * ==================================================
          */
 
@@ -298,45 +291,49 @@ Invoice.init = function () {
 
         /*
          * ==================================================
-         * 保存済みデータ復元
+         * 11. 保存済み書類データ復元
          *
-         * フォーム・明細・計算初期化後に実行
+         * Form・Items・Calc・Save初期化後に実行
+         * ==================================================
+         */
+
+        Invoice.Save.load(
+            false
+        );
+
+
+        /*
+         * ==================================================
+         * 12. 発行者プロフィール復元
+         *
+         * 書類データ復元後に実行することで、
+         * 保存済みプロフィールを発行者情報として優先
          * ==================================================
          */
 
         if (
-            Invoice.Save &&
-            typeof Invoice.Save.load ===
+            Invoice.Profile &&
+            typeof Invoice.Profile.init ===
                 "function"
         ) {
 
-            Invoice.Save.load(
-                false
-            );
+            Invoice.Profile.init();
 
         }
 
 
         /*
          * ==================================================
-         * 最終計算
+         * 13. 最終計算
          * ==================================================
          */
 
-        if (
-            Invoice.Calc &&
-            typeof Invoice.Calc.update ===
-                "function"
-        ) {
-
-            Invoice.Calc.update();
-
-        }
+        Invoice.Calc.update();
 
 
         /*
          * ==================================================
-         * PWA初期化
+         * 14. PWA初期化
          * ==================================================
          */
 
@@ -356,8 +353,6 @@ Invoice.init = function () {
         /*
          * ==================================================
          * 初期化成功
-         *
-         * 全処理完了後にtrueにする
          * ==================================================
          */
 
@@ -373,7 +368,9 @@ Invoice.init = function () {
         return true;
 
 
-    } catch (
+    }
+
+    catch (
         error
     ) {
 
@@ -464,7 +461,9 @@ if (
         }
     );
 
-} else {
+}
+
+else {
 
     bootInvoiceApp();
 
