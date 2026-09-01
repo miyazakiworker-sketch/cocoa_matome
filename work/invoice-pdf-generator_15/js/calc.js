@@ -12,14 +12,29 @@ Invoice.Calc = (() => {
 
     let initialized = false;
 
+
+    /*
+     * ======================================================
+     * 現在の計算結果
+     * ======================================================
+     */
+
     let result = {
+
         subtotal: 0,
+
         discount: 0,
+
         shipping: 0,
+
         taxable: 0,
+
         taxRate: 10,
+
         tax: 0,
+
         total: 0
+
     };
 
 
@@ -37,8 +52,13 @@ Invoice.Calc = (() => {
 
         }
 
+
         initialized = true;
 
+
+        /*
+         * 通常入力
+         */
 
         document.addEventListener(
             "input",
@@ -46,11 +66,19 @@ Invoice.Calc = (() => {
         );
 
 
+        /*
+         * select・date等の変更
+         */
+
         document.addEventListener(
             "change",
             handleChange
         );
 
+
+        /*
+         * 明細変更
+         */
 
         document.addEventListener(
             "invoice:items-change",
@@ -71,6 +99,18 @@ Invoice.Calc = (() => {
      */
 
     function handleChange(e) {
+
+        if (
+            !e ||
+            !e.target ||
+            typeof e.target.closest !==
+                "function"
+        ) {
+
+            return;
+
+        }
+
 
         if (
             e.target.closest(
@@ -98,7 +138,9 @@ Invoice.Calc = (() => {
 
 
         /*
+         * ==================================================
          * 明細小計
+         * ==================================================
          */
 
         let subtotal = 0;
@@ -108,14 +150,14 @@ Invoice.Calc = (() => {
             function (item) {
 
                 const qty =
-                    COCOA.number(
-                        item.qty
+                    normalizeNumber(
+                        item?.qty
                     );
 
 
                 const price =
-                    COCOA.number(
-                        item.price
+                    normalizeNumber(
+                        item?.price
                     );
 
 
@@ -126,8 +168,17 @@ Invoice.Calc = (() => {
         );
 
 
+        subtotal =
+            Math.max(
+                0,
+                subtotal
+            );
+
+
         /*
+         * ==================================================
          * 値引き
+         * ==================================================
          */
 
         const discount =
@@ -137,7 +188,9 @@ Invoice.Calc = (() => {
 
 
         /*
+         * ==================================================
          * 送料・諸経費
+         * ==================================================
          */
 
         const shipping =
@@ -147,14 +200,19 @@ Invoice.Calc = (() => {
 
 
         /*
+         * ==================================================
          * 課税対象額
          *
          * 小計 - 値引き + 送料
+         *
+         * マイナスにはしない
+         * ==================================================
          */
 
         const taxable =
             Math.max(
                 0,
+
                 subtotal -
                 discount +
                 shipping
@@ -162,7 +220,9 @@ Invoice.Calc = (() => {
 
 
         /*
+         * ==================================================
          * 消費税率
+         * ==================================================
          */
 
         const taxRate =
@@ -170,9 +230,11 @@ Invoice.Calc = (() => {
 
 
         /*
+         * ==================================================
          * 消費税
          *
-         * 端数は切り捨て
+         * 端数切り捨て
+         * ==================================================
          */
 
         const tax =
@@ -184,13 +246,21 @@ Invoice.Calc = (() => {
 
 
         /*
+         * ==================================================
          * 合計
+         * ==================================================
          */
 
         const total =
             taxable +
             tax;
 
+
+        /*
+         * ==================================================
+         * 計算結果保存
+         * ==================================================
+         */
 
         result = {
 
@@ -211,12 +281,25 @@ Invoice.Calc = (() => {
         };
 
 
+        /*
+         * ==================================================
+         * 表示更新
+         * ==================================================
+         */
+
         render();
+
+
+        /*
+         * ==================================================
+         * 明細金額更新
+         * ==================================================
+         */
 
         updateItemAmounts();
 
 
-        return result;
+        return getResult();
 
     }
 
@@ -235,12 +318,53 @@ Invoice.Calc = (() => {
                 "function"
         ) {
 
-            return Invoice.Items.data();
+            const data =
+                Invoice.Items.data();
+
+
+            return Array.isArray(data)
+
+                ? data
+
+                : [];
 
         }
 
 
         return [];
+
+    }
+
+
+    /**
+     * ======================================================
+     * 数値正規化
+     * ======================================================
+     */
+
+    function normalizeNumber(value) {
+
+        const number =
+            COCOA.number(
+                value
+            );
+
+
+        if (
+            !Number.isFinite(
+                number
+            )
+        ) {
+
+            return 0;
+
+        }
+
+
+        return Math.max(
+            0,
+            number
+        );
 
     }
 
@@ -264,15 +388,8 @@ Invoice.Calc = (() => {
         }
 
 
-        const value =
-            COCOA.number(
-                element.value
-            );
-
-
-        return Math.max(
-            0,
-            value
+        return normalizeNumber(
+            element.value
         );
 
     }
@@ -287,7 +404,9 @@ Invoice.Calc = (() => {
     function getTaxRate() {
 
         const element =
-            COCOA.id("taxRate");
+            COCOA.id(
+                "taxRate"
+            );
 
 
         if (!element) {
@@ -298,10 +417,14 @@ Invoice.Calc = (() => {
 
 
         const rate =
-            COCOA.number(
+            normalizeNumber(
                 element.value
             );
 
+
+        /*
+         * 現在対応している税率のみ許可
+         */
 
         if (
             rate !== 0 &&
@@ -328,19 +451,27 @@ Invoice.Calc = (() => {
     function render() {
 
         const subtotal =
-            COCOA.id("subtotal");
+            COCOA.id(
+                "subtotal"
+            );
 
 
         const taxable =
-            COCOA.id("taxable");
+            COCOA.id(
+                "taxable"
+            );
 
 
         const tax =
-            COCOA.id("tax");
+            COCOA.id(
+                "tax"
+            );
 
 
         const total =
-            COCOA.id("total");
+            COCOA.id(
+                "total"
+            );
 
 
         if (subtotal) {
@@ -445,6 +576,10 @@ Invoice.Calc = (() => {
     /**
      * ======================================================
      * 計算結果セット
+     *
+     * 基本的にはSave.apply()後に
+     * update()で再計算するため、
+     * 外部互換用として保持
      * ======================================================
      */
 
@@ -452,48 +587,61 @@ Invoice.Calc = (() => {
 
         if (
             !value ||
-            typeof value !== "object"
+            typeof value !==
+                "object" ||
+            Array.isArray(value)
         ) {
 
-            return;
+            return false;
 
         }
+
+
+        const taxRate =
+            normalizeNumber(
+                value.taxRate
+            );
 
 
         result = {
 
             subtotal:
-                COCOA.number(
+                normalizeNumber(
                     value.subtotal
                 ),
 
             discount:
-                COCOA.number(
+                normalizeNumber(
                     value.discount
                 ),
 
             shipping:
-                COCOA.number(
+                normalizeNumber(
                     value.shipping
                 ),
 
             taxable:
-                COCOA.number(
+                normalizeNumber(
                     value.taxable
                 ),
 
             taxRate:
-                COCOA.number(
-                    value.taxRate
-                ),
+
+                taxRate === 0 ||
+                taxRate === 8 ||
+                taxRate === 10
+
+                    ? taxRate
+
+                    : 10,
 
             tax:
-                COCOA.number(
+                normalizeNumber(
                     value.tax
                 ),
 
             total:
-                COCOA.number(
+                normalizeNumber(
                     value.total
                 )
 
@@ -501,6 +649,9 @@ Invoice.Calc = (() => {
 
 
         render();
+
+
+        return true;
 
     }
 
