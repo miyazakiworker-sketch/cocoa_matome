@@ -186,6 +186,24 @@ Invoice.Save = (() => {
 
 
         /*
+         * 最新計算を保証
+         */
+
+        if (
+
+            Invoice.Calc &&
+
+            typeof Invoice.Calc.update ===
+                "function"
+
+        ) {
+
+            Invoice.Calc.update();
+
+        }
+
+
+        /*
          * 計算結果取得
          */
 
@@ -279,9 +297,6 @@ Invoice.Save = (() => {
 
                 /*
                  * 金額設定
-                 *
-                 * 復元時にフォームへ戻すため
-                 * document側にも保持
                  */
 
                 taxRate:
@@ -327,6 +342,9 @@ Invoice.Save = (() => {
             return false;
 
         }
+
+
+        cancelAutoSave();
 
 
         const data =
@@ -499,9 +517,7 @@ Invoice.Save = (() => {
 
 
         /*
-         * ==================================================
          * 現行形式
-         * ==================================================
          */
 
         if (
@@ -516,15 +532,6 @@ Invoice.Save = (() => {
             const documentData =
                 data.document;
 
-
-            /*
-             * 完全に空の
-             * document:{} は拒否
-             *
-             * ただし通常の保存データでは
-             * docType等の文字列、
-             * またはitems配列が存在する。
-             */
 
             return (
 
@@ -550,9 +557,7 @@ Invoice.Save = (() => {
 
 
         /*
-         * ==================================================
          * 旧形式互換
-         * ==================================================
          */
 
         return (
@@ -593,8 +598,7 @@ Invoice.Save = (() => {
 
 
         /*
-         * apply中は
-         * autosaveを完全停止
+         * apply中はautosave停止
          */
 
         applying = true;
@@ -606,7 +610,8 @@ Invoice.Save = (() => {
 
                 data.document &&
                 typeof data.document ===
-                    "object"
+                    "object" &&
+                !Array.isArray(data.document)
 
                     ? data.document
 
@@ -624,30 +629,25 @@ Invoice.Save = (() => {
                 documentData.docType
             );
 
-
             setValue(
                 "docNo",
                 documentData.docNo
             );
-
 
             setValue(
                 "issueDate",
                 documentData.issueDate
             );
 
-
             setValue(
                 "dueDate",
                 documentData.dueDate
             );
 
-
             setValue(
                 "client",
                 documentData.client
             );
-
 
             setValue(
                 "subject",
@@ -666,18 +666,15 @@ Invoice.Save = (() => {
                 documentData.company
             );
 
-
             setValue(
                 "address",
                 documentData.address
             );
 
-
             setValue(
                 "tel",
                 documentData.tel
             );
-
 
             setValue(
                 "mail",
@@ -696,7 +693,6 @@ Invoice.Save = (() => {
                 documentData.bank
             );
 
-
             setValue(
                 "memo",
                 documentData.memo
@@ -706,9 +702,6 @@ Invoice.Save = (() => {
             /*
              * ==================================================
              * 税率
-             *
-             * document側を優先
-             * 古いJSONはcalc側からも復元可能
              * ==================================================
              */
 
@@ -803,10 +796,6 @@ Invoice.Save = (() => {
 
             ) {
 
-                /*
-                 * 明細なしの旧データ
-                 */
-
                 Invoice.Items.clear();
 
             }
@@ -836,8 +825,8 @@ Invoice.Save = (() => {
              * ==================================================
              * 最終計算
              *
-             * Items.setDataによるイベント計算とは別に
-             * 最後に必ず確定計算
+             * 保存されているcalc値ではなく、
+             * 現在のフォーム・明細から再計算する
              * ==================================================
              */
 
@@ -979,7 +968,7 @@ Invoice.Save = (() => {
 
 
             /*
-             * 明細初期化
+             * 明細リセット
              */
 
             if (
@@ -1033,9 +1022,23 @@ Invoice.Save = (() => {
 
         }
 
+        catch (error) {
+
+            console.error(
+                "Invoice.Save.reset:",
+                error
+            );
+
+
+            return false;
+
+        }
+
         finally {
 
             applying = false;
+
+            cancelAutoSave();
 
         }
 
@@ -1182,7 +1185,9 @@ Invoice.Save = (() => {
 
                             const data =
                                 JSON.parse(
-                                    reader.result
+                                    String(
+                                        reader.result || ""
+                                    )
                                 );
 
 
@@ -1256,6 +1261,9 @@ Invoice.Save = (() => {
                     "utf-8"
                 );
 
+            },
+            {
+                once: true
             }
         );
 
@@ -1327,6 +1335,10 @@ Invoice.Save = (() => {
 
         link.download =
             fileName;
+
+
+        link.style.display =
+            "none";
 
 
         document.body.appendChild(
