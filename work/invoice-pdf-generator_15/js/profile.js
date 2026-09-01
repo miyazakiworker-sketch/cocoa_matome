@@ -31,14 +31,16 @@ Invoice.Profile = (() => {
 
         }
 
+
         initialized = true;
 
         bindEvents();
 
+
         /*
          * 保存済み発行者情報を自動復元
          *
-         * 起動時は通知を表示しない。
+         * 起動時は通知なし
          */
 
         load(false);
@@ -62,11 +64,13 @@ Invoice.Profile = (() => {
                  * 発行者情報保存
                  */
 
-                if (
+                const saveButton =
                     e.target.closest(
                         "#profileSaveBtn"
-                    )
-                ) {
+                    );
+
+
+                if (saveButton) {
 
                     e.preventDefault();
 
@@ -81,11 +85,13 @@ Invoice.Profile = (() => {
                  * 発行者情報読込
                  */
 
-                if (
+                const loadButton =
                     e.target.closest(
                         "#profileLoadBtn"
-                    )
-                ) {
+                    );
+
+
+                if (loadButton) {
 
                     e.preventDefault();
 
@@ -100,11 +106,13 @@ Invoice.Profile = (() => {
                  * 発行者情報削除
                  */
 
-                if (
+                const resetButton =
                     e.target.closest(
                         "#profileResetBtn"
-                    )
-                ) {
+                    );
+
+
+                if (resetButton) {
 
                     e.preventDefault();
 
@@ -127,6 +135,14 @@ Invoice.Profile = (() => {
     function collect() {
 
         return {
+
+            version:
+                Invoice.VERSION || "2.0.0",
+
+
+            savedAt:
+                new Date().toISOString(),
+
 
             company:
                 getValue("company"),
@@ -175,6 +191,14 @@ Invoice.Profile = (() => {
 
         }
 
+        else {
+
+            notify(
+                "発行者情報を保存できませんでした。"
+            );
+
+        }
+
 
         return success;
 
@@ -207,12 +231,18 @@ Invoice.Profile = (() => {
 
             }
 
+
             return false;
 
         }
 
 
-        if (!apply(data)) {
+        if (!isValidData(data)) {
+
+            console.warn(
+                "Invoice.Profile.load: 保存データの形式が不正です。"
+            );
+
 
             if (showMessage) {
 
@@ -221,6 +251,27 @@ Invoice.Profile = (() => {
                 );
 
             }
+
+
+            return false;
+
+        }
+
+
+        const success =
+            apply(data);
+
+
+        if (!success) {
+
+            if (showMessage) {
+
+                notify(
+                    "発行者情報を読み込めませんでした。"
+                );
+
+            }
+
 
             return false;
 
@@ -243,15 +294,16 @@ Invoice.Profile = (() => {
 
     /**
      * ======================================================
-     * 適用
+     * データ形式確認
      * ======================================================
      */
 
-    function apply(data) {
+    function isValidData(data) {
 
         if (
             !data ||
-            typeof data !== "object"
+            typeof data !== "object" ||
+            Array.isArray(data)
         ) {
 
             return false;
@@ -259,51 +311,103 @@ Invoice.Profile = (() => {
         }
 
 
-        setValue(
-            "company",
-            data.company
+        return (
+
+            "company" in data ||
+
+            "address" in data ||
+
+            "tel" in data ||
+
+            "mail" in data ||
+
+            "bank" in data
+
         );
 
-        setValue(
-            "address",
-            data.address
-        );
-
-        setValue(
-            "tel",
-            data.tel
-        );
-
-        setValue(
-            "mail",
-            data.mail
-        );
-
-        setValue(
-            "bank",
-            data.bank
-        );
+    }
 
 
-        /*
-         * 現在の書類データにも反映
-         *
-         * 発行者情報を読み込んだ時点で
-         * 現在の見積書・請求書へ反映する。
-         */
+    /**
+     * ======================================================
+     * 適用
+     * ======================================================
+     */
 
-        if (
-            Invoice.Save &&
-            typeof Invoice.Save.autoSave ===
-                "function"
-        ) {
+    function apply(data) {
 
-            Invoice.Save.autoSave();
+        if (!isValidData(data)) {
+
+            return false;
 
         }
 
 
-        return true;
+        try {
+
+            setValue(
+                "company",
+                data.company
+            );
+
+
+            setValue(
+                "address",
+                data.address
+            );
+
+
+            setValue(
+                "tel",
+                data.tel
+            );
+
+
+            setValue(
+                "mail",
+                data.mail
+            );
+
+
+            setValue(
+                "bank",
+                data.bank
+            );
+
+
+            /*
+             * 現在の書類データにも反映
+             *
+             * DOMイベントは発火しないため
+             * 明示的に自動保存予約
+             */
+
+            if (
+                Invoice.Save &&
+                typeof Invoice.Save.autoSave ===
+                    "function"
+            ) {
+
+                Invoice.Save.autoSave();
+
+            }
+
+
+            return true;
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Invoice.Profile.apply:",
+                error
+            );
+
+
+            return false;
+
+        }
 
     }
 
@@ -311,6 +415,9 @@ Invoice.Profile = (() => {
     /**
      * ======================================================
      * 削除
+     *
+     * 保存済みプロフィールのみ削除。
+     * 現在フォームの入力内容は消さない。
      * ======================================================
      */
 
@@ -343,6 +450,14 @@ Invoice.Profile = (() => {
 
         }
 
+        else {
+
+            notify(
+                "発行者情報を削除できませんでした。"
+            );
+
+        }
+
 
         return success;
 
@@ -362,9 +477,11 @@ Invoice.Profile = (() => {
 
 
         return element
+
             ? String(
-                element.value || ""
+                element.value ?? ""
             )
+
             : "";
 
     }
@@ -374,7 +491,7 @@ Invoice.Profile = (() => {
      * ======================================================
      * 値設定
      * ======================================================
-    */
+     */
 
     function setValue(
         id,
@@ -392,11 +509,18 @@ Invoice.Profile = (() => {
         }
 
 
-        element.value =
+        if (
             value === undefined ||
             value === null
-                ? ""
-                : String(value);
+        ) {
+
+            return;
+
+        }
+
+
+        element.value =
+            String(value);
 
     }
 
