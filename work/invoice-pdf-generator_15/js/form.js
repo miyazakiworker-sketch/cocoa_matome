@@ -67,6 +67,7 @@ Invoice.Form = (() => {
                     <input
                         id="docNo"
                         type="text"
+                        autocomplete="off"
                         placeholder="自動採番">
 
                 </div>
@@ -115,6 +116,7 @@ Invoice.Form = (() => {
             <input
                 id="client"
                 type="text"
+                autocomplete="organization"
                 placeholder="○○株式会社">
 
 
@@ -125,6 +127,7 @@ Invoice.Form = (() => {
             <input
                 id="subject"
                 type="text"
+                autocomplete="off"
                 placeholder="内装工事一式">
 
 
@@ -144,6 +147,7 @@ Invoice.Form = (() => {
             <input
                 id="company"
                 type="text"
+                autocomplete="organization"
                 placeholder="COCOA COMPANY">
 
 
@@ -154,6 +158,7 @@ Invoice.Form = (() => {
             <textarea
                 id="address"
                 rows="2"
+                autocomplete="street-address"
                 placeholder="〒000-0000&#10;○○県○○市..."></textarea>
 
 
@@ -164,6 +169,7 @@ Invoice.Form = (() => {
             <input
                 id="tel"
                 type="tel"
+                autocomplete="tel"
                 placeholder="000-0000-0000">
 
 
@@ -174,6 +180,7 @@ Invoice.Form = (() => {
             <input
                 id="mail"
                 type="email"
+                autocomplete="email"
                 placeholder="example@example.com">
 
 
@@ -184,6 +191,7 @@ Invoice.Form = (() => {
             <textarea
                 id="bank"
                 rows="3"
+                autocomplete="off"
                 placeholder="○○銀行 ○○支店&#10;普通 1234567&#10;口座名義：COCOA COMPANY"></textarea>
 
 
@@ -279,6 +287,7 @@ Invoice.Form = (() => {
                         type="number"
                         min="0"
                         step="1"
+                        inputmode="numeric"
                         value="0"
                         placeholder="0">
 
@@ -296,6 +305,7 @@ Invoice.Form = (() => {
                         type="number"
                         min="0"
                         step="1"
+                        inputmode="numeric"
                         value="0"
                         placeholder="0">
 
@@ -334,9 +344,7 @@ Invoice.Form = (() => {
                         <option
                             value="10"
                             selected>
-
                             10%
-
                         </option>
 
                     </select>
@@ -409,6 +417,10 @@ Invoice.Form = (() => {
 
     function initDefault() {
 
+        const today =
+            getToday();
+
+
         const issue =
             COCOA.id("issueDate");
 
@@ -418,9 +430,7 @@ Invoice.Form = (() => {
 
 
         /*
-         * ==================================================
          * 発行日
-         * ==================================================
          */
 
         if (
@@ -429,17 +439,15 @@ Invoice.Form = (() => {
         ) {
 
             issue.value =
-                getLocalDateString(
-                    new Date()
-                );
+                today;
 
         }
 
 
         /*
-         * ==================================================
          * 支払期限
-         * ==================================================
+         *
+         * 初期状態のみ30日後を設定
          */
 
         if (
@@ -457,7 +465,7 @@ Invoice.Form = (() => {
 
 
             due.value =
-                getLocalDateString(
+                formatDate(
                     date
                 );
 
@@ -468,13 +476,56 @@ Invoice.Form = (() => {
 
     /**
      * ======================================================
-     * ローカル日付文字列
+     * 今日の日付取得
      *
-     * YYYY-MM-DD
+     * COCOA.today() が存在する場合は優先。
+     * なければローカル日時から生成。
      * ======================================================
      */
 
-    function getLocalDateString(date) {
+    function getToday() {
+
+        if (
+            window.COCOA &&
+            typeof COCOA.today ===
+                "function"
+        ) {
+
+            return COCOA.today();
+
+        }
+
+
+        return formatDate(
+            new Date()
+        );
+
+    }
+
+
+    /**
+     * ======================================================
+     * Date → YYYY-MM-DD
+     *
+     * toISOString() はUTCになるため、
+     * 日本時間などで日付ズレが起きないよう
+     * ローカル日時から生成する。
+     * ======================================================
+     */
+
+    function formatDate(date) {
+
+        if (
+            !(date instanceof Date) ||
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+
+            return "";
+
+        }
+
 
         const year =
             date.getFullYear();
@@ -514,9 +565,7 @@ Invoice.Form = (() => {
     function type() {
 
         return (
-            COCOA.id(
-                "docType"
-            )?.value ||
+            COCOA.id("docType")?.value ||
             "estimate"
         );
 
@@ -532,9 +581,7 @@ Invoice.Form = (() => {
     function setType(value) {
 
         const element =
-            COCOA.id(
-                "docType"
-            );
+            COCOA.id("docType");
 
 
         if (!element) {
@@ -556,6 +603,33 @@ Invoice.Form = (() => {
 
         element.value =
             value;
+
+
+        /*
+         * 書類種類変更後は
+         * 自動保存と再計算
+         */
+
+        if (
+            Invoice.Calc &&
+            typeof Invoice.Calc.update ===
+                "function"
+        ) {
+
+            Invoice.Calc.update();
+
+        }
+
+
+        if (
+            Invoice.Save &&
+            typeof Invoice.Save.autoSave ===
+                "function"
+        ) {
+
+            Invoice.Save.autoSave();
+
+        }
 
 
         return true;
