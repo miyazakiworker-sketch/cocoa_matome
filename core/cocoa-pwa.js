@@ -31,7 +31,7 @@ COCOA.PWA = (() => {
         if (!("serviceWorker" in navigator)) {
 
             console.log(
-                "PWA: Service Worker is not supported."
+                "Service Worker is not supported."
             );
 
             return;
@@ -44,11 +44,8 @@ COCOA.PWA = (() => {
          */
 
         if (
-
             window.location.protocol !== "http:" &&
-
             window.location.protocol !== "https:"
-
         ) {
 
             console.log(
@@ -63,25 +60,6 @@ COCOA.PWA = (() => {
         initialized = true;
 
 
-        /*
-         * すでにページ読込完了後なら即登録
-         */
-
-        if (
-            document.readyState === "complete"
-        ) {
-
-            register(swPath);
-
-            return;
-
-        }
-
-
-        /*
-         * 読込前ならload後に登録
-         */
-
         window.addEventListener(
 
             "load",
@@ -90,10 +68,6 @@ COCOA.PWA = (() => {
 
                 register(swPath);
 
-            },
-
-            {
-                once: true
             }
 
         );
@@ -112,18 +86,14 @@ COCOA.PWA = (() => {
         try {
 
             const registration =
-
                 await navigator.serviceWorker.register(
                     swPath
                 );
 
 
             console.log(
-
                 "PWA: Service Worker registered.",
-
                 registration.scope
-
             );
 
 
@@ -151,31 +121,26 @@ COCOA.PWA = (() => {
                         function () {
 
                             if (
-                                worker.state !==
+                                worker.state ===
                                 "installed"
                             ) {
 
-                                return;
+                                if (
+                                    navigator.serviceWorker
+                                        .controller
+                                ) {
 
-                            }
+                                    console.log(
+                                        "PWA: New version available."
+                                    );
 
+                                } else {
 
-                            if (
-                                navigator.serviceWorker
-                                    .controller
-                            ) {
+                                    console.log(
+                                        "PWA: Offline cache ready."
+                                    );
 
-                                console.log(
-                                    "PWA: New version available."
-                                );
-
-                            }
-
-                            else {
-
-                                console.log(
-                                    "PWA: Offline cache ready."
-                                );
+                                }
 
                             }
 
@@ -187,23 +152,12 @@ COCOA.PWA = (() => {
 
             );
 
-
-            return registration;
-
-        }
-
-        catch (error) {
+        } catch (error) {
 
             console.error(
-
                 "PWA: Service Worker registration failed.",
-
                 error
-
             );
-
-
-            return null;
 
         }
 
@@ -219,7 +173,8 @@ COCOA.PWA = (() => {
     async function update() {
 
         if (
-            !("serviceWorker" in navigator)
+            !navigator.serviceWorker ||
+            !navigator.serviceWorker.controller
         ) {
 
             return false;
@@ -230,9 +185,7 @@ COCOA.PWA = (() => {
         try {
 
             const registration =
-
-                await navigator.serviceWorker
-                    .getRegistration();
+                await navigator.serviceWorker.getRegistration();
 
 
             if (!registration) {
@@ -244,18 +197,14 @@ COCOA.PWA = (() => {
 
             await registration.update();
 
-
             return true;
 
-        }
-
-        catch (error) {
+        } catch (error) {
 
             console.error(
                 "PWA: update failed.",
                 error
             );
-
 
             return false;
 
