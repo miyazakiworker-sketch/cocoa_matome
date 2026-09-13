@@ -2,7 +2,7 @@
  * ==========================================================
  * COCOA TOOLS v2.0
  * js/validation.js
- * 入力チェック
+ * 入力バリデーション
  * ==========================================================
  */
 
@@ -13,32 +13,20 @@ Invoice.Validation = (() => {
     let initialized = false;
 
 
-    /**
-     * ======================================================
-     * 初期化
-     * ======================================================
-     */
-
     function init() {
 
         if (initialized) {
-
-            return;
-
+            return true;
         }
 
         initialized = true;
 
         bind();
 
+        return true;
+
     }
 
-
-    /**
-     * ======================================================
-     * イベント
-     * ======================================================
-     */
 
     function bind() {
 
@@ -46,13 +34,22 @@ Invoice.Validation = (() => {
             "input",
             function (e) {
 
+                const target =
+                    e.target;
+
                 if (
-                    e.target.closest("#invoiceForm")
+                    !target ||
+                    !target.closest(
+                        "#invoiceForm"
+                    )
                 ) {
-
-                    clearError(e.target);
-
+                    return;
                 }
+
+
+                clearFieldError(
+                    target
+                );
 
             }
         );
@@ -62,13 +59,22 @@ Invoice.Validation = (() => {
             "change",
             function (e) {
 
+                const target =
+                    e.target;
+
                 if (
-                    e.target.closest("#invoiceForm")
+                    !target ||
+                    !target.closest(
+                        "#invoiceForm"
+                    )
                 ) {
-
-                    clearError(e.target);
-
+                    return;
                 }
+
+
+                clearFieldError(
+                    target
+                );
 
             }
         );
@@ -76,15 +82,12 @@ Invoice.Validation = (() => {
     }
 
 
-    /**
-     * ======================================================
-     * 全体チェック
-     * ======================================================
-     */
-
-    function check() {
+    function validate() {
 
         clearAllErrors();
+
+
+        let valid = true;
 
 
         const requiredFields = [
@@ -107,205 +110,180 @@ Invoice.Validation = (() => {
         ];
 
 
-        for (
-            const field of requiredFields
-        ) {
+        requiredFields.forEach(
+            field => {
 
-            const element =
-                COCOA.id(field.id);
+                const element =
+                    COCOA.id(field.id);
 
-
-            if (!element) {
-
-                continue;
-
-            }
+                if (!element) {
+                    return;
+                }
 
 
-            if (
-                !String(
-                    element.value || ""
-                ).trim()
-            ) {
+                if (
+                    !String(
+                        element.value || ""
+                    ).trim()
+                ) {
 
-                markError(
-                    element,
-                    field.message
-                );
+                    setError(
+                        element,
+                        field.message
+                    );
 
+                    valid = false;
 
-                element.focus();
-
-                return false;
+                }
 
             }
+        );
 
-        }
-
-
-        /*
-         * 明細チェック
-         */
 
         const items =
-            getItems();
-
-
-        if (!items.length) {
-
-            notify(
-                "明細を1件以上追加してください。"
-            );
-
-            return false;
-
-        }
-
-
-        for (
-            let i = 0;
-            i < items.length;
-            i++
-        ) {
-
-            const item =
-                items[i];
-
-
-            const name =
-                String(
-                    item.name || ""
-                ).trim();
-
-
-            const qty =
-                COCOA.number(
-                    item.qty
-                );
-
-
-            const price =
-                COCOA.number(
-                    item.price
-                );
-
-
-            /*
-             * 空の明細は許可
-             *
-             * 初期状態の空行を考慮する。
-             */
-
-            if (
-                !name &&
-                qty === 1 &&
-                price === 0
-            ) {
-
-                continue;
-
-            }
-
-
-            if (!name) {
-
-                notify(
-                    `明細 ${i + 1} の内容を入力してください。`
-                );
-
-                focusItemField(
-                    i,
-                    "name"
-                );
-
-                return false;
-
-            }
-
-
-            if (qty <= 0) {
-
-                notify(
-                    `明細 ${i + 1} の数量を確認してください。`
-                );
-
-                focusItemField(
-                    i,
-                    "qty"
-                );
-
-                return false;
-
-            }
-
-
-            if (price < 0) {
-
-                notify(
-                    `明細 ${i + 1} の単価を確認してください。`
-                );
-
-                focusItemField(
-                    i,
-                    "price"
-                );
-
-                return false;
-
-            }
-
-        }
-
-
-        return true;
-
-    }
-
-
-    /**
-     * ======================================================
-     * 明細取得
-     * ======================================================
-     */
-
-    function getItems() {
-
-        if (
             Invoice.Items &&
             typeof Invoice.Items.data ===
                 "function"
+                ? Invoice.Items.data()
+                : [];
+
+
+        items.forEach(
+            (item, index) => {
+
+                const name =
+                    String(
+                        item.name || ""
+                    ).trim();
+
+                const qty =
+                    COCOA.number(
+                        item.qty
+                    );
+
+                const price =
+                    COCOA.number(
+                        item.price
+                    );
+
+
+                const isBlank =
+                    !name &&
+                    qty === 1 &&
+                    price === 0;
+
+
+                if (isBlank) {
+                    return;
+                }
+
+
+                if (!name) {
+
+                    setItemError(
+                        index,
+                        "name",
+                        "内容を入力してください。"
+                    );
+
+                    valid = false;
+
+                }
+
+
+                if (qty <= 0) {
+
+                    setItemError(
+                        index,
+                        "qty",
+                        "数量は1以上で入力してください。"
+                    );
+
+                    valid = false;
+
+                }
+
+
+                if (price < 0) {
+
+                    setItemError(
+                        index,
+                        "price",
+                        "単価は0以上で入力してください。"
+                    );
+
+                    valid = false;
+
+                }
+
+            }
+        );
+
+
+        const discount =
+            COCOA.id("discount");
+
+        if (
+            discount &&
+            COCOA.number(
+                discount.value
+            ) < 0
         ) {
 
-            return Invoice.Items.data();
+            setError(
+                discount,
+                "値引きは0以上で入力してください。"
+            );
+
+            valid = false;
 
         }
 
 
-        return [];
+        const shipping =
+            COCOA.id("shipping");
+
+        if (
+            shipping &&
+            COCOA.number(
+                shipping.value
+            ) < 0
+        ) {
+
+            setError(
+                shipping,
+                "送料は0以上で入力してください。"
+            );
+
+            valid = false;
+
+        }
+
+
+        if (!valid) {
+
+            showValidationMessage();
+
+        }
+
+
+        return valid;
 
     }
 
 
-    /**
-     * ======================================================
-     * エラー表示
-     * ======================================================
-     */
-
-    function markError(
+    function setError(
         element,
         message
     ) {
 
         if (!element) {
-
             return;
-
         }
 
 
         element.classList.add(
-            "input-error"
+            "error"
         );
 
 
@@ -315,28 +293,52 @@ Invoice.Validation = (() => {
         );
 
 
-        notify(message);
+        element.dataset.errorMessage =
+            message;
 
     }
 
 
-    /**
-     * ======================================================
-     * エラー解除
-     * ======================================================
-     */
+    function setItemError(
+        index,
+        field,
+        message
+    ) {
 
-    function clearError(element) {
+        const selector =
+            `[data-item-index="${index}"][data-item-field="${field}"]`;
+
+
+        const element =
+            document.querySelector(
+                selector
+            );
+
 
         if (!element) {
-
             return;
+        }
 
+
+        setError(
+            element,
+            message
+        );
+
+    }
+
+
+    function clearFieldError(
+        element
+    ) {
+
+        if (!element) {
+            return;
         }
 
 
         element.classList.remove(
-            "input-error"
+            "error"
         );
 
 
@@ -344,72 +346,83 @@ Invoice.Validation = (() => {
             "aria-invalid"
         );
 
+
+        delete element.dataset.errorMessage;
+
     }
 
-
-    /**
-     * ======================================================
-     * 全エラー解除
-     * ======================================================
-     */
 
     function clearAllErrors() {
 
-        document
-            .querySelectorAll(
-                ".input-error"
-            )
-            .forEach(
-
-                function (element) {
-
-                    clearError(element);
-
-                }
-
+        const elements =
+            document.querySelectorAll(
+                "#invoiceForm .error"
             );
+
+
+        elements.forEach(
+            element => {
+
+                clearFieldError(
+                    element
+                );
+
+            }
+        );
 
     }
 
 
-    /**
-     * ======================================================
-     * 明細入力欄へフォーカス
-     * ======================================================
-     */
+    function focusFirstError() {
+
+        const element =
+            document.querySelector(
+                "#invoiceForm .error"
+            );
+
+
+        if (element) {
+
+            element.focus();
+
+            return true;
+
+        }
+
+
+        return false;
+
+    }
+
 
     function focusItemField(
         index,
         field
     ) {
 
+        const selector =
+            `[data-item-index="${index}"][data-item-field="${field}"]`;
+
+
         const element =
             document.querySelector(
-                `[data-item-index="${index}"][data-field="${field}"]`
+                selector
             );
 
 
-        if (element) {
-
-            element.classList.add(
-                "input-error"
-            );
-
-
-            element.focus();
-
+        if (!element) {
+            return false;
         }
+
+
+        element.focus();
+
+        return true;
 
     }
 
 
-    /**
-     * ======================================================
-     * 通知
-     * ======================================================
-     */
-
-    function notify(message) {
+    function showValidationMessage() {
 
         if (
             window.COCOA &&
@@ -417,38 +430,32 @@ Invoice.Validation = (() => {
                 "function"
         ) {
 
-            COCOA.toast(message);
-
-            return;
+            COCOA.toast(
+                "入力内容を確認してください。"
+            );
 
         }
 
-
-        console.warn(
-            "Invoice.Validation:",
-            message
-        );
-
     }
 
-
-    /**
-     * ======================================================
-     * 公開API
-     * ======================================================
-     */
 
     return {
 
         init,
 
-        bind,
+        validate,
 
-        check,
+        setError,
 
-        clearError,
+        setItemError,
 
-        clearAllErrors
+        clearFieldError,
+
+        clearAllErrors,
+
+        focusFirstError,
+
+        focusItemField
 
     };
 
