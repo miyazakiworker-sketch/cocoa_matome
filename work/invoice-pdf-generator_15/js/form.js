@@ -114,7 +114,6 @@ Invoice.Form = (() => {
                             <th style="width:10%"></th>
                         </tr>
                     </thead>
-
                     <tbody id="itemBody"></tbody>
                 </table>
             </div>
@@ -168,7 +167,6 @@ Invoice.Form = (() => {
 
                 <div class="summary-row">
                     <span>消費税</span>
-
                     <select id="taxRate">
                         <option value="0">0%</option>
                         <option value="8">8%</option>
@@ -206,37 +204,19 @@ Invoice.Form = (() => {
 
 
     function initDefault() {
+        const issueDate = COCOA.id("issueDate");
+        const dueDate = COCOA.id("dueDate");
 
-        const issueDate =
-            COCOA.id("issueDate");
-
-        const dueDate =
-            COCOA.id("dueDate");
-
-
-        if (
-            issueDate &&
-            !issueDate.value
-        ) {
-
-            issueDate.value =
-                COCOA.today();
-
+        if (issueDate && !issueDate.value) {
+            issueDate.value = COCOA.today();
         }
 
-
-        if (
-            dueDate &&
-            !dueDate.value
-        ) {
-
-            const date =
-                new Date();
+        if (dueDate && !dueDate.value) {
+            const date = new Date();
 
             date.setDate(
                 date.getDate() + 30
             );
-
 
             const year =
                 date.getFullYear();
@@ -251,12 +231,9 @@ Invoice.Form = (() => {
                     date.getDate()
                 ).padStart(2, "0");
 
-
             dueDate.value =
                 `${year}-${month}-${day}`;
-
         }
-
 
         const discount =
             COCOA.id("discount");
@@ -268,7 +245,6 @@ Invoice.Form = (() => {
             discount.value = "0";
         }
 
-
         const shipping =
             COCOA.id("shipping");
 
@@ -278,7 +254,6 @@ Invoice.Form = (() => {
         ) {
             shipping.value = "0";
         }
-
     }
 
 
