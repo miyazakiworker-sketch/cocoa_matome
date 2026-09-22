@@ -2,7 +2,7 @@
  * ==========================================================
  * COCOA TOOLS v2.0
  * js/template.js
- * 印刷・PDF用テンプレート生成
+ * 印刷・PDF用書類テンプレート
  * ==========================================================
  */
 
@@ -25,6 +25,13 @@ Invoice.Template = (() => {
 
     }
 
+
+    /**
+     * ======================================================
+     * 現在データからテンプレート生成
+     * ※ HTML全体ではなく「書類部分」だけを返す
+     * ======================================================
+     */
 
     function render(data) {
 
@@ -53,447 +60,254 @@ Invoice.Template = (() => {
 
 
         const docNo =
-            escape(
-                documentData.docNo || ""
-            );
+            documentData.docNo || "";
 
 
         const issueDate =
-            escape(
-                documentData.issueDate || ""
-            );
+            documentData.issueDate || "";
 
 
         const dueDate =
-            escape(
-                documentData.dueDate || ""
-            );
+            documentData.dueDate || "";
 
 
         const client =
-            escape(
-                documentData.client || ""
-            );
+            documentData.client || "";
 
 
         const subject =
-            escape(
-                documentData.subject || ""
-            );
+            documentData.subject || "";
 
 
         const company =
-            escape(
-                documentData.company || ""
-            );
+            documentData.company || "";
 
 
         const address =
-            escape(
-                documentData.address || ""
-            );
+            documentData.address || "";
 
 
         const tel =
-            escape(
-                documentData.tel || ""
-            );
+            documentData.tel || "";
 
 
         const mail =
-            escape(
-                documentData.mail || ""
-            );
+            documentData.mail || "";
 
 
         const bank =
-            escape(
-                documentData.bank || ""
-            ).replace(
-                /\n/g,
-                "<br>"
-            );
+            documentData.bank || "";
 
 
         const memo =
-            escape(
-                documentData.memo || ""
-            ).replace(
-                /\n/g,
-                "<br>"
-            );
+            documentData.memo || "";
 
 
         const subtotal =
-            number(
-                calc.subtotal
-            );
+            number(calc.subtotal);
 
 
         const discount =
-            number(
-                calc.discount
-            );
+            number(calc.discount);
 
 
         const shipping =
-            number(
-                calc.shipping
-            );
+            number(calc.shipping);
 
 
         const taxable =
-            number(
-                calc.taxable
-            );
+            number(calc.taxable);
 
 
         const taxRate =
-            number(
-                calc.taxRate ??
-                documentData.taxRate ??
-                10
-            );
+            number(calc.taxRate);
 
 
         const tax =
-            number(
-                calc.tax
-            );
+            number(calc.tax);
 
 
         const total =
-            number(
-                calc.total
-            );
+            number(calc.total);
 
 
         const itemRows =
             items
-                .filter(
-                    item =>
+                .filter(function (item) {
+
+                    return (
                         String(
                             item.name || ""
-                        ).trim() ||
+                        ).trim() !== "" ||
                         number(item.qty) !== 1 ||
                         number(item.price) !== 0
-                )
-                .map(
-                    item => {
+                    );
 
-                        const name =
-                            escape(
-                                item.name || ""
-                            ).replace(
-                                /\n/g,
-                                "<br>"
-                            );
+                })
+                .map(function (item) {
 
-
-                        const qty =
-                            number(
-                                item.qty
-                            );
+                    const name =
+                        escapeHTML(
+                            item.name || ""
+                        ).replace(
+                            /\n/g,
+                            "<br>"
+                        );
 
 
-                        const price =
-                            number(
-                                item.price
-                            );
+                    const qty =
+                        number(item.qty);
 
 
-                        const amount =
-                            qty * price;
+                    const price =
+                        number(item.price);
 
 
-                        return `
-                            <tr>
-                                <td>${name}</td>
-                                <td class="num">
-                                    ${qty.toLocaleString("ja-JP")}
-                                </td>
-                                <td class="num">
-                                    ${money(price)}
-                                </td>
-                                <td class="num">
-                                    ${money(amount)}
-                                </td>
-                            </tr>
-                        `;
+                    const amount =
+                        qty * price;
 
-                    }
-                )
+
+                    return `
+                        <tr>
+
+                            <td class="item-name">
+                                ${name}
+                            </td>
+
+                            <td class="item-number">
+                                ${qty.toLocaleString("ja-JP")}
+                            </td>
+
+                            <td class="item-number">
+                                ${money(price)}
+                            </td>
+
+                            <td class="item-number">
+                                ${money(amount)}
+                            </td>
+
+                        </tr>
+                    `;
+
+                })
                 .join("");
 
 
-        return `<!DOCTYPE html>
+        return `
 
-<html lang="ja">
+<div class="invoice-document">
 
-<head>
+    <div class="invoice-header">
 
-<meta charset="UTF-8">
+        <div>
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+            <h1 class="invoice-title">
+                ${escapeHTML(docType)}
+            </h1>
 
-<title>${docType}</title>
+        </div>
 
-<style>
 
-* {
-    box-sizing: border-box;
-}
-
-html,
-body {
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    background: #fff;
-    color: #111;
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        "Hiragino Kaku Gothic ProN",
-        "Hiragino Sans",
-        "Yu Gothic",
-        Meiryo,
-        sans-serif;
-    font-size: 12px;
-    line-height: 1.6;
-}
-
-.page {
-    width: 210mm;
-    min-height: 297mm;
-    margin: 0 auto;
-    padding: 16mm 15mm;
-    background: #fff;
-}
-
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 20px;
-    margin-bottom: 24px;
-}
-
-.title {
-    margin: 0;
-    font-size: 26px;
-    letter-spacing: 0.08em;
-}
-
-.meta {
-    text-align: right;
-    font-size: 11px;
-}
-
-.meta div {
-    margin-bottom: 3px;
-}
-
-.client {
-    margin-bottom: 18px;
-}
-
-.client-name {
-    display: inline-block;
-    min-width: 240px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid #111;
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.subject {
-    margin-bottom: 18px;
-}
-
-.subject-label {
-    font-weight: 700;
-}
-
-.items {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-.items th,
-.items td {
-    padding: 7px 8px;
-    border: 1px solid #999;
-}
-
-.items th {
-    background: #f3f3f3;
-    font-weight: 700;
-    text-align: center;
-}
-
-.items .num {
-    text-align: right;
-    white-space: nowrap;
-}
-
-.summary {
-    width: 100%;
-    max-width: 330px;
-    margin: 18px 0 0 auto;
-    border-collapse: collapse;
-}
-
-.summary td {
-    padding: 6px 8px;
-    border-bottom: 1px solid #ccc;
-}
-
-.summary td:last-child {
-    text-align: right;
-    white-space: nowrap;
-}
-
-.summary .total td {
-    padding-top: 10px;
-    border-top: 2px solid #111;
-    border-bottom: 0;
-    font-size: 16px;
-    font-weight: 700;
-}
-
-.section {
-    margin-top: 24px;
-}
-
-.section-title {
-    margin: 0 0 6px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid #111;
-    font-weight: 700;
-}
-
-.company {
-    margin-top: 28px;
-    text-align: right;
-}
-
-.company-name {
-    font-size: 15px;
-    font-weight: 700;
-}
-
-.footer {
-    margin-top: 28px;
-    padding-top: 8px;
-    border-top: 1px solid #ccc;
-    text-align: center;
-    color: #666;
-    font-size: 9px;
-}
-
-@media print {
-
-    @page {
-        size: A4;
-        margin: 0;
-    }
-
-    body {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-    .page {
-        margin: 0;
-    }
-
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="page">
-
-    <header class="header">
-
-        <h1 class="title">
-            ${docType}
-        </h1>
-
-        <div class="meta">
+        <div class="invoice-meta">
 
             ${
                 docNo
-                    ? `<div>書類番号：${docNo}</div>`
+                    ? `
+                        <div>
+                            書類番号：
+                            ${escapeHTML(docNo)}
+                        </div>
+                    `
                     : ""
             }
+
 
             ${
                 issueDate
-                    ? `<div>発行日：${issueDate}</div>`
+                    ? `
+                        <div>
+                            発行日：
+                            ${escapeHTML(issueDate)}
+                        </div>
+                    `
                     : ""
             }
+
 
             ${
                 dueDate
-                    ? `<div>支払期限：${dueDate}</div>`
+                    ? `
+                        <div>
+                            支払期限：
+                            ${escapeHTML(dueDate)}
+                        </div>
+                    `
                     : ""
             }
 
         </div>
 
-    </header>
+    </div>
 
 
-    <section class="client">
+    <div class="invoice-client">
 
-        <div class="client-name">
-            ${client}
+        <div class="invoice-client-name">
+
+            ${escapeHTML(client)}
+
+            <span>
+                御中
+            </span>
+
         </div>
 
-    </section>
+    </div>
 
 
     ${
         subject
             ? `
-                <section class="subject">
+                <div class="invoice-subject">
 
-                    <span class="subject-label">
+                    <strong>
                         件名：
-                    </span>
+                    </strong>
 
-                    ${subject}
+                    ${escapeHTML(subject)}
 
-                </section>
+                </div>
             `
             : ""
     }
 
 
-    <table class="items">
+    <table class="invoice-items">
 
         <thead>
 
             <tr>
-                <th style="width:48%">内容</th>
-                <th style="width:12%">数量</th>
-                <th style="width:20%">単価</th>
-                <th style="width:20%">金額</th>
+
+                <th class="item-name">
+                    内容
+                </th>
+
+                <th>
+                    数量
+                </th>
+
+                <th>
+                    単価
+                </th>
+
+                <th>
+                    金額
+                </th>
+
             </tr>
 
         </thead>
+
 
         <tbody>
 
@@ -501,9 +315,14 @@ body {
                 itemRows ||
                 `
                     <tr>
-                        <td colspan="4">
+
+                        <td
+                            colspan="4"
+                            class="empty-row"
+                        >
                             明細なし
                         </td>
+
                     </tr>
                 `
             }
@@ -513,71 +332,120 @@ body {
     </table>
 
 
-    <table class="summary">
+    <div class="invoice-total">
 
-        <tbody>
+        <div class="invoice-total-row">
 
-            <tr>
-                <td>小計</td>
-                <td>${money(subtotal)}</td>
-            </tr>
+            <span>
+                小計
+            </span>
 
-            ${
-                discount > 0
-                    ? `
-                        <tr>
-                            <td>値引き</td>
-                            <td>-${money(discount)}</td>
-                        </tr>
-                    `
-                    : ""
-            }
+            <strong>
+                ${money(subtotal)}
+            </strong>
 
-            ${
-                shipping > 0
-                    ? `
-                        <tr>
-                            <td>送料</td>
-                            <td>${money(shipping)}</td>
-                        </tr>
-                    `
-                    : ""
-            }
+        </div>
 
-            <tr>
-                <td>課税対象額</td>
-                <td>${money(taxable)}</td>
-            </tr>
 
-            <tr>
-                <td>消費税（${taxRate}%）</td>
-                <td>${money(tax)}</td>
-            </tr>
+        ${
+            discount > 0
+                ? `
+                    <div class="invoice-total-row">
 
-            <tr class="total">
-                <td>合計</td>
-                <td>${money(total)}</td>
-            </tr>
+                        <span>
+                            値引き
+                        </span>
 
-        </tbody>
+                        <strong>
+                            -${money(discount)}
+                        </strong>
 
-    </table>
+                    </div>
+                `
+                : ""
+        }
+
+
+        ${
+            shipping > 0
+                ? `
+                    <div class="invoice-total-row">
+
+                        <span>
+                            送料
+                        </span>
+
+                        <strong>
+                            ${money(shipping)}
+                        </strong>
+
+                    </div>
+                `
+                : ""
+        }
+
+
+        <div class="invoice-total-row">
+
+            <span>
+                課税対象額
+            </span>
+
+            <strong>
+                ${money(taxable)}
+            </strong>
+
+        </div>
+
+
+        <div class="invoice-total-row">
+
+            <span>
+                消費税
+                （${taxRate}%）
+            </span>
+
+            <strong>
+                ${money(tax)}
+            </strong>
+
+        </div>
+
+
+        <div
+            class="
+                invoice-total-row
+                invoice-total-main
+            "
+        >
+
+            <span>
+                合計
+            </span>
+
+            <strong>
+                ${money(total)}
+            </strong>
+
+        </div>
+
+    </div>
 
 
     ${
         bank
             ? `
-                <section class="section">
+                <div class="invoice-bank">
 
-                    <h2 class="section-title">
+                    <strong>
                         振込先
-                    </h2>
+                    </strong>
 
-                    <div>
-                        ${bank}
+                    <div class="invoice-multiline">
+                        ${escapeHTML(bank)}
                     </div>
 
-                </section>
+                </div>
             `
             : ""
     }
@@ -586,76 +454,90 @@ body {
     ${
         memo
             ? `
-                <section class="section">
+                <div class="invoice-memo">
 
-                    <h2 class="section-title">
+                    <strong>
                         備考
-                    </h2>
+                    </strong>
 
-                    <div>
-                        ${memo}
+                    <div class="invoice-multiline">
+                        ${escapeHTML(memo)}
                     </div>
 
-                </section>
+                </div>
             `
             : ""
     }
 
 
-    ${
-        company ||
-        address ||
-        tel ||
-        mail
-            ? `
-                <section class="company">
+    <div class="invoice-company">
 
-                    ${
-                        company
-                            ? `
-                                <div class="company-name">
-                                    ${company}
-                                </div>
-                            `
-                            : ""
-                    }
-
-                    ${
-                        address
-                            ? `<div>${address}</div>`
-                            : ""
-                    }
-
-                    ${
-                        tel
-                            ? `<div>TEL：${tel}</div>`
-                            : ""
-                    }
-
-                    ${
-                        mail
-                            ? `<div>MAIL：${mail}</div>`
-                            : ""
-                    }
-
-                </section>
-            `
-            : ""
-    }
+        ${
+            company
+                ? `
+                    <div class="invoice-company-name">
+                        ${escapeHTML(company)}
+                    </div>
+                `
+                : ""
+        }
 
 
-    <footer class="footer">
+        ${
+            address
+                ? `
+                    <div class="invoice-company-line invoice-multiline">
+                        ${escapeHTML(address)}
+                    </div>
+                `
+                : ""
+        }
+
+
+        ${
+            tel
+                ? `
+                    <div class="invoice-company-line">
+                        TEL：
+                        ${escapeHTML(tel)}
+                    </div>
+                `
+                : ""
+        }
+
+
+        ${
+            mail
+                ? `
+                    <div class="invoice-company-line">
+                        Email：
+                        ${escapeHTML(mail)}
+                    </div>
+                `
+                : ""
+        }
+
+    </div>
+
+
+    <div class="invoice-footer">
+
         COCOA TOOLS v2.0
-    </footer>
+
+    </div>
 
 </div>
 
-</body>
-
-</html>`;
+        `;
 
     }
 
+
+    /**
+     * ======================================================
+     * 現在データから生成
+     * ======================================================
+     */
 
     function renderCurrent() {
 
@@ -668,19 +550,24 @@ body {
         }
 
 
-        const data =
-            Invoice.Save.collect();
-
-
-        return render(data);
+        return render(
+            Invoice.Save.collect()
+        );
 
     }
 
+
+    /**
+     * ======================================================
+     * 画面内プレビュー
+     * ======================================================
+     */
 
     function mountPreview() {
 
         const preview =
             COCOA.id("printPreview");
+
 
         if (!preview) {
             return false;
@@ -705,7 +592,13 @@ body {
     }
 
 
-    function escape(value) {
+    /**
+     * ======================================================
+     * HTMLエスケープ
+     * ======================================================
+     */
+
+    function escapeHTML(value) {
 
         if (
             window.COCOA &&
@@ -723,29 +616,35 @@ body {
         return String(
             value ?? ""
         )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
 
     }
 
+
+    /**
+     * ======================================================
+     * 数値
+     * ======================================================
+     */
 
     function number(value) {
 
@@ -767,11 +666,11 @@ body {
                 String(
                     value ?? ""
                 )
-                .replace(
-                    /,/g,
-                    ""
-                )
-                .trim()
+                    .replace(
+                        /,/g,
+                        ""
+                    )
+                    .trim()
             );
 
 
@@ -783,6 +682,12 @@ body {
 
     }
 
+
+    /**
+     * ======================================================
+     * 金額
+     * ======================================================
+     */
 
     function money(value) {
 
