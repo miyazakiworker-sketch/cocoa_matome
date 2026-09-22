@@ -10,87 +10,17 @@ window.Invoice = window.Invoice || {};
 
 Invoice.Print = (() => {
 
-    let initialized = false;
-
-
     function init() {
 
-        if (initialized) {
-            return true;
-        }
-
-        initialized = true;
-
-        bind();
-
         return true;
-    }
-
-
-    /**
-     * ======================================================
-     * 印刷ボタン
-     * ======================================================
-     */
-
-    function bind() {
-
-        const button =
-            COCOA.id("printBtn");
-
-
-        if (!button) {
-
-            console.error(
-                "Invoice.Print: #printBtn が見つかりません。"
-            );
-
-            return;
-        }
-
-
-        /*
-         * 既存イベントとの二重実行を防止
-         */
-
-        button.addEventListener(
-            "click",
-            handlePrintClick
-        );
 
     }
 
-
-    /**
-     * ======================================================
-     * 印刷クリック
-     * ======================================================
-     */
-
-    function handlePrintClick(e) {
-
-        e.preventDefault();
-
-        e.stopPropagation();
-
-        e.stopImmediatePropagation();
-
-
-        print();
-
-    }
-
-
-    /**
-     * ======================================================
-     * 印刷
-     * ======================================================
-     */
 
     function print() {
 
         /*
-         * バリデーション
+         * 入力チェック
          */
 
         if (
@@ -99,9 +29,10 @@ Invoice.Print = (() => {
                 "function"
         ) {
 
-            if (
-                !Invoice.Validation.validate()
-            ) {
+            const valid =
+                Invoice.Validation.validate();
+
+            if (!valid) {
 
                 if (
                     typeof Invoice.Validation
@@ -116,7 +47,6 @@ Invoice.Print = (() => {
 
                 return false;
             }
-
         }
 
 
@@ -145,8 +75,8 @@ Invoice.Print = (() => {
                 "function"
         ) {
 
-            console.error(
-                "Invoice.Print: Invoice.Save.collect がありません。"
+            alert(
+                "印刷データを取得できません。"
             );
 
             return false;
@@ -158,7 +88,7 @@ Invoice.Print = (() => {
 
 
         /*
-         * テンプレート生成
+         * 書類HTML
          */
 
         if (
@@ -167,8 +97,8 @@ Invoice.Print = (() => {
                 "function"
         ) {
 
-            console.error(
-                "Invoice.Print: Invoice.Template.render がありません。"
+            alert(
+                "印刷テンプレートを読み込めません。"
             );
 
             return false;
@@ -183,8 +113,8 @@ Invoice.Print = (() => {
 
         if (!documentHTML) {
 
-            console.error(
-                "Invoice.Print: 印刷内容が空です。"
+            alert(
+                "印刷内容を生成できません。"
             );
 
             return false;
@@ -192,19 +122,20 @@ Invoice.Print = (() => {
 
 
         /*
-         * ポップアップを開く
+         * 印刷ウィンドウ
          */
 
         const printWindow =
             window.open(
                 "",
-                "_blank"
+                "_blank",
+                "width=900,height=1200"
             );
 
 
         if (!printWindow) {
 
-            showError(
+            alert(
                 "印刷画面を開けませんでした。ポップアップを許可してください。"
             );
 
@@ -213,10 +144,12 @@ Invoice.Print = (() => {
 
 
         /*
-         * 印刷専用HTML
+         * 印刷専用ページ
          */
 
-        const html = `
+        printWindow.document.open();
+
+        printWindow.document.write(`
 
 <!DOCTYPE html>
 
@@ -231,16 +164,18 @@ Invoice.Print = (() => {
     content="width=device-width, initial-scale=1.0"
 >
 
-<title>COCOA TOOLS 印刷</title>
-
+<title>見積書・請求書</title>
 
 <style>
+
+* {
+    box-sizing: border-box;
+}
 
 html,
 body {
 
     margin: 0;
-
     padding: 0;
 
     width: 100%;
@@ -248,7 +183,6 @@ body {
     background: #fff;
 
 }
-
 
 body {
 
@@ -258,8 +192,6 @@ body {
         -apple-system,
         BlinkMacSystemFont,
         "Segoe UI",
-        "Hiragino Kaku Gothic ProN",
-        "Hiragino Sans",
         "Yu Gothic",
         Meiryo,
         sans-serif;
@@ -270,10 +202,6 @@ body {
 
 }
 
-
-/* ==========================================================
-   A4
-========================================================== */
 
 .invoice-document {
 
@@ -287,14 +215,8 @@ body {
 
     background: #fff;
 
-    box-sizing: border-box;
-
 }
 
-
-/* ==========================================================
-   ヘッダー
-========================================================== */
 
 .invoice-header {
 
@@ -304,9 +226,7 @@ body {
 
     align-items: flex-start;
 
-    gap: 20px;
-
-    margin-bottom: 24px;
+    margin-bottom: 22px;
 
 }
 
@@ -319,8 +239,6 @@ body {
 
     font-weight: 700;
 
-    letter-spacing: 0.08em;
-
 }
 
 
@@ -330,14 +248,8 @@ body {
 
     font-size: 11px;
 
-    line-height: 1.8;
-
 }
 
-
-/* ==========================================================
-   宛名
-========================================================== */
 
 .invoice-client {
 
@@ -374,10 +286,6 @@ body {
 }
 
 
-/* ==========================================================
-   件名
-========================================================== */
-
 .invoice-subject {
 
     margin-bottom: 18px;
@@ -386,14 +294,8 @@ body {
 
     border: 1px solid #ccc;
 
-    background: #fafafa;
-
 }
 
-
-/* ==========================================================
-   明細
-========================================================== */
 
 .invoice-items {
 
@@ -421,8 +323,6 @@ body {
     background: #f3f3f3;
 
     text-align: center;
-
-    font-weight: 700;
 
 }
 
@@ -477,19 +377,6 @@ body {
 }
 
 
-.empty-row {
-
-    text-align: center;
-
-    color: #666;
-
-}
-
-
-/* ==========================================================
-   合計
-========================================================== */
-
 .invoice-total {
 
     width: 330px;
@@ -504,8 +391,6 @@ body {
     display: flex;
 
     justify-content: space-between;
-
-    align-items: center;
 
     padding: 6px 8px;
 
@@ -528,10 +413,6 @@ body {
 
 }
 
-
-/* ==========================================================
-   振込先・備考
-========================================================== */
 
 .invoice-bank,
 .invoice-memo {
@@ -564,10 +445,6 @@ body {
 }
 
 
-/* ==========================================================
-   発行者
-========================================================== */
-
 .invoice-company {
 
     margin-top: 28px;
@@ -593,10 +470,6 @@ body {
 }
 
 
-/* ==========================================================
-   フッター
-========================================================== */
-
 .invoice-footer {
 
     margin-top: 28px;
@@ -613,10 +486,6 @@ body {
 
 }
 
-
-/* ==========================================================
-   印刷
-========================================================== */
 
 @page {
 
@@ -642,7 +511,6 @@ body {
 
     }
 
-
     .invoice-document {
 
         width: 210mm;
@@ -661,11 +529,9 @@ body {
 
 </head>
 
-
 <body>
 
 ${documentHTML}
-
 
 <script>
 
@@ -687,7 +553,6 @@ window.addEventListener(
     }
 );
 
-
 window.addEventListener(
     "afterprint",
     function () {
@@ -706,48 +571,16 @@ window.addEventListener(
 
 <\/script>
 
-
 </body>
 
 </html>
-`;
 
-
-        printWindow.document.open();
-
-        printWindow.document.write(
-            html
-        );
+        `);
 
         printWindow.document.close();
 
 
-        return true;
-
-    }
-
-
-    /**
-     * ======================================================
-     * エラー表示
-     * ======================================================
-     */
-
-    function showError(message) {
-
-        if (
-            window.COCOA &&
-            typeof COCOA.toast ===
-                "function"
-        ) {
-
-            COCOA.toast(message);
-
-            return;
-        }
-
-
-        alert(message);
+        return false;
 
     }
 
