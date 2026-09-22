@@ -10,45 +10,43 @@ window.Invoice = window.Invoice || {};
 
 Invoice.Print = (() => {
 
+    let initialized = false;
+
+
     function init() {
 
-        return true;
+        if (initialized) {
+            return true;
+        }
 
+        initialized = true;
+
+        const button =
+            document.getElementById("printBtn");
+
+        if (!button) {
+            console.error(
+                "Invoice.Print: #printBtn が見つかりません。"
+            );
+            return false;
+        }
+
+        button.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                print();
+
+            }
+        );
+
+        return true;
     }
 
 
     function print() {
-
-        /*
-         * 入力チェック
-         */
-
-        if (
-            Invoice.Validation &&
-            typeof Invoice.Validation.validate ===
-                "function"
-        ) {
-
-            const valid =
-                Invoice.Validation.validate();
-
-            if (!valid) {
-
-                if (
-                    typeof Invoice.Validation
-                        .focusFirstError ===
-                        "function"
-                ) {
-
-                    Invoice.Validation
-                        .focusFirstError();
-
-                }
-
-                return false;
-            }
-        }
-
 
         /*
          * 最新計算
@@ -56,8 +54,7 @@ Invoice.Print = (() => {
 
         if (
             Invoice.Calc &&
-            typeof Invoice.Calc.update ===
-                "function"
+            typeof Invoice.Calc.update === "function"
         ) {
 
             Invoice.Calc.update();
@@ -71,8 +68,7 @@ Invoice.Print = (() => {
 
         if (
             !Invoice.Save ||
-            typeof Invoice.Save.collect !==
-                "function"
+            typeof Invoice.Save.collect !== "function"
         ) {
 
             alert(
@@ -88,30 +84,27 @@ Invoice.Print = (() => {
 
 
         /*
-         * 書類HTML
+         * テンプレート生成
          */
 
         if (
             !Invoice.Template ||
-            typeof Invoice.Template.render !==
-                "function"
+            typeof Invoice.Template.render !== "function"
         ) {
 
             alert(
-                "印刷テンプレートを読み込めません。"
+                "印刷テンプレートを取得できません。"
             );
 
             return false;
         }
 
 
-        const documentHTML =
-            Invoice.Template.render(
-                data
-            );
+        const content =
+            Invoice.Template.render(data);
 
 
-        if (!documentHTML) {
+        if (!content) {
 
             alert(
                 "印刷内容を生成できません。"
@@ -122,10 +115,10 @@ Invoice.Print = (() => {
 
 
         /*
-         * 印刷ウィンドウ
+         * 印刷専用ウィンドウ
          */
 
-        const printWindow =
+        const win =
             window.open(
                 "",
                 "_blank",
@@ -133,25 +126,20 @@ Invoice.Print = (() => {
             );
 
 
-        if (!printWindow) {
+        if (!win) {
 
             alert(
-                "印刷画面を開けませんでした。ポップアップを許可してください。"
+                "ポップアップがブロックされています。"
             );
 
             return false;
         }
 
 
-        /*
-         * 印刷専用ページ
-         */
+        win.document.open();
 
-        printWindow.document.open();
 
-        printWindow.document.write(`
-
-<!DOCTYPE html>
+        win.document.write(`<!DOCTYPE html>
 
 <html lang="ja">
 
@@ -159,14 +147,14 @@ Invoice.Print = (() => {
 
 <meta charset="UTF-8">
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
 <title>見積書・請求書</title>
 
 <style>
+
+@page {
+    size: A4 portrait;
+    margin: 0;
+}
 
 * {
     box-sizing: border-box;
@@ -178,15 +166,15 @@ body {
     margin: 0;
     padding: 0;
 
-    width: 100%;
+    width: 210mm;
+    min-height: 297mm;
 
     background: #fff;
+    color: #111;
 
 }
 
 body {
-
-    color: #111;
 
     font-family:
         -apple-system,
@@ -197,50 +185,40 @@ body {
         sans-serif;
 
     font-size: 12px;
-
     line-height: 1.6;
 
 }
 
-
 .invoice-document {
 
     width: 210mm;
-
     min-height: 297mm;
 
-    margin: 0 auto;
-
+    margin: 0;
     padding: 15mm;
 
     background: #fff;
 
 }
 
-
 .invoice-header {
 
     display: flex;
-
     justify-content: space-between;
-
     align-items: flex-start;
 
     margin-bottom: 22px;
 
 }
 
-
 .invoice-title {
 
     margin: 0;
 
     font-size: 28px;
-
     font-weight: 700;
 
 }
-
 
 .invoice-meta {
 
@@ -248,15 +226,15 @@ body {
 
     font-size: 11px;
 
-}
+    line-height: 1.8;
 
+}
 
 .invoice-client {
 
     margin-bottom: 18px;
 
 }
-
 
 .invoice-client-name {
 
@@ -269,22 +247,18 @@ body {
     border-bottom: 1px solid #111;
 
     font-size: 18px;
-
     font-weight: 700;
 
 }
-
 
 .invoice-client-name span {
 
     margin-left: 4px;
 
     font-size: 13px;
-
     font-weight: 400;
 
 }
-
 
 .invoice-subject {
 
@@ -296,7 +270,6 @@ body {
 
 }
 
-
 .invoice-items {
 
     width: 100%;
@@ -307,7 +280,6 @@ body {
 
 }
 
-
 .invoice-items th,
 .invoice-items td {
 
@@ -317,7 +289,6 @@ body {
 
 }
 
-
 .invoice-items th {
 
     background: #f3f3f3;
@@ -326,14 +297,12 @@ body {
 
 }
 
-
 .invoice-items th:first-child,
 .invoice-items td:first-child {
 
     width: 46%;
 
 }
-
 
 .invoice-items th:nth-child(2),
 .invoice-items td:nth-child(2) {
@@ -342,7 +311,6 @@ body {
 
 }
 
-
 .invoice-items th:nth-child(3),
 .invoice-items td:nth-child(3) {
 
@@ -350,14 +318,12 @@ body {
 
 }
 
-
 .invoice-items th:nth-child(4),
 .invoice-items td:nth-child(4) {
 
     width: 22%;
 
 }
-
 
 .item-name {
 
@@ -367,7 +333,6 @@ body {
 
 }
 
-
 .item-number {
 
     text-align: right;
@@ -375,7 +340,6 @@ body {
     white-space: nowrap;
 
 }
-
 
 .invoice-total {
 
@@ -385,19 +349,19 @@ body {
 
 }
 
-
 .invoice-total-row {
 
     display: flex;
 
     justify-content: space-between;
 
+    align-items: center;
+
     padding: 6px 8px;
 
     border-bottom: 1px solid #ddd;
 
 }
-
 
 .invoice-total-main {
 
@@ -413,14 +377,12 @@ body {
 
 }
 
-
 .invoice-bank,
 .invoice-memo {
 
     margin-top: 24px;
 
 }
-
 
 .invoice-bank > strong,
 .invoice-memo > strong {
@@ -435,7 +397,6 @@ body {
 
 }
 
-
 .invoice-multiline {
 
     white-space: pre-line;
@@ -443,7 +404,6 @@ body {
     word-break: break-word;
 
 }
-
 
 .invoice-company {
 
@@ -453,7 +413,6 @@ body {
 
 }
 
-
 .invoice-company-name {
 
     font-size: 15px;
@@ -462,13 +421,11 @@ body {
 
 }
 
-
 .invoice-company-line {
 
     font-size: 11px;
 
 }
-
 
 .invoice-footer {
 
@@ -486,27 +443,15 @@ body {
 
 }
 
-
-@page {
-
-    size: A4 portrait;
-
-    margin: 0;
-
-}
-
-
 @media print {
 
     html,
     body {
 
         width: 210mm;
-
         min-height: 297mm;
 
         margin: 0;
-
         padding: 0;
 
     }
@@ -514,11 +459,9 @@ body {
     .invoice-document {
 
         width: 210mm;
-
         min-height: 297mm;
 
         margin: 0;
-
         padding: 15mm;
 
     }
@@ -531,7 +474,7 @@ body {
 
 <body>
 
-${documentHTML}
+${content}
 
 <script>
 
@@ -573,14 +516,13 @@ window.addEventListener(
 
 </body>
 
-</html>
-
-        `);
-
-        printWindow.document.close();
+</html>`);
 
 
-        return false;
+        win.document.close();
+
+
+        return true;
 
     }
 
@@ -588,7 +530,6 @@ window.addEventListener(
     return {
 
         init,
-
         print
 
     };
