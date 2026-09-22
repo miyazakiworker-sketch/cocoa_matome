@@ -487,30 +487,76 @@
         }
 
 
-        @media print {
+       @media print {
 
-            body {
+    html,
+    body {
 
-                background: #fff;
+        margin: 0 !important;
 
-                color: #000;
+        padding: 0 !important;
 
-            }
+        width: 100% !important;
 
-            .no-print {
+        min-height: 0 !important;
 
-                display: none !important;
+        background: #fff !important;
 
-            }
+        color: #000 !important;
 
-            .print-only {
+    }
 
-                display: block !important;
 
-            }
+    /*
+     * 印刷時はアプリ画面を全部隠す
+     */
 
-        }
+    .app > *:not(#printPreview) {
 
+        display: none !important;
+
+    }
+
+
+    /*
+     * 印刷専用書類だけ表示
+     */
+
+    #printPreview {
+
+        display: block !important;
+
+        width: 100% !important;
+
+        margin: 0 !important;
+
+        padding: 0 !important;
+
+    }
+
+
+    /*
+     * print-only の既存指定を上書き
+     */
+
+    .print-only {
+
+        display: block !important;
+
+    }
+
+
+    /*
+     * 念のため非印刷要素も完全非表示
+     */
+
+    .no-print {
+
+        display: none !important;
+
+    }
+
+}
     </style>
 
 </head>
@@ -724,11 +770,10 @@
          印刷用プレビュー
     ================================================== -->
 
-    <section
-        id="printPreview"
-        class="print-only">
-    </section>
-
+  <section
+    id="printPreview"
+    class="print-only">
+</section>
 
     <footer>
 
