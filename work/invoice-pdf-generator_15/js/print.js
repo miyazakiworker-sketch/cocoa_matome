@@ -24,39 +24,38 @@ Invoice.Print = (() => {
         bind();
 
         return true;
-
     }
 
 
     /**
      * ======================================================
-     * ボタンイベント
+     * 印刷ボタン
      * ======================================================
      */
 
     function bind() {
 
-        document.addEventListener(
+        const button =
+            COCOA.id("printBtn");
+
+
+        if (!button) {
+
+            console.error(
+                "Invoice.Print: #printBtn が見つかりません。"
+            );
+
+            return;
+        }
+
+
+        /*
+         * 既存イベントとの二重実行を防止
+         */
+
+        button.addEventListener(
             "click",
-            function (e) {
-
-                const button =
-                    e.target.closest(
-                        "#printBtn"
-                    );
-
-
-                if (!button) {
-                    return;
-                }
-
-
-                e.preventDefault();
-
-
-                print();
-
-            }
+            handlePrintClick
         );
 
     }
@@ -64,7 +63,27 @@ Invoice.Print = (() => {
 
     /**
      * ======================================================
-     * 印刷開始
+     * 印刷クリック
+     * ======================================================
+     */
+
+    function handlePrintClick(e) {
+
+        e.preventDefault();
+
+        e.stopPropagation();
+
+        e.stopImmediatePropagation();
+
+
+        print();
+
+    }
+
+
+    /**
+     * ======================================================
+     * 印刷
      * ======================================================
      */
 
@@ -80,11 +99,9 @@ Invoice.Print = (() => {
                 "function"
         ) {
 
-            const valid =
-                Invoice.Validation.validate();
-
-
-            if (!valid) {
+            if (
+                !Invoice.Validation.validate()
+            ) {
 
                 if (
                     typeof Invoice.Validation
@@ -98,14 +115,13 @@ Invoice.Print = (() => {
                 }
 
                 return false;
-
             }
 
         }
 
 
         /*
-         * 最新の計算結果を反映
+         * 最新計算
          */
 
         if (
@@ -120,37 +136,29 @@ Invoice.Print = (() => {
 
 
         /*
-         * 最新データ取得
+         * データ取得
          */
 
-        let data = null;
-
-
         if (
-            Invoice.Save &&
-            typeof Invoice.Save.collect ===
+            !Invoice.Save ||
+            typeof Invoice.Save.collect !==
                 "function"
         ) {
 
-            data =
-                Invoice.Save.collect();
-
-        }
-
-
-        if (!data) {
-
             console.error(
-                "Invoice.Print: データを取得できません。"
+                "Invoice.Print: Invoice.Save.collect がありません。"
             );
 
             return false;
-
         }
 
 
+        const data =
+            Invoice.Save.collect();
+
+
         /*
-         * 書類HTML生成
+         * テンプレート生成
          */
 
         if (
@@ -160,11 +168,10 @@ Invoice.Print = (() => {
         ) {
 
             console.error(
-                "Invoice.Print: Template.render が見つかりません。"
+                "Invoice.Print: Invoice.Template.render がありません。"
             );
 
             return false;
-
         }
 
 
@@ -177,62 +184,39 @@ Invoice.Print = (() => {
         if (!documentHTML) {
 
             console.error(
-                "Invoice.Print: 印刷用HTMLを生成できません。"
+                "Invoice.Print: 印刷内容が空です。"
             );
 
             return false;
-
         }
 
 
         /*
-         * 印刷用ウィンドウ
+         * ポップアップを開く
          */
 
         const printWindow =
             window.open(
                 "",
-                "_blank",
-                "width=900,height=1200"
+                "_blank"
             );
 
 
         if (!printWindow) {
 
-            if (
-                window.COCOA &&
-                typeof COCOA.toast ===
-                    "function"
-            ) {
-
-                COCOA.toast(
-                    "ポップアップがブロックされています。ブラウザの設定を確認してください。"
-                );
-
-            } else {
-
-                alert(
-                    "ポップアップがブロックされています。ブラウザの設定を確認してください。"
-                );
-
-            }
+            showError(
+                "印刷画面を開けませんでした。ポップアップを許可してください。"
+            );
 
             return false;
-
         }
 
 
         /*
-         * 印刷用HTML
-         *
-         * Template.jsは書類部分だけを返す。
-         * ここで印刷専用CSSを外側から与える。
+         * 印刷専用HTML
          */
 
-        printWindow.document.open();
-
-
-        printWindow.document.write(`
+        const html = `
 
 <!DOCTYPE html>
 
@@ -247,26 +231,26 @@ Invoice.Print = (() => {
     content="width=device-width, initial-scale=1.0"
 >
 
-<title>印刷</title>
+<title>COCOA TOOLS 印刷</title>
 
 
 <style>
 
-* {
-    box-sizing: border-box;
-}
-
-
 html,
 body {
+
     margin: 0;
+
     padding: 0;
+
+    width: 100%;
+
+    background: #fff;
+
 }
 
 
 body {
-
-    background: #fff;
 
     color: #111;
 
@@ -287,6 +271,10 @@ body {
 }
 
 
+/* ==========================================================
+   A4
+========================================================== */
+
 .invoice-document {
 
     width: 210mm;
@@ -299,8 +287,14 @@ body {
 
     background: #fff;
 
+    box-sizing: border-box;
+
 }
 
+
+/* ==========================================================
+   ヘッダー
+========================================================== */
 
 .invoice-header {
 
@@ -312,7 +306,7 @@ body {
 
     gap: 20px;
 
-    margin-bottom: 22px;
+    margin-bottom: 24px;
 
 }
 
@@ -341,6 +335,10 @@ body {
 }
 
 
+/* ==========================================================
+   宛名
+========================================================== */
+
 .invoice-client {
 
     margin-bottom: 18px;
@@ -356,7 +354,7 @@ body {
 
     padding-bottom: 5px;
 
-    border-bottom: 1px solid #222;
+    border-bottom: 1px solid #111;
 
     font-size: 18px;
 
@@ -376,6 +374,10 @@ body {
 }
 
 
+/* ==========================================================
+   件名
+========================================================== */
+
 .invoice-subject {
 
     margin-bottom: 18px;
@@ -388,6 +390,10 @@ body {
 
 }
 
+
+/* ==========================================================
+   明細
+========================================================== */
 
 .invoice-items {
 
@@ -406,8 +412,6 @@ body {
     padding: 7px 8px;
 
     border: 1px solid #999;
-
-    vertical-align: middle;
 
 }
 
@@ -475,14 +479,16 @@ body {
 
 .empty-row {
 
-    height: 40px;
-
     text-align: center;
 
     color: #666;
 
 }
 
+
+/* ==========================================================
+   合計
+========================================================== */
 
 .invoice-total {
 
@@ -501,18 +507,9 @@ body {
 
     align-items: center;
 
-    gap: 20px;
-
     padding: 6px 8px;
 
     border-bottom: 1px solid #ddd;
-
-}
-
-
-.invoice-total-row strong {
-
-    white-space: nowrap;
 
 }
 
@@ -532,6 +529,10 @@ body {
 }
 
 
+/* ==========================================================
+   振込先・備考
+========================================================== */
+
 .invoice-bank,
 .invoice-memo {
 
@@ -549,7 +550,7 @@ body {
 
     padding-bottom: 4px;
 
-    border-bottom: 1px solid #222;
+    border-bottom: 1px solid #111;
 
 }
 
@@ -563,6 +564,10 @@ body {
 }
 
 
+/* ==========================================================
+   発行者
+========================================================== */
+
 .invoice-company {
 
     margin-top: 28px;
@@ -573,8 +578,6 @@ body {
 
 
 .invoice-company-name {
-
-    margin-bottom: 3px;
 
     font-size: 15px;
 
@@ -589,6 +592,10 @@ body {
 
 }
 
+
+/* ==========================================================
+   フッター
+========================================================== */
 
 .invoice-footer {
 
@@ -607,16 +614,20 @@ body {
 }
 
 
+/* ==========================================================
+   印刷
+========================================================== */
+
+@page {
+
+    size: A4 portrait;
+
+    margin: 0;
+
+}
+
+
 @media print {
-
-    @page {
-
-        size: A4 portrait;
-
-        margin: 0;
-
-    }
-
 
     html,
     body {
@@ -628,8 +639,6 @@ body {
         margin: 0;
 
         padding: 0;
-
-        background: #fff;
 
     }
 
@@ -646,38 +655,7 @@ body {
 
     }
 
-
-    .invoice-items {
-
-        break-inside: auto;
-
-    }
-
-
-    .invoice-items tr {
-
-        break-inside: avoid;
-
-    }
-
-
-    .invoice-total {
-
-        break-inside: avoid;
-
-    }
-
-
-    .invoice-bank,
-    .invoice-memo,
-    .invoice-company {
-
-        break-inside: avoid;
-
-    }
-
 }
-
 
 </style>
 
@@ -703,11 +681,12 @@ window.addEventListener(
                 window.print();
 
             },
-            300
+            500
         );
 
     }
 );
+
 
 window.addEventListener(
     "afterprint",
@@ -731,14 +710,44 @@ window.addEventListener(
 </body>
 
 </html>
+`;
 
-        `);
 
+        printWindow.document.open();
+
+        printWindow.document.write(
+            html
+        );
 
         printWindow.document.close();
 
 
         return true;
+
+    }
+
+
+    /**
+     * ======================================================
+     * エラー表示
+     * ======================================================
+     */
+
+    function showError(message) {
+
+        if (
+            window.COCOA &&
+            typeof COCOA.toast ===
+                "function"
+        ) {
+
+            COCOA.toast(message);
+
+            return;
+        }
+
+
+        alert(message);
 
     }
 
