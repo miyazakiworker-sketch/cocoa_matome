@@ -1,536 +1,240 @@
 /* =========================================================
    COCOA TOOLS v2.0
-   内装クロス・床資材 一瞬必要数カウンター
-   ========================================================= */
+   内装クロス・床資材 必要数カウンター
+========================================================= */
 
-(() => {
-  "use strict";
-
-
-  /* =======================================================
-     SETTINGS
-  ======================================================= */
-
-  const STORAGE_KEY = "cocoa-tools-cross-floor-v2";
-
-  const DEFAULT_STATE = {
-    siteName: "",
-    roomName: "",
-
-    mainMode: "cross",
-    inputType: "dim",
-
-    width: "",
-    length: "",
-    height: "2.4",
-    directArea: "",
-
-    lossRate: 0.10,
-
-    memo: ""
-  };
+"use strict";
 
 
-  /* =======================================================
-     DOM
-  ======================================================= */
+/* =========================================================
+   設定
+========================================================= */
 
-  const $ = (id) => document.getElementById(id);
+const STORAGE_KEY = "cocoa_cross_floor_v2";
 
+const DEFAULT_STATE = {
+  siteName: "",
+  roomName: "",
 
-  const els = {
+  mainMode: "cross",
+  inputType: "dim",
+  lossRate: 0.10,
 
-    siteName: $("siteName"),
-    roomName: $("roomName"),
+  dimWidth: "",
+  dimLength: "",
+  dimHeight: "2.4",
+  directArea: "",
 
-    modeCross: $("modeCross"),
-    modeFloor: $("modeFloor"),
-
-    inputTypeDim: $("inputTypeDim"),
-    inputTypeArea: $("inputTypeArea"),
-
-    panelDim: $("panelDim"),
-    panelArea: $("panelArea"),
-
-    heightField: $("heightField"),
-    directAreaLabel: $("directAreaLabel"),
-
-    dimWidth: $("dimWidth"),
-    dimLength: $("dimLength"),
-    dimHeight: $("dimHeight"),
-    directArea: $("directArea"),
-
-    loss5: $("loss5"),
-    loss10: $("loss10"),
-    loss15: $("loss15"),
-
-    resArea: $("resArea"),
-    resExact: $("resExact"),
-    resLossInc: $("resLossInc"),
-
-    resultMode: $("resultMode"),
-    resultLossRate: $("resultLossRate"),
-
-    genchoMemo: $("genchoMemo"),
-
-    copyOrderBtn: $("copyOrderBtn"),
-    copyLineBtn: $("copyLineBtn"),
-    copyXBtn: $("copyXBtn"),
-    copyImageBtn: $("copyImageBtn"),
-
-    actionMessage: $("actionMessage"),
-
-    imageSite: $("imageSite"),
-    imageRoom: $("imageRoom"),
-    imageArea: $("imageArea"),
-    imageLoss: $("imageLoss"),
-
-    saveStatus: $("saveStatus"),
-
-    imageResult: $("imageResult")
-  };
+  memo: ""
+};
 
 
-  /* =======================================================
-     STATE
-  ======================================================= */
+/* =========================================================
+   現在の状態
+========================================================= */
 
-  let state = {
-    ...DEFAULT_STATE
-  };
+let state = {
+  ...DEFAULT_STATE
+};
 
 
-  /* =======================================================
-     UTILITY
-  ======================================================= */
+/* =========================================================
+   DOM
+========================================================= */
 
-  function round2(value) {
-    return Math.round(value * 100) / 100;
+const $ = (id) => document.getElementById(id);
+
+
+/* 現場情報 */
+const siteName = $("siteName");
+const roomName = $("roomName");
+
+
+/* モード */
+const modeCross = $("modeCross");
+const modeFloor = $("modeFloor");
+
+const inputTypeDim = $("inputTypeDim");
+const inputTypeArea = $("inputTypeArea");
+
+const panelDim = $("panelDim");
+const panelArea = $("panelArea");
+
+const groupHeight = $("groupHeight");
+const labelDirectArea = $("labelDirectArea");
+
+
+/* 寸法 */
+const dimWidth = $("dimWidth");
+const dimLength = $("dimLength");
+const dimHeight = $("dimHeight");
+const directArea = $("directArea");
+
+
+/* ロス */
+const loss5 = $("loss5");
+const loss10 = $("loss10");
+const loss15 = $("loss15");
+
+
+/* 結果 */
+const resArea = $("resArea");
+const resExact = $("resExact");
+const resLossInc = $("resLossInc");
+
+const resultModeLabel = $("resultModeLabel");
+const resultLossLabel = $("resultLossLabel");
+
+
+/* メモ */
+const genchoMemo = $("genchoMemo");
+
+
+/* アクション */
+const copyOrderBtn = $("copyOrderBtn");
+const copyLineBtn = $("copyLineBtn");
+const copyXBtn = $("copyXBtn");
+const copyImageBtn = $("copyImageBtn");
+const saveImageBtn = $("saveImageBtn");
+const copyResultBtn = $("copyResultBtn");
+const resetBtn = $("resetBtn");
+
+
+/* 生成テキスト */
+const generatedText = $("generatedText");
+
+
+/* 保存表示 */
+const saveStatus = $("saveStatus");
+
+
+/* =========================================================
+   数値処理
+========================================================= */
+
+function toNumber(value) {
+  const number = parseFloat(value);
+
+  if (!Number.isFinite(number) || number < 0) {
+    return 0;
   }
 
+  return number;
+}
 
-  function ceil0(value) {
-    return Math.ceil(value);
+
+function round2(number) {
+  return Math.round((number + Number.EPSILON) * 100) / 100;
+}
+
+
+function ceil0(number) {
+  return Math.ceil(number);
+}
+
+
+function formatNumber(number, digits = 2) {
+  if (!Number.isFinite(number)) {
+    return "0";
   }
 
+  return number.toLocaleString("ja-JP", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: digits
+  });
+}
 
-  function escapeText(value) {
-    return String(value ?? "").trim();
-  }
 
+/* =========================================================
+   計算
+========================================================= */
 
-  function formatPercent(rate) {
-    return `${Math.round(rate * 100)}%`;
-  }
+function calculate() {
 
+  let area = 0;
 
-  function getModeName() {
-    return state.mainMode === "cross"
-      ? "壁紙・クロス"
-      : "床材";
-  }
+  if (state.inputType === "dim") {
 
-
-  function hasCalculationInput() {
-
-    if (state.inputType === "area") {
-      return Number(state.directArea) > 0;
-    }
-
-    return (
-      Number(state.width) > 0 &&
-      Number(state.length) > 0
-    );
-  }
-
-
-  /* =======================================================
-     LOCAL STORAGE
-  ======================================================= */
-
-  function saveState() {
-
-    try {
-
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(state)
-      );
-
-      showSaveStatus("💾 自動保存済み");
-
-    } catch (error) {
-
-      console.warn(
-        "LocalStorage save failed:",
-        error
-      );
-
-      showSaveStatus("⚠️ 保存できませんでした");
-    }
-  }
-
-
-  function loadState() {
-
-    try {
-
-      const saved =
-        localStorage.getItem(STORAGE_KEY);
-
-      if (!saved) {
-        return;
-      }
-
-      const parsed =
-        JSON.parse(saved);
-
-      state = {
-        ...DEFAULT_STATE,
-        ...parsed
-      };
-
-    } catch (error) {
-
-      console.warn(
-        "LocalStorage load failed:",
-        error
-      );
-
-      state = {
-        ...DEFAULT_STATE
-      };
-    }
-  }
-
-
-  function clearSavedData() {
-
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (error) {
-      console.warn(error);
-    }
-  }
-
-
-  function showSaveStatus(message) {
-
-    if (!els.saveStatus) {
-      return;
-    }
-
-    els.saveStatus.textContent = message;
-  }
-
-
-  /* =======================================================
-     APPLY STATE TO UI
-  ======================================================= */
-
-  function applyStateToUI() {
-
-    els.siteName.value =
-      state.siteName || "";
-
-    els.roomName.value =
-      state.roomName || "";
-
-    els.dimWidth.value =
-      state.width || "";
-
-    els.dimLength.value =
-      state.length || "";
-
-    els.dimHeight.value =
-      state.height || "2.4";
-
-    els.directArea.value =
-      state.directArea || "";
-
-    els.genchoMemo.value =
-      state.memo || "";
-
-
-    updateModeButtons();
-
-    updateInputTypeButtons();
-
-    updateLossButtons();
-
-    updatePanelVisibility();
-
-    updateAllCalculations();
-  }
-
-
-  /* =======================================================
-     STATE FROM UI
-  ======================================================= */
-
-  function readFormToState() {
-
-    state.siteName =
-      els.siteName.value;
-
-    state.roomName =
-      els.roomName.value;
-
-    state.width =
-      els.dimWidth.value;
-
-    state.length =
-      els.dimLength.value;
-
-    state.height =
-      els.dimHeight.value;
-
-    state.directArea =
-      els.directArea.value;
-
-    state.memo =
-      els.genchoMemo.value;
-  }
-
-
-  /* =======================================================
-     MODE BUTTONS
-  ======================================================= */
-
-  function updateModeButtons() {
-
-    els.modeCross.classList.toggle(
-      "active",
-      state.mainMode === "cross"
-    );
-
-    els.modeFloor.classList.toggle(
-      "active",
-      state.mainMode === "floor"
-    );
-  }
-
-
-  function setMainMode(mode) {
-
-    state.mainMode = mode;
-
-    updateModeButtons();
-
-    updatePanelVisibility();
-
-    updateAllCalculations();
-
-    saveState();
-  }
-
-
-  /* =======================================================
-     INPUT TYPE
-  ======================================================= */
-
-  function updateInputTypeButtons() {
-
-    els.inputTypeDim.classList.toggle(
-      "active",
-      state.inputType === "dim"
-    );
-
-    els.inputTypeArea.classList.toggle(
-      "active",
-      state.inputType === "area"
-    );
-  }
-
-
-  function setInputType(type) {
-
-    state.inputType = type;
-
-    updateInputTypeButtons();
-
-    updatePanelVisibility();
-
-    updateAllCalculations();
-
-    saveState();
-  }
-
-
-  /* =======================================================
-     PANEL VISIBILITY
-  ======================================================= */
-
-  function updatePanelVisibility() {
-
-    const isCross =
-      state.mainMode === "cross";
-
-    const isDim =
-      state.inputType === "dim";
-
-
-    els.panelDim.classList.toggle(
-      "hidden",
-      !isDim
-    );
-
-    els.panelArea.classList.toggle(
-      "hidden",
-      isDim
-    );
-
-
-    els.heightField.classList.toggle(
-      "hidden",
-      !isCross
-    );
-
-
-    if (isCross) {
-
-      els.directAreaLabel.textContent =
-        "壁の総面積";
-
-    } else {
-
-      els.directAreaLabel.textContent =
-        "床の総面積";
-    }
-  }
-
-
-  /* =======================================================
-     LOSS RATE
-  ======================================================= */
-
-  function updateLossButtons() {
-
-    els.loss5.classList.toggle(
-      "active",
-      state.lossRate === 0.05
-    );
-
-    els.loss10.classList.toggle(
-      "active",
-      state.lossRate === 0.10
-    );
-
-    els.loss15.classList.toggle(
-      "active",
-      state.lossRate === 0.15
-    );
-  }
-
-
-  function setLossRate(rate) {
-
-    state.lossRate = rate;
-
-    updateLossButtons();
-
-    updateAllCalculations();
-
-    saveState();
-  }
-
-
-  /* =======================================================
-     CALCULATION CORE
-  ======================================================= */
-
-  function calculate() {
-
-    let area = 0;
-
-
-    if (state.inputType === "dim") {
-
-      const width =
-        parseFloat(state.width) || 0;
-
-      const length =
-        parseFloat(state.length) || 0;
-
-      const height =
-        parseFloat(state.height) || 2.4;
-
-
-      if (state.mainMode === "cross") {
-
-        /*
-          元コードの計算ロジックを維持。
-
-          壁4面の外周面積
-          (横幅 + 奥行) × 2 × 高さ
-        */
-
-        area =
-          (width + length) *
-          2 *
-          height;
-
-      } else {
-
-        /*
-          床面積
-          横幅 × 奥行
-        */
-
-        area =
-          width * length;
-      }
-
-    } else {
-
-      area =
-        parseFloat(state.directArea) || 0;
-    }
-
-
-    area = Math.max(0, area);
+    const width = toNumber(state.dimWidth);
+    const length = toNumber(state.dimLength);
+    const height =
+      toNumber(state.dimHeight) || 2.4;
 
 
     if (state.mainMode === "cross") {
 
       /*
-        クロス
+       * クロス
+       * 周長 × 天井高
+       */
+      area =
+        (width + length) *
+        2 *
+        height;
 
-        有効幅92cm
-        0.92m / 1m
-      */
+    } else {
 
-      const exactM =
-        area / 0.92;
+      /*
+       * 床材
+       */
+      area =
+        width *
+        length;
+    }
 
-      const lossM =
-        exactM *
-        (1 + state.lossRate);
+  } else {
+
+    area =
+      toNumber(state.directArea);
+  }
 
 
-      return {
-        area,
+  const roundedArea = round2(area);
 
-        exactText:
-          area > 0
-            ? `約 ${round2(exactM)} m`
-            : "0",
+  let exactText = "0";
+  let lossText = "0";
 
-        lossText:
-          area > 0
-            ? `約 ${ceil0(lossM)} m`
-            : "0"
-      };
+  let exactValue = 0;
+  let lossValue = 0;
 
+
+  /* -----------------------------------------
+     クロス
+  ----------------------------------------- */
+
+  if (state.mainMode === "cross") {
+
+    /*
+     * 有効幅92cm換算
+     */
+    exactValue =
+      area / 0.92;
+
+    lossValue =
+      exactValue *
+      (1 + state.lossRate);
+
+
+    if (area > 0) {
+
+      exactText =
+        `約 ${formatNumber(round2(exactValue))} m`;
+
+      lossText =
+        `約 ${formatNumber(ceil0(lossValue))} m`;
     }
 
 
-    /*
-      床材
+  /* -----------------------------------------
+     床材
+  ----------------------------------------- */
 
-      1ケース = 3.3㎡
-      30cm角 = 0.09㎡
-    */
+  } else {
+
+    /*
+     * 1ケース = 約3.3㎡
+     * 1枚 = 30cm × 30cm = 0.09㎡
+     */
 
     const exactCase =
       area / 3.3;
@@ -547,441 +251,897 @@
       (1 + state.lossRate);
 
 
-    return {
+    exactValue = exactCase;
+    lossValue = lossCase;
 
-      area,
 
-      exactText:
-        area > 0
-          ? `${round2(exactCase)} ケース / ${ceil0(exactTile)} 枚`
-          : "0",
+    if (area > 0) {
 
-      lossText:
-        area > 0
-          ? `${ceil0(lossCase)} ケース / ${ceil0(lossTile)} 枚`
-          : "0"
+      exactText =
+        `${formatNumber(round2(exactCase))} ケース / ` +
+        `${formatNumber(ceil0(exactTile))} 枚`;
+
+      lossText =
+        `${formatNumber(ceil0(lossCase))} ケース / ` +
+        `${formatNumber(ceil0(lossTile))} 枚`;
+    }
+  }
+
+
+  return {
+    area,
+    roundedArea,
+    exactValue,
+    lossValue,
+    exactText,
+    lossText
+  };
+}
+
+
+/* =========================================================
+   画面更新
+========================================================= */
+
+function updateCalculation() {
+
+  const result = calculate();
+
+
+  resArea.textContent =
+    `${formatNumber(result.roundedArea)} ㎡`;
+
+  resExact.textContent =
+    result.exactText;
+
+  resLossInc.textContent =
+    result.lossText;
+
+
+  resultModeLabel.textContent =
+    state.mainMode === "cross"
+      ? "壁紙（クロス）"
+      : "床材";
+
+
+  resultLossLabel.textContent =
+    `ロス ${state.lossRate * 100}%`;
+
+
+  updateGeneratedText();
+}
+
+
+/* =========================================================
+   モードUI
+========================================================= */
+
+function updateModeUI() {
+
+  if (state.mainMode === "cross") {
+
+    modeCross.classList.add("active");
+    modeFloor.classList.remove("active");
+
+    groupHeight.style.display = "block";
+
+    labelDirectArea.textContent =
+      "壁の総面積";
+
+  } else {
+
+    modeCross.classList.remove("active");
+    modeFloor.classList.add("active");
+
+    groupHeight.style.display = "none";
+
+    labelDirectArea.textContent =
+      "床の総面積";
+  }
+
+
+  if (state.inputType === "dim") {
+
+    inputTypeDim.classList.add("active");
+    inputTypeArea.classList.remove("active");
+
+    panelDim.classList.add("show");
+    panelArea.classList.remove("show");
+
+  } else {
+
+    inputTypeDim.classList.remove("active");
+    inputTypeArea.classList.add("active");
+
+    panelDim.classList.remove("show");
+    panelArea.classList.add("show");
+  }
+
+
+  loss5.classList.remove("active");
+  loss10.classList.remove("active");
+  loss15.classList.remove("active");
+
+
+  if (state.lossRate === 0.05) {
+    loss5.classList.add("active");
+  }
+
+  if (state.lossRate === 0.10) {
+    loss10.classList.add("active");
+  }
+
+  if (state.lossRate === 0.15) {
+    loss15.classList.add("active");
+  }
+}
+
+
+/* =========================================================
+   状態 → フォーム
+========================================================= */
+
+function renderState() {
+
+  siteName.value =
+    state.siteName;
+
+  roomName.value =
+    state.roomName;
+
+  dimWidth.value =
+    state.dimWidth;
+
+  dimLength.value =
+    state.dimLength;
+
+  dimHeight.value =
+    state.dimHeight || "2.4";
+
+  directArea.value =
+    state.directArea;
+
+  genchoMemo.value =
+    state.memo;
+
+
+  updateModeUI();
+  updateCalculation();
+}
+
+
+/* =========================================================
+   フォーム → 状態
+========================================================= */
+
+function readFormState() {
+
+  state.siteName =
+    siteName.value.trim();
+
+  state.roomName =
+    roomName.value.trim();
+
+  state.dimWidth =
+    dimWidth.value;
+
+  state.dimLength =
+    dimLength.value;
+
+  state.dimHeight =
+    dimHeight.value;
+
+  state.directArea =
+    directArea.value;
+
+  state.memo =
+    genchoMemo.value;
+}
+
+
+/* =========================================================
+   LocalStorage 保存
+========================================================= */
+
+function saveState(showMessage = true) {
+
+  readFormState();
+
+  try {
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(state)
+    );
+
+
+    if (showMessage) {
+      showSaveStatus();
+    }
+
+  } catch (error) {
+
+    console.warn(
+      "LocalStorageへの保存に失敗しました。",
+      error
+    );
+  }
+}
+
+
+/* =========================================================
+   LocalStorage 復元
+========================================================= */
+
+function loadState() {
+
+  try {
+
+    const saved =
+      localStorage.getItem(STORAGE_KEY);
+
+
+    if (!saved) {
+      state = {
+        ...DEFAULT_STATE
+      };
+
+      return;
+    }
+
+
+    const parsed =
+      JSON.parse(saved);
+
+
+    state = {
+      ...DEFAULT_STATE,
+      ...parsed
+    };
+
+
+  } catch (error) {
+
+    console.warn(
+      "保存データの読み込みに失敗しました。",
+      error
+    );
+
+    state = {
+      ...DEFAULT_STATE
     };
   }
+}
 
 
-  /* =======================================================
-     UPDATE RESULT
-  ======================================================= */
+/* =========================================================
+   保存表示
+========================================================= */
 
-  function updateAllCalculations() {
+let saveTimer = null;
 
-    const result =
-      calculate();
+function showSaveStatus() {
 
-
-    els.resArea.textContent =
-      `${round2(result.area)} ㎡`;
-
-    els.resExact.textContent =
-      result.exactText;
-
-    els.resLossInc.textContent =
-      result.lossText;
-
-    els.resultMode.textContent =
-      getModeName();
-
-    els.resultLossRate.textContent =
-      formatPercent(state.lossRate);
-
-
-    updateImagePreview(result);
+  if (!saveStatus) {
+    return;
   }
 
 
-  /* =======================================================
-     IMAGE PREVIEW DATA
-  ======================================================= */
+  saveStatus.textContent =
+    "✓ 保存しました";
 
-  function updateImagePreview(result) {
-
-    els.imageSite.textContent =
-      escapeText(state.siteName) ||
-      "未入力";
-
-    els.imageRoom.textContent =
-      escapeText(state.roomName) ||
-      "未入力";
-
-    els.imageArea.textContent =
-      `${round2(result.area)}㎡`;
-
-    els.imageLoss.textContent =
-      result.lossText;
-  }
+  saveStatus.classList.add("saved");
 
 
-  /* =======================================================
-     TEXT GENERATORS
-  ======================================================= */
+  clearTimeout(saveTimer);
 
-  function buildOrderText() {
 
-    const result =
-      calculate();
+  saveTimer =
+    setTimeout(() => {
 
-    let text = "";
+      saveStatus.textContent =
+        "● 自動保存 ON";
 
-    text += "【COCOA TOOLS｜資材発注メモ】\n";
-    text += "━━━━━━━━━━━━━━━━\n";
+      saveStatus.classList.remove("saved");
 
-    text += `■ 現場名：${escapeText(state.siteName) || "未入力"}\n`;
-    text += `■ 部屋名：${escapeText(state.roomName) || "未入力"}\n`;
-    text += `■ 資材：${getModeName()}\n`;
+    }, 900);
+}
 
-    if (state.inputType === "dim") {
 
-      text += `■ 寸法：${state.width || "0"}m × ${state.length || "0"}m`;
+/* =========================================================
+   入力変更
+========================================================= */
 
-      if (state.mainMode === "cross") {
-        text += ` × H${state.height || "2.4"}m`;
-      }
+function handleInput() {
 
-      text += "\n";
+  readFormState();
 
-    } else {
+  updateCalculation();
 
-      text += `■ 施工面積入力：${state.directArea || "0"}㎡\n`;
+  saveState(false);
+
+  showSaveStatus();
+}
+
+
+/* =========================================================
+   モード変更
+========================================================= */
+
+modeCross.addEventListener("click", () => {
+
+  state.mainMode = "cross";
+
+  updateModeUI();
+  updateCalculation();
+
+  saveState();
+});
+
+
+modeFloor.addEventListener("click", () => {
+
+  state.mainMode = "floor";
+
+  updateModeUI();
+  updateCalculation();
+
+  saveState();
+});
+
+
+inputTypeDim.addEventListener("click", () => {
+
+  state.inputType = "dim";
+
+  updateModeUI();
+  updateCalculation();
+
+  saveState();
+});
+
+
+inputTypeArea.addEventListener("click", () => {
+
+  state.inputType = "area";
+
+  updateModeUI();
+  updateCalculation();
+
+  saveState();
+});
+
+
+/* =========================================================
+   ロス率
+========================================================= */
+
+loss5.addEventListener("click", () => {
+
+  state.lossRate = 0.05;
+
+  updateModeUI();
+  updateCalculation();
+
+  saveState();
+});
+
+
+loss10.addEventListener("click", () => {
+
+  state.lossRate = 0.10;
+
+  updateModeUI();
+  updateCalculation();
+
+  saveState();
+});
+
+
+loss15.addEventListener("click", () => {
+
+  state.lossRate = 0.15;
+
+  updateModeUI();
+  updateCalculation();
+
+  saveState();
+});
+
+
+/* =========================================================
+   入力イベント
+========================================================= */
+
+[
+  siteName,
+  roomName,
+  dimWidth,
+  dimLength,
+  dimHeight,
+  directArea,
+  genchoMemo
+].forEach((element) => {
+
+  element.addEventListener(
+    "input",
+    handleInput
+  );
+});
+
+
+/* =========================================================
+   基本結果テキスト
+========================================================= */
+
+function buildResultText() {
+
+  const result =
+    calculate();
+
+
+  const modeName =
+    state.mainMode === "cross"
+      ? "壁紙（クロス）"
+      : "床材";
+
+
+  let text = "";
+
+  text +=
+    "【内装資材 必要数カウンター】\n";
+
+  text +=
+    `■ 現場：${state.siteName || "未入力"}\n`;
+
+  text +=
+    `■ 部屋：${state.roomName || "未入力"}\n`;
+
+  text +=
+    `■ モード：${modeName}\n`;
+
+
+  if (state.inputType === "dim") {
+
+    text +=
+      `■ 寸法：横幅 ${state.dimWidth || "0"}m`;
+
+    text +=
+      ` / 奥行 ${state.dimLength || "0"}m`;
+
+    if (state.mainMode === "cross") {
+
+      text +=
+        ` / 天井高 ${state.dimHeight || "2.4"}m`;
     }
-
-    text += `■ 施工面積：${round2(result.area)}㎡\n`;
-    text += `■ ぴったり数量：${result.exactText}\n`;
-    text += `■ ロス率：${formatPercent(state.lossRate)}\n`;
-    text += `■ 発注数量：${result.lossText}\n`;
-
-    if (state.memo.trim()) {
-
-      text += "\n■ 現場メモ\n";
-      text += `${state.memo.trim()}\n`;
-    }
-
-    text += "━━━━━━━━━━━━━━━━\n";
-    text += "COCOA TOOLS\n";
-
-    return text;
-  }
-
-
-  function buildLineText() {
-
-    const result =
-      calculate();
-
-    let text = "";
-
-    text += "【現場報告】資材数量\n";
-
-    if (state.siteName.trim()) {
-      text += `現場：${state.siteName.trim()}\n`;
-    }
-
-    if (state.roomName.trim()) {
-      text += `部屋：${state.roomName.trim()}\n`;
-    }
-
-    text += `資材：${getModeName()}\n`;
-    text += `施工面積：${round2(result.area)}㎡\n`;
-    text += `発注目安：${result.lossText}\n`;
-    text += `ロス率：${formatPercent(state.lossRate)}\n`;
-
-    if (state.memo.trim()) {
-      text += `メモ：${state.memo.trim()}\n`;
-    }
-
-    text += "\n※数量は現場条件によって変動します。";
-
-    return text;
-  }
-
-
-  function buildXText() {
-
-    const result =
-      calculate();
-
-    let text = "";
-
-    text += "【内装資材を一瞬計算】\n";
-
-    if (state.siteName.trim()) {
-      text += `現場：${state.siteName.trim()}\n`;
-    }
-
-    text += `資材：${getModeName()}\n`;
-    text += `施工面積：${round2(result.area)}㎡\n`;
-    text += `ロス込み：${result.lossText}\n`;
 
     text += "\n";
-    text += "だるい数量計算を一瞬で。\n";
-    text += "#COCOATOOLS";
 
-    return text;
+  } else {
+
+    text +=
+      `■ 入力面積：${state.directArea || "0"}㎡\n`;
   }
 
 
-  /* =======================================================
-     CLIPBOARD TEXT
-  ======================================================= */
+  text +=
+    `■ 施工面積：${formatNumber(result.roundedArea)} ㎡\n`;
 
-  async function copyText(text) {
+  text +=
+    `■ ぴったり：${result.exactText}\n`;
 
-    if (
-      navigator.clipboard &&
-      window.isSecureContext
-    ) {
+  text +=
+    `■ ロス込み：${result.lossText}\n`;
 
-      await navigator.clipboard.writeText(text);
-
-      return true;
-    }
+  text +=
+    `■ ロス設定：${state.lossRate * 100}%増\n`;
 
 
-    /*
-      HTTPS Clipboard APIが使えない環境用の
-      フォールバック。
-    */
+  if (state.memo) {
 
-    const textarea =
-      document.createElement("textarea");
+    text +=
+      "■ 現場メモ：\n";
 
-    textarea.value = text;
-
-    textarea.style.position = "fixed";
-    textarea.style.opacity = "0";
-
-    document.body.appendChild(textarea);
-
-    textarea.focus();
-    textarea.select();
-
-    let success = false;
-
-    try {
-      success =
-        document.execCommand("copy");
-    } catch (error) {
-      console.warn(error);
-    }
-
-    textarea.remove();
-
-    if (!success) {
-      throw new Error("Clipboard copy failed.");
-    }
-
-    return true;
+    text +=
+      `${state.memo}\n`;
   }
 
 
-  /* =======================================================
-     BUTTON SUCCESS
-  ======================================================= */
+  text +=
+    "--------\n";
 
-  function showButtonSuccess(
-    button,
-    successText,
-    duration = 2000
-  ) {
+  text +=
+    "#COCOATOOLS";
 
-    const originalText =
-      button.dataset.originalText ||
-      button.textContent;
 
-    button.dataset.originalText =
-      originalText;
+  return text;
+}
 
-    button.textContent =
-      successText;
 
-    button.classList.add(
-      "button-success"
-    );
+/* =========================================================
+   発注書テキスト
+========================================================= */
 
-    window.setTimeout(() => {
+function buildOrderText() {
+
+  const result =
+    calculate();
+
+
+  const material =
+    state.mainMode === "cross"
+      ? "内装クロス"
+      : "床材";
+
+
+  let text = "";
+
+  text +=
+    "【発注用メモ】\n";
+
+  text +=
+    `現場：${state.siteName || "未入力"}\n`;
+
+  text +=
+    `部屋：${state.roomName || "未入力"}\n`;
+
+  text +=
+    `材料：${material}\n`;
+
+  text +=
+    `施工面積：${formatNumber(result.roundedArea)}㎡\n`;
+
+  text +=
+    `ぴったり数量：${result.exactText}\n`;
+
+  text +=
+    `発注数量（ロス${state.lossRate * 100}%）：${result.lossText}\n`;
+
+
+  if (state.inputType === "dim") {
+
+    text +=
+      `寸法：${state.dimWidth || "0"}m × ${state.dimLength || "0"}m`;
+
+    if (state.mainMode === "cross") {
+
+      text +=
+        ` × H${state.dimHeight || "2.4"}m`;
+    }
+
+    text += "\n";
+  }
+
+
+  if (state.memo) {
+
+    text +=
+      `現場メモ：${state.memo}\n`;
+  }
+
+
+  text +=
+    "\n※簡易計算値のため、最終発注数量は現場条件をご確認ください。";
+
+
+  return text;
+}
+
+
+/* =========================================================
+   LINE報告テキスト
+========================================================= */
+
+function buildLineText() {
+
+  const result =
+    calculate();
+
+
+  const material =
+    state.mainMode === "cross"
+      ? "クロス"
+      : "床材";
+
+
+  let text = "";
+
+  text +=
+    "【現調・数量報告】\n";
+
+  text +=
+    `現場：${state.siteName || "未入力"}\n`;
+
+  text +=
+    `部屋：${state.roomName || "未入力"}\n`;
+
+  text +=
+    `材料：${material}\n`;
+
+  text +=
+    `施工面積：${formatNumber(result.roundedArea)}㎡\n`;
+
+  text +=
+    `ぴったり：${result.exactText}\n`;
+
+  text +=
+    `ロス込み：${result.lossText}\n`;
+
+  text +=
+    `ロス設定：${state.lossRate * 100}%\n`;
+
+
+  if (state.memo) {
+
+    text +=
+      `\n【メモ】\n${state.memo}\n`;
+  }
+
+
+  text +=
+    "\n※簡易計算による目安です。";
+
+
+  return text;
+}
+
+
+/* =========================================================
+   X投稿テキスト
+========================================================= */
+
+function buildXText() {
+
+  const result =
+    calculate();
+
+
+  const material =
+    state.mainMode === "cross"
+      ? "クロス"
+      : "床材";
+
+
+  let text = "";
+
+  text +=
+    "内装資材の必要数を一瞬計算📐\n";
+
+  text +=
+    `${material}：${formatNumber(result.roundedArea)}㎡\n`;
+
+  text +=
+    `ロス込み：${result.lossText}\n`;
+
+
+  if (state.siteName) {
+
+    text +=
+      `現場：${state.siteName}\n`;
+  }
+
+
+  text +=
+    "\n現場の面倒な計算を3秒で。\n";
+
+  text +=
+    "COCOA TOOLS v2.0\n";
+
+  text +=
+    "#COCOATOOLS #建築 #現場 #無料ツール";
+
+
+  return text;
+}
+
+
+/* =========================================================
+   生成テキスト表示
+========================================================= */
+
+function updateGeneratedText() {
+
+  if (!generatedText) {
+    return;
+  }
+
+  generatedText.value =
+    buildResultText();
+}
+
+
+/* =========================================================
+   クリップボード
+========================================================= */
+
+async function copyText(
+  text,
+  button,
+  successMessage = "コピー完了！"
+) {
+
+  if (!text) {
+    return false;
+  }
+
+
+  try {
+
+    await navigator.clipboard.writeText(text);
+
+
+    if (button) {
+
+      const original =
+        button.textContent;
 
       button.textContent =
-        originalText;
+        successMessage;
 
-      button.classList.remove(
-        "button-success"
+      button.classList.add(
+        "success",
+        "copy-success"
       );
 
-    }, duration);
+
+      setTimeout(() => {
+
+        button.textContent =
+          original;
+
+        button.classList.remove(
+          "success",
+          "copy-success"
+        );
+
+      }, 1500);
+    }
+
+
+    return true;
+
+
+  } catch (error) {
+
+    /*
+     * Clipboard APIが使えない環境用
+     */
+    try {
+
+      const textarea =
+        document.createElement("textarea");
+
+      textarea.value = text;
+
+      textarea.style.position =
+        "fixed";
+
+      textarea.style.left =
+        "-9999px";
+
+      document.body.appendChild(
+        textarea
+      );
+
+      textarea.select();
+
+      document.execCommand(
+        "copy"
+      );
+
+      textarea.remove();
+
+
+      if (button) {
+
+        const original =
+          button.textContent;
+
+        button.textContent =
+          successMessage;
+
+        button.classList.add(
+          "success",
+          "copy-success"
+        );
+
+
+        setTimeout(() => {
+
+          button.textContent =
+            original;
+
+          button.classList.remove(
+            "success",
+            "copy-success"
+          );
+
+        }, 1500);
+      }
+
+
+      return true;
+
+
+    } catch (fallbackError) {
+
+      alert(
+        "コピーに失敗しました。\n生成テキスト欄からコピーしてください。"
+      );
+
+      return false;
+    }
   }
+}
 
 
-  /* =======================================================
-     ACTION MESSAGE
-  ======================================================= */
+/* =========================================================
+   発注書コピー
+========================================================= */
 
-  let actionMessageTimer = null;
+copyOrderBtn.addEventListener(
+  "click",
+  async () => {
 
+    const text =
+      buildOrderText();
 
-  function showActionMessage(message) {
+    generatedText.value =
+      text;
 
-    els.actionMessage.textContent =
-      message;
-
-    window.clearTimeout(
-      actionMessageTimer
+    await copyText(
+      text,
+      copyOrderBtn,
+      "発注書コピー完了！"
     );
-
-    actionMessageTimer =
-      window.setTimeout(() => {
-
-        els.actionMessage.textContent =
-          "";
-
-      }, 3000);
   }
+);
 
 
-  /* =======================================================
-     ORDER COPY
-  ======================================================= */
+/* =========================================================
+   LINEコピー
+========================================================= */
 
-  async function handleOrderCopy() {
+copyLineBtn.addEventListener(
+  "click",
+  async () => {
 
-    const result =
-      calculate();
+    const text =
+      buildLineText();
 
-    if (
-      result.area <= 0 &&
-      !state.memo.trim()
-    ) {
+    generatedText.value =
+      text;
 
-      alert(
-        "寸法・面積を入力するか、現調メモを入力してください。"
-      );
-
-      return;
-    }
-
-
-    try {
-
-      await copyText(
-        buildOrderText()
-      );
-
-      showButtonSuccess(
-        els.copyOrderBtn,
-        "発注書コピー完了！🍋"
-      );
-
-      showActionMessage(
-        "発注用テキストをコピーしました。"
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert(
-        "コピーに失敗しました。ブラウザのコピー権限をご確認ください。"
-      );
-    }
+    await copyText(
+      text,
+      copyLineBtn,
+      "LINE文をコピー！"
+    );
   }
+);
 
 
-  /* =======================================================
-     LINE COPY
-  ======================================================= */
+/* =========================================================
+   X投稿
+   ※ window.open() をクリック直後に実行
+========================================================= */
 
-  async function handleLineCopy() {
+copyXBtn.addEventListener(
+  "click",
+  async () => {
 
-    const result =
-      calculate();
-
-    if (
-      result.area <= 0 &&
-      !state.memo.trim()
-    ) {
-
-      alert(
-        "寸法・面積を入力するか、現調メモを入力してください。"
-      );
-
-      return;
-    }
-
-
-    try {
-
-      await copyText(
-        buildLineText()
-      );
-
-      showButtonSuccess(
-        els.copyLineBtn,
-        "LINE用コピー完了！🍋"
-      );
-
-      showActionMessage(
-        "LINEにそのまま貼り付けできます。"
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert(
-        "コピーに失敗しました。"
-      );
-    }
-  }
-
-
-  /* =======================================================
-     X
-     IMPORTANT:
-     window.open MUST BE EXECUTED IMMEDIATELY
-     ON THE FIRST ACTION PATH.
-  ======================================================= */
-
-  function handleXCopy() {
-
-    const result =
-      calculate();
-
-    if (
-      result.area <= 0 &&
-      !state.memo.trim()
-    ) {
-
-      alert(
-        "寸法・面積を入力するか、現調メモを入力してください。"
-      );
-
-      return;
-    }
-
-
-    const xText =
+    const text =
       buildXText();
+
+    const xUrl =
+      "https://x.com/intent/post?text=" +
+      encodeURIComponent(text);
 
 
     /*
-      ★ ポップアップブロック対策
-
-      非同期Clipboard処理より先に
-      XのURLを生成してwindow.openする。
-
-      setTimeout禁止。
-      Promise待機禁止。
-      clipboard処理より前に実行。
-    */
-
-    const xUrl =
-      "https://twitter.com/intent/post?text=" +
-      encodeURIComponent(xText);
-
-
+     * ポップアップブロック対策。
+     * クリックイベントの最初にXを開く。
+     */
     const xWindow =
       window.open(
         xUrl,
@@ -990,868 +1150,841 @@
       );
 
 
-    /*
-      Xが開いた後にクリップボード処理。
-    */
+    generatedText.value =
+      text;
 
-    copyText(xText)
-      .then(() => {
 
-        showButtonSuccess(
-          els.copyXBtn,
-          "コピー完了！Xへ移動します...💨"
-        );
+    const copied =
+      await copyText(
+        text,
+        copyXBtn,
+        "コピー完了！Xへ💨"
+      );
 
-        showActionMessage(
-          xWindow
-            ? "X投稿文をコピーしてXを開きました。"
-            : "投稿文をコピーしました。Xのポップアップがブロックされた可能性があります。"
-        );
 
-      })
-      .catch((error) => {
+    if (!xWindow) {
 
-        console.warn(
-          "X text copy failed:",
-          error
-        );
+      /*
+       * ポップアップがブロックされた場合
+       */
+      alert(
+        copied
+          ? "文章をコピーしました。Xが自動で開かなかった場合は、もう一度ボタンを押してください。"
+          : "Xを開けませんでした。"
+      );
+    }
+  }
+);
 
-        showButtonSuccess(
-          els.copyXBtn,
-          "Xへ移動しました！🍋"
-        );
 
-        showActionMessage(
-          "Xは開きました。コピーはブラウザ設定をご確認ください。"
+/* =========================================================
+   結果コピー
+========================================================= */
+
+copyResultBtn.addEventListener(
+  "click",
+  async () => {
+
+    const text =
+      buildResultText();
+
+    generatedText.value =
+      text;
+
+    await copyText(
+      text,
+      copyResultBtn,
+      "コピー完了！"
+    );
+  }
+);
+
+
+/* =========================================================
+   画像生成
+========================================================= */
+
+function createResultCanvas() {
+
+  const canvas =
+    document.createElement("canvas");
+
+
+  const width =
+    1200;
+
+  const height =
+    900;
+
+
+  canvas.width =
+    width;
+
+  canvas.height =
+    height;
+
+
+  const ctx =
+    canvas.getContext("2d");
+
+
+  /*
+   * 背景
+   */
+  ctx.fillStyle =
+    "#0d0f12";
+
+  ctx.fillRect(
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  /*
+   * メインカード
+   */
+  ctx.fillStyle =
+    "#1a1f26";
+
+  roundRect(
+    ctx,
+    50,
+    50,
+    width - 100,
+    height - 100,
+    35
+  );
+
+  ctx.fill();
+
+
+  /*
+   * 枠
+   */
+  ctx.strokeStyle =
+    "#2d3748";
+
+  ctx.lineWidth =
+    3;
+
+  roundRect(
+    ctx,
+    50,
+    50,
+    width - 100,
+    height - 100,
+    35
+  );
+
+  ctx.stroke();
+
+
+  /*
+   * ブランド
+   */
+  ctx.fillStyle =
+    "#a3e635";
+
+  ctx.font =
+    "bold 28px sans-serif";
+
+  ctx.fillText(
+    "COCOA TOOLS v2.0",
+    90,
+    105
+  );
+
+
+  /*
+   * タイトル
+   */
+  ctx.fillStyle =
+    "#ffffff";
+
+  ctx.font =
+    "bold 42px sans-serif";
+
+  ctx.fillText(
+    "内装資材 必要数カウンター",
+    90,
+    165
+  );
+
+
+  const result =
+    calculate();
+
+
+  const material =
+    state.mainMode === "cross"
+      ? "壁紙（クロス）"
+      : "床材";
+
+
+  /*
+   * 現場
+   */
+  ctx.fillStyle =
+    "#a0aec0";
+
+  ctx.font =
+    "bold 25px sans-serif";
+
+  ctx.fillText(
+    `現場：${state.siteName || "未入力"}`,
+    90,
+    225
+  );
+
+
+  ctx.fillText(
+    `部屋：${state.roomName || "未入力"}`,
+    90,
+    270
+  );
+
+
+  ctx.fillText(
+    `材料：${material}`,
+    90,
+    315
+  );
+
+
+  /*
+   * 区切り
+   */
+  ctx.strokeStyle =
+    "#2d3748";
+
+  ctx.lineWidth =
+    2;
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    90,
+    350
+  );
+
+  ctx.lineTo(
+    width - 90,
+    350
+  );
+
+  ctx.stroke();
+
+
+  /*
+   * 面積
+   */
+  ctx.fillStyle =
+    "#cbd5e0";
+
+  ctx.font =
+    "bold 27px sans-serif";
+
+  ctx.fillText(
+    "施工面積",
+    90,
+    410
+  );
+
+
+  ctx.fillStyle =
+    "#ffffff";
+
+  ctx.font =
+    "bold 42px sans-serif";
+
+  ctx.fillText(
+    `${formatNumber(result.roundedArea)} ㎡`,
+    500,
+    410
+  );
+
+
+  /*
+   * ぴったり
+   */
+  ctx.fillStyle =
+    "#cbd5e0";
+
+  ctx.font =
+    "bold 27px sans-serif";
+
+  ctx.fillText(
+    "ぴったり数量",
+    90,
+    480
+  );
+
+
+  ctx.fillStyle =
+    "#ffffff";
+
+  ctx.font =
+    "bold 32px sans-serif";
+
+  ctx.fillText(
+    result.exactText,
+    500,
+    480
+  );
+
+
+  /*
+   * ロス込み
+   */
+  ctx.fillStyle =
+    "#ffffff";
+
+  ctx.font =
+    "bold 30px sans-serif";
+
+  ctx.fillText(
+    `ロス込み発注数量（${state.lossRate * 100}%）`,
+    90,
+    565
+  );
+
+
+  ctx.fillStyle =
+    "#34d399";
+
+  ctx.font =
+    "bold 43px sans-serif";
+
+  ctx.fillText(
+    result.lossText,
+    90,
+    630
+  );
+
+
+  /*
+   * メモ
+   */
+  if (state.memo) {
+
+    ctx.fillStyle =
+      "#a0aec0";
+
+    ctx.font =
+      "bold 24px sans-serif";
+
+    ctx.fillText(
+      "現場メモ",
+      90,
+      690
+    );
+
+
+    ctx.fillStyle =
+      "#e2e8f0";
+
+    ctx.font =
+      "23px sans-serif";
+
+
+    const memoLines =
+      wrapText(
+        state.memo,
+        850,
+        ctx
+      );
+
+
+    memoLines
+      .slice(0, 3)
+      .forEach((line, index) => {
+
+        ctx.fillText(
+          line,
+          90,
+          730 + index * 32
         );
       });
   }
 
 
-  /* =======================================================
-     CANVAS IMAGE
-  ======================================================= */
+  /*
+   * フッター
+   */
+  ctx.fillStyle =
+    "#718096";
 
-  function getCanvasScale() {
-    return window.devicePixelRatio || 1;
-  }
+  ctx.font =
+    "20px sans-serif";
+
+  ctx.fillText(
+    "#COCOATOOLS",
+    90,
+    840
+  );
 
 
-  function drawRoundedRect(
-    ctx,
+  return canvas;
+}
+
+
+/* =========================================================
+   Canvas用角丸
+========================================================= */
+
+function roundRect(
+  ctx,
+  x,
+  y,
+  width,
+  height,
+  radius
+) {
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    x + radius,
+    y
+  );
+
+  ctx.lineTo(
+    x + width - radius,
+    y
+  );
+
+  ctx.quadraticCurveTo(
+    x + width,
+    y,
+    x + width,
+    y + radius
+  );
+
+  ctx.lineTo(
+    x + width,
+    y + height - radius
+  );
+
+  ctx.quadraticCurveTo(
+    x + width,
+    y + height,
+    x + width - radius,
+    y + height
+  );
+
+  ctx.lineTo(
+    x + radius,
+    y + height
+  );
+
+  ctx.quadraticCurveTo(
+    x,
+    y + height,
+    x,
+    y + height - radius
+  );
+
+  ctx.lineTo(
+    x,
+    y + radius
+  );
+
+  ctx.quadraticCurveTo(
     x,
     y,
-    width,
-    height,
-    radius
-  ) {
-
-    const r =
-      Math.min(
-        radius,
-        width / 2,
-        height / 2
-      );
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-      x + r,
-      y
-    );
-
-    ctx.arcTo(
-      x + width,
-      y,
-      x + width,
-      y + height,
-      r
-    );
-
-    ctx.arcTo(
-      x + width,
-      y + height,
-      x,
-      y + height,
-      r
-    );
-
-    ctx.arcTo(
-      x,
-      y + height,
-      x,
-      y,
-      r
-    );
-
-    ctx.arcTo(
-      x,
-      y,
-      x + width,
-      y,
-      r
-    );
-
-    ctx.closePath();
-  }
-
-
-  function drawText(
-    ctx,
-    text,
-    x,
-    y,
-    font,
-    color,
-    align = "left"
-  ) {
-
-    ctx.font = font;
-    ctx.fillStyle = color;
-    ctx.textAlign = align;
-    ctx.textBaseline = "middle";
-
-    ctx.fillText(
-      text,
-      x,
-      y
-    );
-  }
-
-
-  function createResultCanvas() {
-
-    const result =
-      calculate();
-
-
-    const width = 1200;
-    const height = 720;
-
-    const canvas =
-      document.createElement("canvas");
-
-    canvas.width = width;
-    canvas.height = height;
-
-    const ctx =
-      canvas.getContext("2d");
-
-
-    /*
-      Background
-    */
-
-    ctx.fillStyle =
-      "#0d0f12";
-
-    ctx.fillRect(
-      0,
-      0,
-      width,
-      height
-    );
-
-
-    /*
-      Top glow
-    */
-
-    const gradient =
-      ctx.createRadialGradient(
-        1000,
-        80,
-        10,
-        1000,
-        80,
-        450
-      );
-
-    gradient.addColorStop(
-      0,
-      "rgba(49,130,206,0.22)"
-    );
-
-    gradient.addColorStop(
-      1,
-      "rgba(49,130,206,0)"
-    );
-
-    ctx.fillStyle =
-      gradient;
-
-    ctx.fillRect(
-      0,
-      0,
-      width,
-      height
-    );
-
-
-    /*
-      Brand
-    */
-
-    drawText(
-      ctx,
-      "☕ COCOA TOOLS",
-      70,
-      65,
-      "900 28px Arial",
-      "#a3e635"
-    );
-
-
-    drawText(
-      ctx,
-      "内装資材 必要数",
-      70,
-      130,
-      "900 48px Arial",
-      "#ffffff"
-    );
-
-
-    /*
-      Info cards
-    */
-
-    drawRoundedRect(
-      ctx,
-      70,
-      180,
-      500,
-      105,
-      18
-    );
-
-    ctx.fillStyle =
-      "#1a1f26";
-
-    ctx.fill();
-
-
-    drawText(
-      ctx,
-      "現場",
-      95,
-      215,
-      "700 18px Arial",
-      "#718096"
-    );
-
-    drawText(
-      ctx,
-      state.siteName.trim() || "未入力",
-      95,
-      250,
-      "800 25px Arial",
-      "#ffffff"
-    );
-
-
-    drawRoundedRect(
-      ctx,
-      600,
-      180,
-      530,
-      105,
-      18
-    );
-
-    ctx.fillStyle =
-      "#1a1f26";
-
-    ctx.fill();
-
-
-    drawText(
-      ctx,
-      "部屋",
-      625,
-      215,
-      "700 18px Arial",
-      "#718096"
-    );
-
-    drawText(
-      ctx,
-      state.roomName.trim() || "未入力",
-      625,
-      250,
-      "800 25px Arial",
-      "#ffffff"
-    );
-
-
-    /*
-      Result box
-    */
-
-    drawRoundedRect(
-      ctx,
-      70,
-      325,
-      1060,
-      230,
-      22
-    );
-
-    ctx.fillStyle =
-      "#1a1f26";
-
-    ctx.fill();
-
-
-    drawText(
-      ctx,
-      "資材",
-      105,
-      370,
-      "700 18px Arial",
-      "#718096"
-    );
-
-    drawText(
-      ctx,
-      getModeName(),
-      105,
-      410,
-      "800 26px Arial",
-      "#ffffff"
-    );
-
-
-    drawText(
-      ctx,
-      "施工面積",
-      105,
-      475,
-      "700 18px Arial",
-      "#a0aec0"
-    );
-
-    drawText(
-      ctx,
-      `${round2(result.area)}㎡`,
-      105,
-      520,
-      "900 34px Arial",
-      "#e2e8f0"
-    );
-
-
-    drawText(
-      ctx,
-      "ロス込み発注",
-      650,
-      380,
-      "700 18px Arial",
-      "#a0aec0"
-    );
-
-    drawText(
-      ctx,
-      result.lossText,
-      650,
-      440,
-      "900 38px Arial",
-      "#a3e635"
-    );
-
-
-    drawText(
-      ctx,
-      `ロス率 ${formatPercent(state.lossRate)}`,
-      650,
-      495,
-      "700 20px Arial",
-      "#718096"
-    );
-
-
-    /*
-      Footer
-    */
-
-    drawText(
-      ctx,
-      "仕事を3秒で終わらせる工具箱。",
-      70,
-      640,
-      "700 18px Arial",
-      "#718096"
-    );
-
-    drawText(
-      ctx,
-      "#COCOATOOLS",
-      1130,
-      640,
-      "800 18px Arial",
-      "#a3e635",
-      "right"
-    );
-
-
-    return canvas;
-  }
-
-
-  /* =======================================================
-     PNG IMAGE COPY
-  ======================================================= */
-
-  async function handleImageCopy() {
-
-    const result =
-      calculate();
-
-    if (
-      result.area <= 0
-    ) {
-
-      alert(
-        "先に寸法または面積を入力してください。"
-      );
-
-      return;
+    x + radius,
+    y
+  );
+
+  ctx.closePath();
+}
+
+
+/* =========================================================
+   Canvas文字折り返し
+========================================================= */
+
+function wrapText(
+  text,
+  maxWidth,
+  ctx
+) {
+
+  const lines = [];
+
+  const paragraphs =
+    text.split("\n");
+
+
+  paragraphs.forEach(
+    (paragraph) => {
+
+      let line = "";
+
+
+      for (
+        let i = 0;
+        i < paragraph.length;
+        i++
+      ) {
+
+        const char =
+          paragraph[i];
+
+        const testLine =
+          line + char;
+
+        const metrics =
+          ctx.measureText(
+            testLine
+          );
+
+
+        if (
+          metrics.width >
+            maxWidth &&
+          line
+        ) {
+
+          lines.push(line);
+
+          line = char;
+
+        } else {
+
+          line += char;
+        }
+      }
+
+
+      if (line) {
+        lines.push(line);
+      }
     }
+  );
 
+
+  return lines;
+}
+
+
+/* =========================================================
+   Canvas → Blob
+========================================================= */
+
+function canvasToBlob(canvas) {
+
+  return new Promise(
+    (resolve) => {
+
+      canvas.toBlob(
+        (blob) => {
+          resolve(blob);
+        },
+        "image/png",
+        1
+      );
+    }
+  );
+}
+
+
+/* =========================================================
+   画像コピー
+========================================================= */
+
+copyImageBtn.addEventListener(
+  "click",
+  async () => {
 
     const canvas =
       createResultCanvas();
 
 
-    /*
-      ClipboardItem対応確認
-    */
-
-    if (
-      !navigator.clipboard ||
-      typeof ClipboardItem === "undefined" ||
-      !window.isSecureContext
-    ) {
-
-      /*
-        画像コピー非対応ブラウザでも
-        PNGを生成できるようにする。
-
-        download属性を使った自動保存ではなく、
-        ユーザーへ明確に案内する。
-      */
-
-      canvas.toBlob((blob) => {
-
-        if (!blob) {
-
-          alert(
-            "PNG画像の生成に失敗しました。"
-          );
-
-          return;
-        }
+    const blob =
+      await canvasToBlob(canvas);
 
 
-        const url =
-          URL.createObjectURL(blob);
+    if (!blob) {
 
-        const link =
-          document.createElement("a");
-
-        link.href = url;
-
-        link.download =
-          "cocoa-tools-result.png";
-
-        document.body.appendChild(link);
-
-        link.click();
-
-        link.remove();
-
-        window.setTimeout(() => {
-          URL.revokeObjectURL(url);
-        }, 1000);
-
-
-        showButtonSuccess(
-          els.copyImageBtn,
-          "PNGを作成しました！🍋"
-        );
-
-        showActionMessage(
-          "画像コピー非対応のためPNGを保存しました。"
-        );
-
-      }, "image/png");
+      alert(
+        "画像の生成に失敗しました。"
+      );
 
       return;
     }
 
 
-    try {
+    /*
+     * 画像クリップボード対応ブラウザ
+     */
+    if (
+      navigator.clipboard &&
+      typeof ClipboardItem !== "undefined" &&
+      navigator.clipboard.write
+    ) {
 
-      const blob =
-        await new Promise(
-          (resolve, reject) => {
+      try {
 
-            canvas.toBlob(
-              (resultBlob) => {
+        const item =
+          new ClipboardItem({
+            "image/png": blob
+          });
 
-                if (resultBlob) {
-                  resolve(resultBlob);
-                } else {
-                  reject(
-                    new Error(
-                      "PNG generation failed."
-                    )
-                  );
-                }
 
-              },
-              "image/png"
-            );
+        await navigator.clipboard.write([
+          item
+        ]);
 
-          }
+
+        copyImageBtn.textContent =
+          "画像コピー完了！";
+
+        copyImageBtn.classList.add(
+          "success",
+          "copy-success"
         );
 
 
-      const item =
-        new ClipboardItem({
-          "image/png": blob
-        });
+        setTimeout(() => {
+
+          copyImageBtn.textContent =
+            "🖼️ 画像コピー";
+
+          copyImageBtn.classList.remove(
+            "success",
+            "copy-success"
+          );
+
+        }, 1500);
 
 
-      await navigator.clipboard.write([
-        item
-      ]);
+        return;
+
+      } catch (error) {
+
+        console.warn(
+          "画像クリップボードへのコピーに失敗しました。",
+          error
+        );
+      }
+    }
 
 
-      showButtonSuccess(
-        els.copyImageBtn,
-        "画像コピー完了！🍋"
+    /*
+     * 非対応ブラウザ
+     */
+    alert(
+      "このブラウザでは画像コピーに対応していません。\n「PNG保存」を利用してください。"
+    );
+  }
+);
+
+
+/* =========================================================
+   PNG保存
+========================================================= */
+
+saveImageBtn.addEventListener(
+  "click",
+  async () => {
+
+    const canvas =
+      createResultCanvas();
+
+
+    const blob =
+      await canvasToBlob(canvas);
+
+
+    if (!blob) {
+
+      alert(
+        "PNG画像の生成に失敗しました。"
       );
 
-      showActionMessage(
-        "結果画像をクリップボードへコピーしました。"
+      return;
+    }
+
+
+    const url =
+      URL.createObjectURL(blob);
+
+
+    const link =
+      document.createElement("a");
+
+
+    link.href =
+      url;
+
+    link.download =
+      `cocoa-tools-${Date.now()}.png`;
+
+
+    document.body.appendChild(
+      link
+    );
+
+    link.click();
+
+    link.remove();
+
+
+    setTimeout(() => {
+
+      URL.revokeObjectURL(url);
+
+    }, 1000);
+
+
+    saveImageBtn.textContent =
+      "PNG保存完了！";
+
+    saveImageBtn.classList.add(
+      "success",
+      "copy-success"
+    );
+
+
+    setTimeout(() => {
+
+      saveImageBtn.textContent =
+        "💾 PNG保存";
+
+      saveImageBtn.classList.remove(
+        "success",
+        "copy-success"
+      );
+
+    }, 1500);
+  }
+);
+
+
+/* =========================================================
+   リセット
+========================================================= */
+
+resetBtn.addEventListener(
+  "click",
+  () => {
+
+    const confirmed =
+      window.confirm(
+        "入力内容・現場名・メモなどをすべてリセットしますか？"
+      );
+
+
+    if (!confirmed) {
+      return;
+    }
+
+
+    state = {
+      ...DEFAULT_STATE
+    };
+
+
+    try {
+
+      localStorage.removeItem(
+        STORAGE_KEY
       );
 
     } catch (error) {
 
-      console.error(
-        "Image clipboard failed:",
+      console.warn(
+        "保存データの削除に失敗しました。",
         error
       );
-
-      /*
-        クリップボード画像が拒否された場合は
-        PNG保存へフォールバック。
-      */
-
-      canvas.toBlob((blob) => {
-
-        if (!blob) {
-          alert(
-            "画像の生成に失敗しました。"
-          );
-          return;
-        }
-
-
-        const url =
-          URL.createObjectURL(blob);
-
-        const link =
-          document.createElement("a");
-
-        link.href = url;
-
-        link.download =
-          "cocoa-tools-result.png";
-
-        document.body.appendChild(link);
-
-        link.click();
-
-        link.remove();
-
-        window.setTimeout(() => {
-          URL.revokeObjectURL(url);
-        }, 1000);
-
-      }, "image/png");
-
-
-      showActionMessage(
-        "画像コピーが許可されなかったため、PNGとして保存しました。"
-      );
     }
-  }
 
 
-  /* =======================================================
-     INPUT EVENTS
-  ======================================================= */
-
-  function bindInputSave(
-    element,
-    stateKey
-  ) {
-
-    element.addEventListener(
-      "input",
-      () => {
-
-        state[stateKey] =
-          element.value;
-
-        updateAllCalculations();
-
-        saveState();
-      }
-    );
-  }
+    renderState();
 
 
-  /* =======================================================
-     EVENTS
-  ======================================================= */
+    saveStatus.textContent =
+      "リセットしました";
 
-  function bindEvents() {
-
-    /*
-      Main mode
-    */
-
-    els.modeCross.addEventListener(
-      "click",
-      () => {
-        setMainMode("cross");
-      }
+    saveStatus.classList.add(
+      "saved"
     );
 
 
-    els.modeFloor.addEventListener(
-      "click",
-      () => {
-        setMainMode("floor");
-      }
-    );
+    setTimeout(() => {
 
+      saveStatus.textContent =
+        "● 自動保存 ON";
 
-    /*
-      Input type
-    */
-
-    els.inputTypeDim.addEventListener(
-      "click",
-      () => {
-        setInputType("dim");
-      }
-    );
-
-
-    els.inputTypeArea.addEventListener(
-      "click",
-      () => {
-        setInputType("area");
-      }
-    );
-
-
-    /*
-      Loss
-    */
-
-    els.loss5.addEventListener(
-      "click",
-      () => {
-        setLossRate(0.05);
-      }
-    );
-
-
-    els.loss10.addEventListener(
-      "click",
-      () => {
-        setLossRate(0.10);
-      }
-    );
-
-
-    els.loss15.addEventListener(
-      "click",
-      () => {
-        setLossRate(0.15);
-      }
-    );
-
-
-    /*
-      Text / number fields
-    */
-
-    bindInputSave(
-      els.siteName,
-      "siteName"
-    );
-
-    bindInputSave(
-      els.roomName,
-      "roomName"
-    );
-
-    bindInputSave(
-      els.dimWidth,
-      "width"
-    );
-
-    bindInputSave(
-      els.dimLength,
-      "length"
-    );
-
-    bindInputSave(
-      els.dimHeight,
-      "height"
-    );
-
-    bindInputSave(
-      els.directArea,
-      "directArea"
-    );
-
-    bindInputSave(
-      els.genchoMemo,
-      "memo"
-    );
-
-
-    /*
-      Actions
-    */
-
-    els.copyOrderBtn.addEventListener(
-      "click",
-      handleOrderCopy
-    );
-
-
-    els.copyLineBtn.addEventListener(
-      "click",
-      handleLineCopy
-    );
-
-
-    els.copyXBtn.addEventListener(
-      "click",
-      handleXCopy
-    );
-
-
-    els.copyImageBtn.addEventListener(
-      "click",
-      handleImageCopy
-    );
-
-
-    /*
-      Before leaving / tab closing
-    */
-
-    window.addEventListener(
-      "beforeunload",
-      () => {
-        readFormToState();
-        saveState();
-      }
-    );
-
-
-    /*
-      Visibility change
-    */
-
-    document.addEventListener(
-      "visibilitychange",
-      () => {
-
-        if (
-          document.visibilityState === "hidden"
-        ) {
-
-          readFormToState();
-          saveState();
-        }
-      }
-    );
-  }
-
-
-  /* =======================================================
-     PWA
-  ======================================================= */
-
-  function registerServiceWorker() {
-
-    if (
-      "serviceWorker" in navigator
-    ) {
-
-      window.addEventListener(
-        "load",
-        () => {
-
-          navigator.serviceWorker
-            .register("./service-worker.js")
-            .then(() => {
-
-              console.log(
-                "COCOA TOOLS Service Worker registered."
-              );
-
-            })
-            .catch((error) => {
-
-              /*
-                service-worker.jsがまだ存在しなくても
-                アプリ本体は正常動作させる。
-              */
-
-              console.info(
-                "PWA service worker is not available yet.",
-                error
-              );
-
-            });
-
-        }
+      saveStatus.classList.remove(
+        "saved"
       );
+
+    }, 1200);
+  }
+);
+
+
+/* =========================================================
+   ページを閉じる前にも保存
+========================================================= */
+
+window.addEventListener(
+  "beforeunload",
+  () => {
+
+    saveState(false);
+  }
+);
+
+
+/* =========================================================
+   PWA Service Worker
+   ※ファイルが存在するときだけ登録
+========================================================= */
+
+if (
+  "serviceWorker" in navigator
+) {
+
+  window.addEventListener(
+    "load",
+    () => {
+
+      navigator.serviceWorker
+        .register(
+          "./service-worker.js"
+        )
+        .catch(() => {
+          /*
+           * service-worker.js がまだ無くても
+           * アプリ本体は正常動作させる。
+           */
+        });
     }
-  }
+  );
+}
 
 
-  /* =======================================================
-     INITIALIZE
-  ======================================================= */
+/* =========================================================
+   起動
+========================================================= */
 
-  function init() {
+function init() {
 
-    loadState();
+  loadState();
 
-    applyStateToUI();
+  renderState();
 
-    bindEvents();
-
-    registerServiceWorker();
-
-    console.log(
-      "COCOA TOOLS Cross/Floor Counter v2.0 initialized."
-    );
-  }
+  updateCalculation();
+}
 
 
-  init();
+/* =========================================================
+   START
+========================================================= */
 
-})();
+init();
