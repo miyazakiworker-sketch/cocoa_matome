@@ -2,128 +2,121 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+  <title>だるい【内装クロス・床資材】一瞬必要数カウンター - COCOA TOOLS v2.0</title>
+  <meta
+    name="description"
+    content="内装クロス・床材の必要数量を一瞬で計算。現場名・部屋名・発注メモ・LINE報告・X投稿・画像化まで対応。"
+  >
 
   <meta name="theme-color" content="#0d0f12">
-  <meta name="description"
-        content="内装クロス・床資材の必要数量を一瞬で計算。現場名・部屋名・ロス率・メモを保存して、発注書やLINE報告にもそのまま使える無料Webツール。">
 
-  <meta property="og:title"
-        content="だるい【内装クロス・床資材】一瞬必要数カウンター - COCOA TOOLS">
-  <meta property="og:description"
-        content="クロス・床材の必要数量を一瞬計算。現場で使える無料Webツール。">
-  <meta property="og:type" content="website">
+  <!-- PWA化するときに使用 -->
+  <link rel="manifest" href="./manifest.json">
 
-  <title>だるい【内装クロス・床資材】一瞬必要数カウンター - COCOA TOOLS</title>
-
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
 
-  <main class="app-shell">
+  <main class="container">
 
     <!-- =========================
-         HEADER
+         ヘッダー
     ========================== -->
     <header class="app-header">
 
-      <div class="brand-mini">
-        <span class="brand-mark">☕</span>
-        <span>COCOA TOOLS</span>
+      <div class="brand-badge">
+        COCOA TOOLS v2.0
       </div>
-
-      <div class="version">v2.0</div>
 
       <h1>
         【内装クロス・床資材】<br>
-        一瞬必要数カウンター
+        必要数カウンター
       </h1>
 
-      <p class="lead">
-        現場の「だるい数量計算」を一瞬で。
+      <p class="bio">
+        現場ロスを計算して、発注・報告まで一瞬。
       </p>
 
       <div class="save-status" id="saveStatus">
-        💾 自動保存ON
+        ● 自動保存 ON
       </div>
 
     </header>
 
 
     <!-- =========================
-         PROJECT INFO
+         現場情報
     ========================== -->
     <section class="card">
 
-      <div class="section-heading">
-        <span>📋</span>
-        <div>
-          <h2>現場情報</h2>
-          <p>入力した内容はこの端末に自動保存されます。</p>
-        </div>
+      <div class="section-title">
+        📋 現場情報
       </div>
 
-      <div class="field-grid">
+      <div class="input-group">
+        <label class="input-label" for="siteName">
+          現場名
+        </label>
 
-        <div class="field">
-          <label for="siteName">現場名</label>
+        <div class="input-row">
           <input
             type="text"
             id="siteName"
             class="text-input"
-            placeholder="例：○○マンション301"
+            placeholder="例：○○マンション301号室"
             autocomplete="off"
           >
         </div>
+      </div>
 
-        <div class="field">
-          <label for="roomName">部屋名</label>
+
+      <div class="input-group">
+        <label class="input-label" for="roomName">
+          部屋名
+        </label>
+
+        <div class="input-row">
           <input
             type="text"
             id="roomName"
             class="text-input"
-            placeholder="例：洋室6帖"
+            placeholder="例：洋室"
             autocomplete="off"
           >
         </div>
-
       </div>
 
     </section>
 
 
     <!-- =========================
-         MAIN MODE
+         資材モード
     ========================== -->
     <section class="card">
 
-      <div class="section-heading">
-        <span>🧱</span>
-        <div>
-          <h2>資材モード</h2>
-          <p>クロスか床材を選択してください。</p>
-        </div>
+      <div class="section-title">
+        🧱 資材タイプ
       </div>
 
-      <div class="segmented">
+      <div class="toggle-row">
 
         <button
           type="button"
           id="modeCross"
-          class="segment active"
+          class="toggle-btn active"
         >
-          🧱 壁紙・クロス
+          壁紙（クロス）モード
         </button>
 
         <button
           type="button"
           id="modeFloor"
-          class="segment"
+          class="toggle-btn orange"
         >
-          🟧 床材
+          床材モード
         </button>
 
       </div>
@@ -132,32 +125,28 @@
 
 
     <!-- =========================
-         INPUT TYPE
+         入力方法
     ========================== -->
     <section class="card">
 
-      <div class="section-heading">
-        <span>📐</span>
-        <div>
-          <h2>計算方法</h2>
-          <p>部屋寸法から自動計算するか、面積を直接入力できます。</p>
-        </div>
+      <div class="section-title">
+        📐 計算方法
       </div>
 
-      <div class="segmented">
+      <div class="toggle-row">
 
         <button
           type="button"
           id="inputTypeDim"
-          class="segment active"
+          class="toggle-btn active small"
         >
-          📐 寸法から計算
+          📐 部屋の寸法から自動計算
         </button>
 
         <button
           type="button"
           id="inputTypeArea"
-          class="segment"
+          class="toggle-btn small"
         >
           ✏️ 面積を直接入力
         </button>
@@ -165,96 +154,124 @@
       </div>
 
 
-      <!-- DIMENSION PANEL -->
-      <div id="panelDim" class="input-panel">
+      <!-- 寸法入力 -->
+      <div id="panelDim" class="form-panel show">
 
-        <div class="field">
-          <label for="dimWidth">
+        <div class="input-group">
+
+          <label
+            class="input-label"
+            for="dimWidth"
+          >
             部屋の横幅（間口）
           </label>
 
-          <div class="unit-input">
+          <div class="input-row">
+
             <input
               type="number"
               id="dimWidth"
-              inputmode="decimal"
-              step="any"
-              min="0"
+              class="num-input"
               placeholder="0"
+              step="any"
+              inputmode="decimal"
             >
-            <span>m</span>
+
+            <span class="unit-text">m</span>
+
           </div>
+
         </div>
 
 
-        <div class="field">
-          <label for="dimLength">
+        <div class="input-group">
+
+          <label
+            class="input-label"
+            for="dimLength"
+          >
             部屋の奥行
           </label>
 
-          <div class="unit-input">
+          <div class="input-row">
+
             <input
               type="number"
               id="dimLength"
-              inputmode="decimal"
-              step="any"
-              min="0"
+              class="num-input"
               placeholder="0"
+              step="any"
+              inputmode="decimal"
             >
-            <span>m</span>
+
+            <span class="unit-text">m</span>
+
           </div>
+
         </div>
 
 
-        <div class="field" id="heightField">
-          <label for="dimHeight">
-            天井の高さ
+        <div
+          class="input-group"
+          id="groupHeight"
+        >
+
+          <label
+            class="input-label"
+            for="dimHeight"
+          >
+            天井の高さ（H）
           </label>
 
-          <div class="unit-input">
+          <div class="input-row">
+
             <input
               type="number"
               id="dimHeight"
-              inputmode="decimal"
-              step="any"
-              min="0"
+              class="num-input"
               placeholder="2.4"
+              value="2.4"
+              step="any"
+              inputmode="decimal"
             >
-            <span>m</span>
+
+            <span class="unit-text">m</span>
+
           </div>
 
-          <small>
-            クロスは「横幅＋奥行」の外周 × 2 × 高さで計算します。
-          </small>
         </div>
 
       </div>
 
 
-      <!-- AREA PANEL -->
+      <!-- 面積直接入力 -->
       <div
         id="panelArea"
-        class="input-panel hidden"
+        class="form-panel"
       >
 
-        <div class="field">
+        <div class="input-group">
 
-          <label for="directArea" id="directAreaLabel">
+          <label
+            class="input-label"
+            id="labelDirectArea"
+            for="directArea"
+          >
             壁の総面積
           </label>
 
-          <div class="unit-input">
+          <div class="input-row">
 
             <input
               type="number"
               id="directArea"
-              inputmode="decimal"
-              step="any"
-              min="0"
+              class="num-input"
               placeholder="0"
+              step="any"
+              inputmode="decimal"
             >
 
-            <span>㎡</span>
+            <span class="unit-text">㎡</span>
 
           </div>
 
@@ -266,46 +283,42 @@
 
 
     <!-- =========================
-         LOSS RATE
+         ロス率
     ========================== -->
     <section class="card">
 
-      <div class="section-heading">
-        <span>📦</span>
-        <div>
-          <h2>発注ロス率</h2>
-          <p>現場状況に合わせて上乗せ率を選択。</p>
-        </div>
+      <div class="section-title">
+        📦 発注ロス率
       </div>
 
-      <div class="loss-grid">
+      <p class="section-note">
+        発注時の上乗せ設定
+      </p>
+
+      <div class="toggle-row loss-row">
 
         <button
           type="button"
           id="loss5"
-          class="loss-button"
-          data-loss="0.05"
+          class="toggle-btn"
         >
-          5%
+          5%増
         </button>
 
         <button
           type="button"
           id="loss10"
-          class="loss-button active"
-          data-loss="0.10"
+          class="toggle-btn active"
         >
-          10%
-          <small>標準</small>
+          10%増（標準）
         </button>
 
         <button
           type="button"
           id="loss15"
-          class="loss-button"
-          data-loss="0.15"
+          class="toggle-btn"
         >
-          15%
+          15%増
         </button>
 
       </div>
@@ -314,35 +327,53 @@
 
 
     <!-- =========================
-         RESULT
+         計算結果
     ========================== -->
-    <section class="result-card">
+    <section
+      class="result-box"
+      id="resultCard"
+    >
 
       <div class="result-header">
-        <div>
-          <span class="result-kicker">CALCULATION RESULT</span>
-          <h2>📐 資材算出結果</h2>
+
+        <div class="section-title">
+          📐 資材算出結果
         </div>
 
-        <span class="result-mode" id="resultMode">
-          クロス
+        <span class="result-badge">
+          目安
         </span>
+
       </div>
 
 
       <div class="result-row">
-        <span>施工面積</span>
-        <strong id="resArea">0 ㎡</strong>
+
+        <span>
+          施工面積
+        </span>
+
+        <strong id="resArea">
+          0 ㎡
+        </strong>
+
       </div>
 
 
       <div class="result-row">
-        <span>ぴったり数量</span>
-        <strong id="resExact">0</strong>
+
+        <span>
+          ぴったり数量
+        </span>
+
+        <strong id="resExact">
+          0
+        </strong>
+
       </div>
 
 
-      <div class="result-main">
+      <div class="result-row result-main">
 
         <span>
           ロス込み発注数量
@@ -355,228 +386,228 @@
       </div>
 
 
-      <div class="loss-note">
-        ※ ロス率
-        <strong id="resultLossRate">10%</strong>
-        を上乗せした発注目安です。
+      <div class="result-meta">
+
+        <span id="resultModeLabel">
+          壁紙（クロス）
+        </span>
+
+        <span id="resultLossLabel">
+          ロス 10%
+        </span>
+
       </div>
 
     </section>
 
 
     <!-- =========================
-         MEMO
+         現場メモ
     ========================== -->
     <section class="card">
 
-      <div class="section-heading">
-        <span>📝</span>
-        <div>
-          <h2>現調メモ</h2>
-          <p>注意事項・開口・材料指定などを保存できます。</p>
-        </div>
+      <div class="section-title">
+        📝 現地調査用メモ
       </div>
 
       <textarea
         id="genchoMemo"
-        class="memo"
-        placeholder="例：窓2ヶ所、梁あり、既存クロス撤去あり..."
+        class="memo-area"
+        placeholder="現場の注意書きやメモを自由に入力できます。&#10;例：梁下注意・既存クロス撤去あり・材料搬入は裏口から"
       ></textarea>
 
     </section>
 
 
     <!-- =========================
-         COPY ACTIONS
+         アクション
     ========================== -->
-    <section class="card action-card">
+    <section class="action-section">
 
-      <div class="section-heading">
-        <span>🚀</span>
-        <div>
-          <h2>現場で使う</h2>
-          <p>用途に合わせてそのままコピーできます。</p>
-        </div>
+      <div class="section-title">
+        🚀 現場で使う
+      </div>
+
+
+      <div class="action-grid">
+
+        <button
+          type="button"
+          id="copyOrderBtn"
+          class="action-btn primary"
+        >
+          📦 発注書コピー
+        </button>
+
+
+        <button
+          type="button"
+          id="copyLineBtn"
+          class="action-btn"
+        >
+          💬 LINE報告
+        </button>
+
+
+        <button
+          type="button"
+          id="copyXBtn"
+          class="action-btn"
+        >
+          𝕏 X投稿文
+        </button>
+
+
+        <button
+          type="button"
+          id="copyImageBtn"
+          class="action-btn"
+        >
+          🖼️ 画像コピー
+        </button>
+
+
+        <button
+          type="button"
+          id="saveImageBtn"
+          class="action-btn"
+        >
+          💾 PNG保存
+        </button>
+
+
+        <button
+          type="button"
+          id="copyResultBtn"
+          class="action-btn"
+        >
+          📋 結果をコピー
+        </button>
+
       </div>
 
 
       <button
         type="button"
-        id="copyOrderBtn"
-        class="primary-button"
+        id="resetBtn"
+        class="reset-btn"
       >
-        📋 発注書をコピー
+        ↺ 入力内容をリセット
       </button>
-
-
-      <button
-        type="button"
-        id="copyLineBtn"
-        class="secondary-button"
-      >
-        💬 LINE報告をコピー
-      </button>
-
-
-      <button
-        type="button"
-        id="copyXBtn"
-        class="secondary-button"
-      >
-        𝕏 X投稿文をコピー
-      </button>
-
-
-      <button
-        type="button"
-        id="copyImageBtn"
-        class="secondary-button"
-      >
-        🖼️ 結果をPNG画像としてコピー
-      </button>
-
-
-      <div
-        id="actionMessage"
-        class="action-message"
-        aria-live="polite"
-      ></div>
 
     </section>
 
 
     <!-- =========================
-         IMAGE RESULT AREA
-         PNGコピー用
+         生成テキスト確認欄
     ========================== -->
-    <section
-      id="imageResult"
-      class="share-image"
-    >
+    <section class="card generated-section">
 
-      <div class="share-image-brand">
-        ☕ COCOA TOOLS
+      <div class="section-title">
+        📄 生成テキスト
       </div>
 
-      <h2>内装資材 必要数</h2>
+      <p class="section-note">
+        発注・LINE・X用の文章を確認できます。
+      </p>
 
-      <div class="share-image-info">
-
-        <div>
-          <span>現場</span>
-          <strong id="imageSite">未入力</strong>
-        </div>
-
-        <div>
-          <span>部屋</span>
-          <strong id="imageRoom">未入力</strong>
-        </div>
-
-      </div>
-
-
-      <div class="share-image-result">
-
-        <span>施工面積</span>
-        <strong id="imageArea">0㎡</strong>
-
-        <span>ロス込み発注</span>
-        <strong id="imageLoss">0</strong>
-
-      </div>
-
-      <div class="share-image-footer">
-        仕事を3秒で終わらせる工具箱。
-      </div>
+      <textarea
+        id="generatedText"
+        class="generated-text"
+        readonly
+        placeholder="ここに生成された文章が表示されます。"
+      ></textarea>
 
     </section>
 
 
     <!-- =========================
-         AD
+         広告枠
     ========================== -->
     <section class="ad-space">
 
-      <span class="ad-label">ADVERTISEMENT</span>
+      <div class="ad-title">
+        【将来の広告枠】
+      </div>
 
-      <strong>
-        COCOA TOOLS
-      </strong>
-
-      <p>
-        ここは将来のスポンサー・広告掲載スペースです。
-      </p>
+      <div>
+        ここは将来的にスポンサー枠として
+        活用予定のエリアです。
+      </div>
 
       <a
         href="https://x.com/cocoa_next7"
         target="_blank"
         rel="noopener noreferrer"
+        class="ad-link"
       >
-        広告・お問い合わせ ↗
+        お問い合わせはこちら ↗
       </a>
 
     </section>
 
 
     <!-- =========================
-         FOOTER X
+         X
     ========================== -->
-    <footer class="footer">
+    <footer class="footer-x">
 
-      <div class="footer-brand">
-        <strong>COCOA TOOLS</strong>
-        <span>仕事を3秒で終わらせる工具箱。</span>
-      </div>
+      開発者：
 
       <a
-        class="x-link"
         href="https://x.com/cocoa_next7"
         target="_blank"
         rel="noopener noreferrer"
       >
-        𝕏 ココア＠プログラミング奮闘中
+        ココア＠プログラミング奮闘中
+        (@cocoa_next7) ↗
       </a>
 
-
-      <div class="footer-links">
-
-        <a href="https://cocoa-matome.pages.dev/">
-          COCOA TOOLSトップ
-        </a>
-
-      </div>
-
-
-      <div class="disclaimer">
-
-        <strong>【免責事項】</strong><br>
-
-        本ツールは、一般的な建築資材の数量を簡易計算するための
-        無料Webツールです。<br><br>
-
-        クロスは一般的な有効幅92cm換算、床材は1坪3.3㎡、
-        30cm角タイルは1枚0.09㎡として計算しています。<br><br>
-
-        実際の必要数量は、材料メーカー・品番・施工方法・割付・
-        開口部・現場条件などによって変わる場合があります。<br><br>
-
-        本ツールの計算結果だけを根拠として発注せず、
-        最終的な数量・仕様については施工会社・材料メーカー等に
-        必ずご確認ください。
-
-      </div>
-
-
-      <div class="copyright">
-        © COCOA TOOLS
-      </div>
-
     </footer>
+
+
+    <!-- =========================
+         免責事項
+    ========================== -->
+    <section class="disclaimer">
+
+      <strong>【免責事項】</strong>
+
+      <p>
+        本ツールは、一般的な建築資材の数量を
+        簡易計算するための無料ツールです。
+      </p>
+
+      <p>
+        クロスは有効幅92cm換算、
+        床材は1坪＝約3.3㎡、
+        30cm角タイルは1枚＝0.09㎡として
+        計算しています。
+      </p>
+
+      <p>
+        開口部（窓・ドア）の引き計算、
+        クロスの柄・方向・ロス、
+        床材の施工方法などは考慮していません。
+        実際の必要数量は現場条件によって
+        前後します。
+      </p>
+
+      <p>
+        最終的な材料数量・発注数量については、
+        必ず施工会社・材料メーカー・販売店等へ
+        ご確認ください。
+      </p>
+
+    </section>
 
   </main>
 
 
-  <script src="app.js"></script>
+  <!-- =========================
+       JavaScript
+  ========================== -->
+  <script src="./app.js"></script>
 
 </body>
 </html>
