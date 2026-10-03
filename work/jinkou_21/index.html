@@ -1,1 +1,673 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<meta name="description" content="人数と日数から人工数・人工代を一瞬で計算できる無料ツール。COCOA TOOLS v2.0。">
+
+<title>だるい人工計算｜COCOA TOOLS v2.0</title>
+
+<style>
+:root {
+  --bg: #0d0f12;
+  --card: #1a1f26;
+  --input: #11151a;
+  --border: #2d3748;
+  --text: #e2e8f0;
+  --muted: #a0aec0;
+  --sub: #718096;
+  --accent: #a3e635;
+  --accent-text: #111827;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Noto Sans JP",
+    sans-serif;
+  line-height: 1.6;
+}
+
+.container {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px 15px 40px;
+}
+
+header {
+  padding: 10px 0 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.35;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.card {
+  margin-top: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.28);
+}
+
+.section-title {
+  margin: 0 0 14px;
+  font-size: 17px;
+}
+
+label {
+  display: block;
+  margin: 14px 0 7px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+input {
+  width: 100%;
+  min-height: 48px;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--input);
+  color: var(--text);
+  font-size: 16px;
+  outline: none;
+}
+
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(163, 230, 53, 0.12);
+}
+
+.unit {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+button {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 18px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+.result {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid rgba(163, 230, 53, 0.45);
+  border-radius: 14px;
+  background: #151b13;
+}
+
+.result-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.result-number {
+  margin-top: 3px;
+  font-size: 34px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.result-number span {
+  margin-left: 5px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.cost {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.cost-value {
+  margin-top: 2px;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.note {
+  margin: 12px 0 0;
+  color: var(--sub);
+  font-size: 12px;
+}
+
+.copy-btn {
+  background: #334155;
+  color: var(--text);
+  margin-top: 12px;
+}
+
+.copy-btn.copied {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.ad {
+  margin-top: 16px;
+  padding: 20px 12px;
+  border: 1px dashed #4a5568;
+  border-radius: 14px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ad a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.disclaimer {
+  margin-top: 16px;
+  padding: 16px;
+  background: #15191f;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.disclaimer h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.disclaimer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+footer {
+  padding: 22px 0 0;
+  text-align: center;
+  color: var(--sub);
+  font-size: 12px;
+}
+
+footer a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+@media (min-width: 481px) {
+  body {
+    padding: 20px 0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+
+<h1>👷 だるい人工計算</h1>
+
+<p class="subtitle">
+人数と日数を入れるだけ。人工数と人工代を一瞬計算。
+</p>
+
+</header>
+
+
+<main>
+
+<section class="card">
+
+<h2 class="section-title">
+🧮 人工を計算
+</h2>
+
+
+<label for="people">
+人数
+</label>
+
+<input
+  id="people"
+  type="number"
+  inputmode="decimal"
+  min="0"
+  step="0.5"
+  placeholder="例：3"
+>
+
+
+<label for="days">
+作業日数
+</label>
+
+<input
+  id="days"
+  type="number"
+  inputmode="decimal"
+  min="0"
+  step="0.5"
+  placeholder="例：2"
+>
+
+
+<label for="unitPrice">
+1人工の単価（任意）
+</label>
+
+<input
+  id="unitPrice"
+  type="number"
+  inputmode="numeric"
+  min="0"
+  step="1"
+  placeholder="例：25000"
+>
+
+<div class="unit">
+単価を入れると人工代も計算します。
+</div>
+
+
+<button id="calcBtn" type="button">
+人工を計算する
+</button>
+
+
+<div
+  class="result"
+  id="result"
+  aria-live="polite"
+>
+
+<div class="result-label">
+人工数
+</div>
+
+<div class="result-number">
+
+<span id="manDays">0</span>
+
+<span>
+人工
+</span>
+
+</div>
+
+
+<div
+  class="cost"
+  id="costArea"
+  hidden
+>
+
+<div class="result-label">
+人工代
+</div>
+
+<div class="cost-value">
+
+¥<span id="totalCost">0</span>
+
+</div>
+
+</div>
+
+
+<p class="note">
+計算式：人数 × 作業日数
+</p>
+
+</div>
+
+
+<button
+  class="copy-btn"
+  id="copyBtn"
+  type="button"
+>
+結果をコピー
+</button>
+
+</section>
+
+
+<section class="ad">
+
+<a
+  href="https://x.com/cocoa_next7"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+【将来の広告枠】スポンサー枠・広告掲載予定
+</a>
+
+</section>
+
+
+<section class="disclaimer">
+
+<h2>
+⚠️ 免責事項
+</h2>
+
+<p>
+このツールは人工数・人工代を簡単に計算するための目安ツールです。
+計算結果の正確性や完全性を保証するものではありません。
+実際の見積・契約・請求などに使用する場合は、
+契約条件や現場の実情、単価などを必ずご確認ください。
+</p>
+
+</section>
+
+</main>
+
+
+<footer>
+
+<div>
+COCOA TOOLS v2.0
+</div>
+
+<div style="margin-top: 6px;">
+
+<a
+  href="https://x.com/cocoa_next7"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+ココア＠プログラミング奮闘中 (@cocoa_next7)
+</a>
+
+</div>
+
+</footer>
+
+</div>
+
+
+<script>
+(() => {
+
+  const STORAGE_KEY = "cocoa_jinkou_calc_v1";
+
+  const people = document.getElementById("people");
+  const days = document.getElementById("days");
+  const unitPrice = document.getElementById("unitPrice");
+
+  const calcBtn = document.getElementById("calcBtn");
+
+  const manDays = document.getElementById("manDays");
+
+  const costArea = document.getElementById("costArea");
+  const totalCost = document.getElementById("totalCost");
+
+  const copyBtn = document.getElementById("copyBtn");
+
+
+  function save() {
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        people: people.value,
+        days: days.value,
+        unitPrice: unitPrice.value
+      })
+    );
+
+  }
+
+
+  function restore() {
+
+    try {
+
+      const saved = JSON.parse(
+        localStorage.getItem(STORAGE_KEY) || "null"
+      );
+
+      if (!saved) {
+        return;
+      }
+
+      people.value = saved.people || "";
+      days.value = saved.days || "";
+      unitPrice.value = saved.unitPrice || "";
+
+      if (people.value && days.value) {
+        calculate(false);
+      }
+
+    } catch (error) {
+
+      console.warn(
+        "保存データの読み込みに失敗しました。"
+      );
+
+    }
+
+  }
+
+
+  function formatNumber(value) {
+
+    if (Number.isInteger(value)) {
+
+      return value.toLocaleString("ja-JP");
+
+    }
+
+    return value.toLocaleString(
+      "ja-JP",
+      {
+        maximumFractionDigits: 2
+      }
+    );
+
+  }
+
+
+  function calculate(shouldSave = true) {
+
+    const p = Number(people.value);
+    const d = Number(days.value);
+
+    if (!(p > 0) || !(d > 0)) {
+
+      manDays.textContent = "0";
+
+      costArea.hidden = true;
+
+      if (shouldSave) {
+        save();
+      }
+
+      return;
+    }
+
+
+    const result = p * d;
+
+    manDays.textContent = formatNumber(result);
+
+
+    const price = Number(unitPrice.value);
+
+    if (price > 0) {
+
+      totalCost.textContent =
+        Math.round(result * price)
+          .toLocaleString("ja-JP");
+
+      costArea.hidden = false;
+
+    } else {
+
+      costArea.hidden = true;
+
+    }
+
+
+    if (shouldSave) {
+      save();
+    }
+
+  }
+
+
+  calcBtn.addEventListener(
+    "click",
+    () => {
+      calculate(true);
+    }
+  );
+
+
+  [
+    people,
+    days,
+    unitPrice
+  ].forEach((input) => {
+
+    input.addEventListener(
+      "input",
+      save
+    );
+
+
+    input.addEventListener(
+      "keydown",
+      (event) => {
+
+        if (event.key === "Enter") {
+          calculate(true);
+        }
+
+      }
+    );
+
+  });
+
+
+  copyBtn.addEventListener(
+    "click",
+    async () => {
+
+      const result =
+        Number(
+          manDays.textContent.replace(/,/g, "")
+        ) || 0;
+
+
+      if (!result) {
+
+        copyBtn.textContent =
+          "先に人工を計算してください";
+
+        setTimeout(() => {
+
+          copyBtn.textContent =
+            "結果をコピー";
+
+        }, 1600);
+
+        return;
+      }
+
+
+      let text =
+        `人工数：${formatNumber(result)}人工`;
+
+
+      const price =
+        Number(unitPrice.value);
+
+
+      if (price > 0) {
+
+        text +=
+          `\n人工代：¥${Math.round(result * price)
+            .toLocaleString("ja-JP")}`;
+
+      }
+
+
+      try {
+
+        await navigator.clipboard.writeText(text);
+
+        copyBtn.textContent =
+          "✓ コピーしました";
+
+        copyBtn.classList.add("copied");
+
+
+        setTimeout(() => {
+
+          copyBtn.textContent =
+            "結果をコピー";
+
+          copyBtn.classList.remove("copied");
+
+        }, 1600);
+
+
+      } catch (error) {
+
+        window.prompt(
+          "以下をコピーしてください",
+          text
+        );
+
+      }
+
+    }
+  );
+
+
+  restore();
+
+})();
+</script>
+
+</body>
+</html>
