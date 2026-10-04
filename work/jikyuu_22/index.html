@@ -1,1 +1,1171 @@
 
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="月給・日給・時給を一瞬で相互計算。残業時間と割増率から残業代・合計額まで計算できる無料ツール。">
+<title>💴 時給・日給一瞬計算｜COCOA TOOLS v2.0</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 20px 15px 40px;
+  background: #0d0f12;
+  color: #e2e8f0;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Hiragino Kaku Gothic ProN",
+    "Hiragino Sans",
+    "Yu Gothic",
+    Meiryo,
+    sans-serif;
+  line-height: 1.6;
+}
+
+.container {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: #1a1f26;
+  border: 1px solid #2d3748;
+  border-radius: 20px;
+  padding: 28px 20px;
+  box-shadow: 0 10px 35px rgba(0,0,0,.45);
+}
+
+h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.subtitle {
+  margin: 8px 0 24px;
+  color: #a0aec0;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* モード */
+.mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.mode-btn {
+  width: 100%;
+  padding: 13px 8px;
+  border: 1px solid #2d3748;
+  border-radius: 12px;
+  background: #11151a;
+  color: #cbd5e0;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.mode-btn:hover {
+  border-color: #4a5568;
+}
+
+.mode-btn.active {
+  background: #a3e635;
+  color: #111827;
+  border-color: #a3e635;
+}
+
+/* セクション */
+.section {
+  margin-top: 20px;
+}
+
+.section-title {
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+/* 入力 */
+.input-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  color: #cbd5e0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+input,
+select {
+  width: 100%;
+  min-height: 48px;
+  padding: 11px 13px;
+  border: 1px solid #2d3748;
+  border-radius: 10px;
+  outline: none;
+  background: #0d1116;
+  color: #e2e8f0;
+  font-size: 16px;
+}
+
+input:focus,
+select:focus {
+  border-color: #a3e635;
+}
+
+.unit {
+  margin-left: 6px;
+  color: #718096;
+  font-size: 13px;
+}
+
+/* 計算ボタン */
+.calc-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: #a3e635;
+  color: #111827;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.calc-btn:hover {
+  filter: brightness(1.05);
+}
+
+.calc-btn:active {
+  transform: scale(.98);
+}
+
+/* 結果 */
+.result-box {
+  margin-top: 26px;
+  padding: 18px;
+  border: 1px solid #2d3748;
+  border-radius: 14px;
+  background: #11151a;
+}
+
+.result-title {
+  margin-bottom: 14px;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 9px 0;
+  border-bottom: 1px solid #252d38;
+}
+
+.result-row:last-of-type {
+  border-bottom: none;
+}
+
+.result-label {
+  color: #a0aec0;
+  font-size: 13px;
+}
+
+.result-value {
+  color: #e2e8f0;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.result-row.main .result-value {
+  color: #a3e635;
+  font-size: 20px;
+}
+
+.result-row.total {
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid #4a5568;
+  border-bottom: none;
+}
+
+.result-row.total .result-label {
+  color: #e2e8f0;
+  font-weight: 800;
+}
+
+.result-row.total .result-value {
+  color: #a3e635;
+  font-size: 22px;
+}
+
+/* コピー */
+.copy-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid #a3e635;
+  border-radius: 10px;
+  background: transparent;
+  color: #a3e635;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.copy-btn.copied {
+  background: #a3e635;
+  color: #111827;
+}
+
+/* 計算式 */
+.formula {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #0d1116;
+  color: #718096;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+/* 広告 */
+.ad-box {
+  margin-top: 28px;
+  padding: 20px 12px;
+  border: 1px dashed #4a5568;
+  border-radius: 12px;
+  color: #718096;
+  text-align: center;
+  font-size: 12px;
+}
+
+.ad-box a {
+  color: #a3e635;
+  text-decoration: none;
+}
+
+/* 免責事項 */
+.disclaimer {
+  margin-top: 24px;
+  padding: 15px;
+  border: 1px solid #2d3748;
+  border-radius: 12px;
+  background: #11151a;
+}
+
+.disclaimer-title {
+  margin-bottom: 7px;
+  color: #cbd5e0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.disclaimer p {
+  margin: 0;
+  color: #718096;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* X */
+.footer {
+  margin-top: 22px;
+  text-align: center;
+}
+
+.footer a {
+  color: #a0aec0;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: #a3e635;
+}
+
+.error {
+  margin-top: 10px;
+  color: #f87171;
+  font-size: 12px;
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>💴 時給・日給一瞬計算</h1>
+
+  <p class="subtitle">
+    月給・日給・時給を一瞬で計算。残業代までまとめて確認。
+  </p>
+
+  <!-- ==================== 計算モード ==================== -->
+
+  <div class="mode-grid">
+
+    <button class="mode-btn active" data-mode="monthlyHourly">
+      月給 → 時給
+    </button>
+
+    <button class="mode-btn" data-mode="dailyHourly">
+      日給 → 時給
+    </button>
+
+    <button class="mode-btn" data-mode="hourlyDaily">
+      時給 → 日給
+    </button>
+
+    <button class="mode-btn" data-mode="monthlyDaily">
+      月給 → 日給
+    </button>
+
+  </div>
+
+
+  <!-- ==================== 入力 ==================== -->
+
+  <div class="section">
+
+    <div class="section-title">
+      📝 基本情報
+    </div>
+
+    <!-- 月給 -->
+    <div class="input-group" id="monthlySalaryGroup">
+      <label for="monthlySalary">
+        月給
+      </label>
+
+      <input
+        type="number"
+        id="monthlySalary"
+        inputmode="decimal"
+        min="0"
+        step="0.01"
+        placeholder="例：250000"
+      >
+    </div>
+
+
+    <!-- 日給 -->
+    <div class="input-group hidden" id="dailySalaryGroup">
+      <label for="dailySalary">
+        日給
+      </label>
+
+      <input
+        type="number"
+        id="dailySalary"
+        inputmode="decimal"
+        min="0"
+        step="0.01"
+        placeholder="例：12000"
+      >
+    </div>
+
+
+    <!-- 時給 -->
+    <div class="input-group hidden" id="hourlySalaryGroup">
+      <label for="hourlySalary">
+        時給
+      </label>
+
+      <input
+        type="number"
+        id="hourlySalary"
+        inputmode="decimal"
+        min="0"
+        step="0.01"
+        placeholder="例：1500"
+      >
+    </div>
+
+
+    <!-- 月勤務日数 -->
+    <div class="input-group" id="monthlyDaysGroup">
+      <label for="monthlyDays">
+        1か月の勤務日数
+      </label>
+
+      <input
+        type="number"
+        id="monthlyDays"
+        inputmode="decimal"
+        min="0"
+        step="0.1"
+        placeholder="例：20"
+      >
+    </div>
+
+
+    <!-- 1日の勤務時間 -->
+    <div class="input-group" id="dailyHoursGroup">
+      <label for="dailyHours">
+        1日の勤務時間
+      </label>
+
+      <input
+        type="number"
+        id="dailyHours"
+        inputmode="decimal"
+        min="0"
+        step="0.1"
+        placeholder="例：8"
+      >
+    </div>
+
+  </div>
+
+
+  <!-- ==================== 残業 ==================== -->
+
+  <div class="section">
+
+    <div class="section-title">
+      ⏰ 残業計算
+    </div>
+
+    <div class="input-group">
+      <label for="overtimeHours">
+        残業時間
+      </label>
+
+      <input
+        type="number"
+        id="overtimeHours"
+        inputmode="decimal"
+        min="0"
+        step="0.1"
+        placeholder="例：2.5"
+      >
+    </div>
+
+
+    <div class="input-group">
+
+      <label for="overtimeRate">
+        割増率
+      </label>
+
+      <select id="overtimeRate">
+        <option value="1.25">1.25倍</option>
+        <option value="1.5">1.50倍</option>
+        <option value="2">2.00倍</option>
+        <option value="2.25">2.25倍</option>
+      </select>
+
+    </div>
+
+  </div>
+
+
+  <!-- ==================== 計算 ==================== -->
+
+  <button class="calc-btn" id="calculateBtn">
+    計算する
+  </button>
+
+  <div id="errorMessage" class="error hidden"></div>
+
+
+  <!-- ==================== 結果 ==================== -->
+
+  <div class="result-box">
+
+    <div class="result-title">
+      💰 計算結果
+    </div>
+
+    <div class="result-row main">
+      <div class="result-label">
+        通常時給
+      </div>
+
+      <div class="result-value" id="regularHourlyResult">
+        -
+      </div>
+    </div>
+
+
+    <div class="result-row">
+      <div class="result-label">
+        通常分
+      </div>
+
+      <div class="result-value" id="regularAmountResult">
+        -
+      </div>
+    </div>
+
+
+    <div class="result-row">
+      <div class="result-label">
+        残業時給
+      </div>
+
+      <div class="result-value" id="overtimeHourlyResult">
+        -
+      </div>
+    </div>
+
+
+    <div class="result-row">
+      <div class="result-label">
+        残業時間
+      </div>
+
+      <div class="result-value" id="overtimeHoursResult">
+        -
+      </div>
+    </div>
+
+
+    <div class="result-row">
+      <div class="result-label">
+        残業代
+      </div>
+
+      <div class="result-value" id="overtimeAmountResult">
+        -
+      </div>
+    </div>
+
+
+    <div class="result-row total">
+      <div class="result-label">
+        合計額
+      </div>
+
+      <div class="result-value" id="totalAmountResult">
+        -
+      </div>
+    </div>
+
+
+    <button class="copy-btn" id="copyBtn">
+      📋 結果をコピー
+    </button>
+
+
+    <div class="formula" id="formula">
+      計算結果がここに表示されます。
+    </div>
+
+  </div>
+
+
+  <!-- ==================== 広告 ==================== -->
+
+  <div class="ad-box">
+
+    【将来の広告枠】<br>
+    COCOA TOOLS スポンサー枠
+
+    <br><br>
+
+    <a href="https://x.com/cocoa_next7" target="_blank" rel="noopener">
+      ココア＠プログラミング奮闘中 (@cocoa_next7)
+    </a>
+
+  </div>
+
+
+  <!-- ==================== 免責事項 ==================== -->
+
+  <div class="disclaimer">
+
+    <div class="disclaimer-title">
+      ⚠️ 免責事項
+    </div>
+
+    <p>
+      このツールの計算結果はあくまで目安です。
+      実際の給与・残業代・労働条件等については、
+      勤務先の規定や契約内容をご確認ください。
+      本ツールの利用によって生じた損害について、
+      制作者は一切の責任を負いません。
+    </p>
+
+  </div>
+
+
+  <!-- ==================== X ==================== -->
+
+  <div class="footer">
+
+    <a
+      href="https://x.com/cocoa_next7"
+      target="_blank"
+      rel="noopener"
+    >
+      🐦 ココア＠プログラミング奮闘中 (@cocoa_next7)
+    </a>
+
+  </div>
+
+</div>
+
+
+<script>
+/* =========================================================
+   COCOA TOOLS v2.0
+   時給・日給一瞬計算
+========================================================= */
+
+const STORAGE_KEY = "cocoa_jikyu_calc_v1";
+
+let currentMode = "monthlyHourly";
+
+const modeButtons = document.querySelectorAll(".mode-btn");
+
+const monthlySalary = document.getElementById("monthlySalary");
+const dailySalary = document.getElementById("dailySalary");
+const hourlySalary = document.getElementById("hourlySalary");
+const monthlyDays = document.getElementById("monthlyDays");
+const dailyHours = document.getElementById("dailyHours");
+const overtimeHours = document.getElementById("overtimeHours");
+const overtimeRate = document.getElementById("overtimeRate");
+
+const monthlySalaryGroup =
+  document.getElementById("monthlySalaryGroup");
+
+const dailySalaryGroup =
+  document.getElementById("dailySalaryGroup");
+
+const hourlySalaryGroup =
+  document.getElementById("hourlySalaryGroup");
+
+const monthlyDaysGroup =
+  document.getElementById("monthlyDaysGroup");
+
+const dailyHoursGroup =
+  document.getElementById("dailyHoursGroup");
+
+const regularHourlyResult =
+  document.getElementById("regularHourlyResult");
+
+const regularAmountResult =
+  document.getElementById("regularAmountResult");
+
+const overtimeHourlyResult =
+  document.getElementById("overtimeHourlyResult");
+
+const overtimeHoursResult =
+  document.getElementById("overtimeHoursResult");
+
+const overtimeAmountResult =
+  document.getElementById("overtimeAmountResult");
+
+const totalAmountResult =
+  document.getElementById("totalAmountResult");
+
+const formula =
+  document.getElementById("formula");
+
+const errorMessage =
+  document.getElementById("errorMessage");
+
+const copyBtn =
+  document.getElementById("copyBtn");
+
+
+/* =========================
+   数値表示
+========================= */
+
+function formatMoney(value) {
+
+  if (!Number.isFinite(value)) {
+    return "-";
+  }
+
+  return "¥" + Math.round(value).toLocaleString("ja-JP");
+}
+
+
+function formatHourly(value) {
+
+  if (!Number.isFinite(value)) {
+    return "-";
+  }
+
+  return "¥" + value.toLocaleString("ja-JP", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  });
+}
+
+
+/* =========================
+   モード切替
+========================= */
+
+function updateMode() {
+
+  monthlySalaryGroup.classList.add("hidden");
+  dailySalaryGroup.classList.add("hidden");
+  hourlySalaryGroup.classList.add("hidden");
+  monthlyDaysGroup.classList.add("hidden");
+  dailyHoursGroup.classList.add("hidden");
+
+  if (currentMode === "monthlyHourly") {
+
+    monthlySalaryGroup.classList.remove("hidden");
+    monthlyDaysGroup.classList.remove("hidden");
+    dailyHoursGroup.classList.remove("hidden");
+
+  }
+
+  else if (currentMode === "dailyHourly") {
+
+    dailySalaryGroup.classList.remove("hidden");
+    dailyHoursGroup.classList.remove("hidden");
+
+  }
+
+  else if (currentMode === "hourlyDaily") {
+
+    hourlySalaryGroup.classList.remove("hidden");
+    dailyHoursGroup.classList.remove("hidden");
+
+  }
+
+  else if (currentMode === "monthlyDaily") {
+
+    monthlySalaryGroup.classList.remove("hidden");
+    monthlyDaysGroup.classList.remove("hidden");
+    dailyHoursGroup.classList.remove("hidden");
+
+  }
+}
+
+
+modeButtons.forEach(button => {
+
+  button.addEventListener("click", () => {
+
+    currentMode = button.dataset.mode;
+
+    modeButtons.forEach(btn => {
+      btn.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    updateMode();
+
+    saveData();
+
+  });
+
+});
+
+
+/* =========================
+   計算
+========================= */
+
+function calculate() {
+
+  errorMessage.classList.add("hidden");
+  errorMessage.textContent = "";
+
+  let regularHourly = 0;
+  let regularAmount = 0;
+  let resultText = "";
+
+  const monthly =
+    Number(monthlySalary.value);
+
+  const daily =
+    Number(dailySalary.value);
+
+  const hourly =
+    Number(hourlySalary.value);
+
+  const days =
+    Number(monthlyDays.value);
+
+  const hours =
+    Number(dailyHours.value);
+
+  const overtime =
+    Number(overtimeHours.value);
+
+  const multiplier =
+    Number(overtimeRate.value);
+
+
+  /* -------------------------
+     入力チェック
+  ------------------------- */
+
+  if (currentMode === "monthlyHourly") {
+
+    if (monthly <= 0 || days <= 0 || hours <= 0) {
+
+      showError(
+        "月給・勤務日数・1日の勤務時間を入力してください。"
+      );
+
+      return;
+    }
+
+    regularHourly =
+      monthly / days / hours;
+
+    regularAmount =
+      monthly;
+
+    resultText =
+      `月給 ${formatMoney(monthly)} ÷ ${days}日 ÷ ${hours}時間`;
+
+  }
+
+
+  else if (currentMode === "dailyHourly") {
+
+    if (daily <= 0 || hours <= 0) {
+
+      showError(
+        "日給・1日の勤務時間を入力してください。"
+      );
+
+      return;
+    }
+
+    regularHourly =
+      daily / hours;
+
+    regularAmount =
+      daily;
+
+    resultText =
+      `日給 ${formatMoney(daily)} ÷ ${hours}時間`;
+
+  }
+
+
+  else if (currentMode === "hourlyDaily") {
+
+    if (hourly <= 0 || hours <= 0) {
+
+      showError(
+        "時給・1日の勤務時間を入力してください。"
+      );
+
+      return;
+    }
+
+    regularHourly =
+      hourly;
+
+    regularAmount =
+      hourly * hours;
+
+    resultText =
+      `時給 ${formatHourly(hourly)} × ${hours}時間`;
+
+  }
+
+
+  else if (currentMode === "monthlyDaily") {
+
+    if (monthly <= 0 || days <= 0 || hours <= 0) {
+
+      showError(
+        "月給・勤務日数・1日の勤務時間を入力してください。"
+      );
+
+      return;
+    }
+
+    regularHourly =
+      monthly / days / hours;
+
+    regularAmount =
+      monthly / days;
+
+    resultText =
+      `月給 ${formatMoney(monthly)} ÷ ${days}日 = ${formatMoney(regularAmount)}`;
+
+  }
+
+
+  /* -------------------------
+     残業計算
+  ------------------------- */
+
+  const overtimeHourly =
+    regularHourly * multiplier;
+
+  const overtimeAmount =
+    overtime > 0
+      ? overtimeHourly * overtime
+      : 0;
+
+  const totalAmount =
+    regularAmount + overtimeAmount;
+
+
+  /* -------------------------
+     結果表示
+  ------------------------- */
+
+  regularHourlyResult.textContent =
+    formatHourly(regularHourly);
+
+  regularAmountResult.textContent =
+    formatMoney(regularAmount);
+
+  overtimeHourlyResult.textContent =
+    formatHourly(overtimeHourly);
+
+  overtimeHoursResult.textContent =
+    `${overtime || 0}時間`;
+
+  overtimeAmountResult.textContent =
+    formatMoney(overtimeAmount);
+
+  totalAmountResult.textContent =
+    formatMoney(totalAmount);
+
+
+  formula.innerHTML =
+    `${resultText}<br>` +
+    `残業時給 = 通常時給 × ${multiplier}倍<br>` +
+    `残業代 = 残業時給 × ${overtime || 0}時間<br>` +
+    `合計額 = 通常分 ＋ 残業代`;
+
+
+  saveData();
+
+}
+
+
+/* =========================
+   エラー
+========================= */
+
+function showError(message) {
+
+  errorMessage.textContent = message;
+  errorMessage.classList.remove("hidden");
+
+}
+
+
+/* =========================
+   コピー
+========================= */
+
+copyBtn.addEventListener("click", async () => {
+
+  const text =
+`【時給・日給一瞬計算】
+通常時給：${regularHourlyResult.textContent}
+通常分：${regularAmountResult.textContent}
+残業時給：${overtimeHourlyResult.textContent}
+残業時間：${overtimeHoursResult.textContent}
+残業代：${overtimeAmountResult.textContent}
+合計額：${totalAmountResult.textContent}`;
+
+  try {
+
+    await navigator.clipboard.writeText(text);
+
+    copyBtn.textContent = "✅ コピーしました";
+    copyBtn.classList.add("copied");
+
+    setTimeout(() => {
+
+      copyBtn.textContent = "📋 結果をコピー";
+      copyBtn.classList.remove("copied");
+
+    }, 1800);
+
+  }
+
+  catch (error) {
+
+    alert("コピーできませんでした。結果を選択してコピーしてください。");
+
+  }
+
+});
+
+
+/* =========================
+   LocalStorage保存
+========================= */
+
+function saveData() {
+
+  const data = {
+
+    mode: currentMode,
+
+    monthlySalary:
+      monthlySalary.value,
+
+    dailySalary:
+      dailySalary.value,
+
+    hourlySalary:
+      hourlySalary.value,
+
+    monthlyDays:
+      monthlyDays.value,
+
+    dailyHours:
+      dailyHours.value,
+
+    overtimeHours:
+      overtimeHours.value,
+
+    overtimeRate:
+      overtimeRate.value
+
+  };
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(data)
+  );
+
+}
+
+
+/* =========================
+   LocalStorage復元
+========================= */
+
+function loadData() {
+
+  const saved =
+    localStorage.getItem(STORAGE_KEY);
+
+  if (!saved) {
+    updateMode();
+    return;
+  }
+
+  try {
+
+    const data =
+      JSON.parse(saved);
+
+    currentMode =
+      data.mode || "monthlyHourly";
+
+    monthlySalary.value =
+      data.monthlySalary || "";
+
+    dailySalary.value =
+      data.dailySalary || "";
+
+    hourlySalary.value =
+      data.hourlySalary || "";
+
+    monthlyDays.value =
+      data.monthlyDays || "";
+
+    dailyHours.value =
+      data.dailyHours || "";
+
+    overtimeHours.value =
+      data.overtimeHours || "";
+
+    overtimeRate.value =
+      data.overtimeRate || "1.25";
+
+
+    modeButtons.forEach(button => {
+
+      button.classList.toggle(
+        "active",
+        button.dataset.mode === currentMode
+      );
+
+    });
+
+    updateMode();
+
+  }
+
+  catch (error) {
+
+    updateMode();
+
+  }
+
+}
+
+
+/* =========================
+   自動保存
+========================= */
+
+[
+  monthlySalary,
+  dailySalary,
+  hourlySalary,
+  monthlyDays,
+  dailyHours,
+  overtimeHours,
+  overtimeRate
+].forEach(element => {
+
+  element.addEventListener("input", saveData);
+  element.addEventListener("change", saveData);
+
+});
+
+
+/* =========================
+   初期化
+========================= */
+
+document
+  .getElementById("calculateBtn")
+  .addEventListener("click", calculate);
+
+loadData();
+
+</script>
+
+</body>
+</html>
