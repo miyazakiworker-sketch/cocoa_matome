@@ -1,11 +1,11 @@
-```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="高さ・水平距離・勾配を一瞬で計算できる無料ツール。m・mm切り替え対応。COCOA TOOLS v2.0">
-<title>📐 勾配計算 一瞬計算｜COCOA TOOLS v2.0</title>
+
+<title>📐 勾配計算 一瞬計算 - COCOA TOOLS</title>
+<meta name="description" content="高さ・水平距離・勾配・角度・寸勾配・斜距離を一瞬で計算できる無料ツール。建築・現場作業に。">
 
 <style>
 * {
@@ -27,7 +27,6 @@ body {
     "Segoe UI",
     "Hiragino Kaku Gothic ProN",
     "Hiragino Sans",
-    "Yu Gothic",
     Meiryo,
     sans-serif;
   line-height: 1.6;
@@ -37,9 +36,6 @@ body {
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
-}
-
-.card {
   background: #1a1f26;
   border: 1px solid #2d3748;
   border-radius: 20px;
@@ -48,160 +44,183 @@ body {
 }
 
 h1 {
-  margin: 0;
+  margin: 0 0 8px;
   font-size: 24px;
-  line-height: 1.35;
-  text-align: center;
+  line-height: 1.3;
   color: #f8fafc;
 }
 
-.description {
-  margin: 10px 0 25px;
-  text-align: center;
+.subtitle {
+  margin: 0 0 24px;
   color: #a0aec0;
-  font-size: 14px;
-}
-
-/* セクション */
-.section {
-  margin-top: 22px;
+  font-size: 13px;
 }
 
 .section-title {
-  margin-bottom: 10px;
-  font-size: 14px;
+  margin: 22px 0 9px;
+  font-size: 13px;
   font-weight: 700;
   color: #cbd5e0;
 }
 
-/* ボタン */
-.button-group {
+.unit-buttons,
+.mode-buttons,
+.slope-type-buttons {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
-.mode-group {
+.unit-buttons {
+  grid-template-columns: 1fr 1fr;
+}
+
+.mode-buttons {
   grid-template-columns: repeat(3, 1fr);
 }
 
-.option-button {
-  width: 100%;
-  min-height: 46px;
-  padding: 10px 8px;
+.slope-type-buttons {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+button {
+  font-family: inherit;
+}
+
+.choice-btn {
+  min-height: 42px;
+  padding: 8px 6px;
   border: 1px solid #2d3748;
-  border-radius: 12px;
-  background: #11151a;
-  color: #a0aec0;
+  border-radius: 8px;
+  background: #10141a;
+  color: #cbd5e0;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.15s ease;
 }
 
-.option-button:hover {
-  border-color: #4a5568;
-  color: #e2e8f0;
+.choice-btn:hover {
+  border-color: #64748b;
 }
 
-.option-button.active {
+.choice-btn.active {
   background: #a3e635;
   border-color: #a3e635;
-  color: #111827;
-}
-
-/* 入力 */
-.input-area {
-  margin-top: 20px;
+  color: #0d0f12;
 }
 
 .input-group {
-  margin-bottom: 15px;
+  margin-top: 15px;
 }
 
 .input-label {
   display: block;
   margin-bottom: 7px;
-  color: #cbd5e0;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
+  color: #cbd5e0;
 }
 
-.input-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.input-wrap {
+  position: relative;
 }
 
-input {
+input[type="number"] {
   width: 100%;
-  min-width: 0;
-  height: 50px;
-  padding: 0 14px;
+  height: 48px;
+  padding: 0 58px 0 14px;
   border: 1px solid #2d3748;
-  border-radius: 12px;
+  border-radius: 8px;
   outline: none;
-  background: #0d1116;
+  background: #0d1117;
   color: #f8fafc;
-  font-size: 18px;
+  font-size: 16px;
+  font-weight: 700;
   text-align: right;
-  transition: 0.2s;
+  appearance: textfield;
 }
 
-input:focus {
+input[type="number"]:focus {
   border-color: #a3e635;
   box-shadow: 0 0 0 2px rgba(163, 230, 53, 0.12);
 }
 
-.unit {
-  min-width: 38px;
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.input-unit {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
   color: #a0aec0;
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.slope-unit {
+  padding-right: 62px !important;
+}
+
+.calculate-btn {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 22px;
+  border: 2px solid #f8fafc;
+  border-radius: 11px;
+  background: #a3e635;
+  color: #0d0f12;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+
+.calculate-btn:hover {
+  filter: brightness(1.05);
+}
+
+.calculate-btn:active {
+  transform: translateY(1px);
+}
+
+.error-message {
+  display: none;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #7f1d1d;
+  border-radius: 8px;
+  background: #2a1215;
+  color: #fca5a5;
+  font-size: 13px;
   font-weight: 700;
 }
 
-/* 計算ボタン */
-.calculate-button {
-  width: 100%;
-  min-height: 54px;
-  margin-top: 8px;
-  border: none;
-  border-radius: 14px;
-  background: #a3e635;
-  color: #111827;
-  font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: 0.2s;
+.error-message.show {
+  display: block;
 }
 
-.calculate-button:hover {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
-}
-
-.calculate-button:active {
-  transform: translateY(0);
-}
-
-/* 結果 */
 .result-box {
-  margin-top: 24px;
-  padding: 20px 16px;
+  margin-top: 14px;
+  padding: 15px 12px 12px;
   border: 1px solid #2d3748;
-  border-radius: 16px;
-  background: #11151a;
+  border-radius: 10px;
+  background: #101419;
 }
 
-.result-title {
-  margin-bottom: 16px;
-  font-size: 17px;
+.result-heading {
+  margin: 0 0 10px;
+  font-size: 14px;
   font-weight: 800;
-  color: #f8fafc;
+  color: #e2e8f0;
 }
 
 .result-item {
-  padding: 12px 0;
+  padding: 10px 0;
   border-bottom: 1px solid #2d3748;
 }
 
@@ -211,101 +230,102 @@ input:focus {
 
 .result-label {
   margin-bottom: 3px;
-  color: #a0aec0;
-  font-size: 13px;
+  color: #718096;
+  font-size: 11px;
 }
 
 .result-value {
-  font-size: 22px;
-  font-weight: 800;
   color: #a3e635;
+  font-size: 16px;
+  font-weight: 800;
   word-break: break-word;
 }
 
-.copy-button {
+.result-sub {
+  margin-top: 2px;
+  color: #718096;
+  font-size: 10px;
+}
+
+.copy-btn {
   width: 100%;
-  min-height: 48px;
-  margin-top: 15px;
+  min-height: 40px;
+  margin-top: 10px;
   border: 1px solid #a3e635;
-  border-radius: 12px;
+  border-radius: 8px;
   background: transparent;
   color: #a3e635;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.15s ease;
 }
 
-.copy-button:hover {
+.copy-btn:hover {
   background: #a3e635;
-  color: #111827;
+  color: #0d0f12;
 }
 
-/* 計算式 */
 .formula-box {
-  margin-top: 15px;
-  padding: 14px;
-  border-radius: 12px;
-  background: #0d1116;
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 7px;
+  background: #0b0e12;
   color: #718096;
-  font-size: 12px;
+  font-size: 10px;
   line-height: 1.7;
 }
 
-/* 広告 */
+.formula-title {
+  margin-bottom: 3px;
+  color: #a0aec0;
+  font-weight: 700;
+}
+
 .ad-box {
-  margin-top: 24px;
-  padding: 22px 15px;
+  margin-top: 22px;
+  padding: 18px 10px;
   border: 1px dashed #4a5568;
-  border-radius: 14px;
+  border-radius: 10px;
   text-align: center;
   color: #718096;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .ad-box a {
-  display: inline-block;
-  margin-top: 6px;
-  color: #a0aec0;
+  color: #a3e635;
   text-decoration: none;
 }
 
-.ad-box a:hover {
-  color: #a3e635;
-}
-
-/* 免責事項 */
 .disclaimer {
-  margin-top: 24px;
-  padding: 16px;
+  margin-top: 22px;
+  padding: 14px;
   border: 1px solid #2d3748;
-  border-radius: 14px;
-  background: #11151a;
+  border-radius: 10px;
+  background: #14181e;
 }
 
 .disclaimer-title {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: #cbd5e0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
 }
 
-.disclaimer p {
-  margin: 0;
+.disclaimer-text {
   color: #718096;
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1.7;
 }
 
-/* X */
 .footer {
-  margin-top: 24px;
+  margin-top: 22px;
   text-align: center;
 }
 
 .footer a {
   color: #a0aec0;
-  font-size: 13px;
+  font-size: 12px;
   text-decoration: none;
 }
 
@@ -313,22 +333,27 @@ input:focus {
   color: #a3e635;
 }
 
-/* エラー */
-.error {
-  margin-top: 10px;
-  color: #f87171;
-  font-size: 12px;
-  text-align: center;
-  display: none;
+.footer-copy {
+  margin-top: 7px;
+  color: #4a5568;
+  font-size: 10px;
+}
+
+.hidden {
+  display: none !important;
 }
 
 @media (max-width: 360px) {
-  .mode-group {
-    grid-template-columns: 1fr;
+  .container {
+    padding: 24px 15px;
   }
 
   h1 {
     font-size: 21px;
+  }
+
+  .choice-btn {
+    font-size: 12px;
   }
 }
 </style>
@@ -338,496 +363,472 @@ input:focus {
 
 <div class="container">
 
-  <main class="card">
-
-    <h1>📐 勾配計算 一瞬計算</h1>
-
-    <p class="description">
-      高さ・水平距離・勾配を一瞬で計算
-    </p>
-
-    <!-- 単位 -->
-    <section class="section">
-
-      <div class="section-title">単位</div>
-
-      <div class="button-group">
-
-        <button
-          type="button"
-          class="option-button unit-button active"
-          data-unit="mm">
-          mm
-        </button>
-
-        <button
-          type="button"
-          class="option-button unit-button"
-          data-unit="m">
-          m
-        </button>
-
-      </div>
-
-    </section>
-
-    <!-- 計算モード -->
-    <section class="section">
-
-      <div class="section-title">計算するもの</div>
-
-      <div class="button-group mode-group">
-
-        <button
-          type="button"
-          class="option-button mode-button active"
-          data-mode="height">
-          高さ
-        </button>
-
-        <button
-          type="button"
-          class="option-button mode-button"
-          data-mode="distance">
-          距離
-        </button>
-
-        <button
-          type="button"
-          class="option-button mode-button"
-          data-mode="slope">
-          勾配
-        </button>
-
-      </div>
-
-    </section>
-
-    <!-- 入力 -->
-    <section class="input-area">
-
-      <!-- 高さ計算 -->
-      <div id="heightInputs">
-
-        <div class="input-group">
-
-          <label class="input-label" for="heightDistance">
-            水平距離
-          </label>
-
-          <div class="input-row">
-
-            <input
-              id="heightDistance"
-              type="number"
-              inputmode="decimal"
-              min="0"
-              step="any"
-              placeholder="例：6000">
-
-            <span class="unit unit-display">mm</span>
-
-          </div>
-
-        </div>
-
-        <div class="input-group">
-
-          <label class="input-label" for="heightSlope">
-            勾配
-          </label>
-
-          <div class="input-row">
-
-            <input
-              id="heightSlope"
-              type="number"
-              inputmode="decimal"
-              min="0"
-              step="any"
-              placeholder="例：20">
-
-            <span class="unit">%</span>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- 距離計算 -->
-      <div id="distanceInputs" style="display:none;">
-
-        <div class="input-group">
-
-          <label class="input-label" for="distanceHeight">
-            高さ
-          </label>
-
-          <div class="input-row">
-
-            <input
-              id="distanceHeight"
-              type="number"
-              inputmode="decimal"
-              min="0"
-              step="any"
-              placeholder="例：1200">
-
-            <span class="unit unit-display">mm</span>
-
-          </div>
-
-        </div>
-
-        <div class="input-group">
-
-          <label class="input-label" for="distanceSlope">
-            勾配
-          </label>
-
-          <div class="input-row">
-
-            <input
-              id="distanceSlope"
-              type="number"
-              inputmode="decimal"
-              min="0"
-              step="any"
-              placeholder="例：20">
-
-            <span class="unit">%</span>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      <!-- 勾配計算 -->
-      <div id="slopeInputs" style="display:none;">
-
-        <div class="input-group">
-
-          <label class="input-label" for="slopeHeight">
-            高さ
-          </label>
-
-          <div class="input-row">
-
-            <input
-              id="slopeHeight"
-              type="number"
-              inputmode="decimal"
-              min="0"
-              step="any"
-              placeholder="例：1200">
-
-            <span class="unit unit-display">mm</span>
-
-          </div>
-
-        </div>
-
-        <div class="input-group">
-
-          <label class="input-label" for="slopeDistance">
-            水平距離
-          </label>
-
-          <div class="input-row">
-
-            <input
-              id="slopeDistance"
-              type="number"
-              inputmode="decimal"
-              min="0"
-              step="any"
-              placeholder="例：6000">
-
-            <span class="unit unit-display">mm</span>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      <div id="errorMessage" class="error"></div>
-
-      <button
-        type="button"
-        id="calculateButton"
-        class="calculate-button">
-        計算する
-      </button>
-
-    </section>
-
-    <!-- 結果 -->
-    <section class="result-box">
-
-      <div class="result-title">
-        📐 計算結果
-      </div>
-
-      <div class="result-item">
-
-        <div class="result-label">高さ</div>
-
-        <div
-          id="resultHeight"
-          class="result-value">
-          -
-        </div>
-
-      </div>
-
-      <div class="result-item">
-
-        <div class="result-label">水平距離</div>
-
-        <div
-          id="resultDistance"
-          class="result-value">
-          -
-        </div>
-
-      </div>
-
-      <div class="result-item">
-
-        <div class="result-label">勾配</div>
-
-        <div
-          id="resultSlope"
-          class="result-value">
-          -
-        </div>
-
-      </div>
-
-      <button
-        type="button"
-        id="copyButton"
-        class="copy-button">
-        結果をコピー
-      </button>
-
-      <div class="formula-box">
-        <strong>計算式</strong><br>
-        高さ ＝ 水平距離 × 勾配 ÷ 100<br>
-        水平距離 ＝ 高さ ÷ 勾配 × 100<br>
-        勾配 ＝ 高さ ÷ 水平距離 × 100
-      </div>
-
-    </section>
-
-  </main>
+  <h1>📐 勾配計算 一瞬計算</h1>
+  <p class="subtitle">高さ・水平距離・勾配・角度・斜距離を一瞬で計算</p>
+
+  <!-- 単位 -->
+  <div class="section-title">単位</div>
+
+  <div class="unit-buttons">
+    <button type="button" class="choice-btn active" id="unitMm">mm</button>
+    <button type="button" class="choice-btn" id="unitM">m</button>
+  </div>
+
+  <!-- 計算するもの -->
+  <div class="section-title">計算するもの</div>
+
+  <div class="mode-buttons">
+    <button type="button" class="choice-btn active" data-mode="height">
+      高さ
+    </button>
+    <button type="button" class="choice-btn" data-mode="distance">
+      距離
+    </button>
+    <button type="button" class="choice-btn" data-mode="slope">
+      勾配
+    </button>
+  </div>
+
+  <!-- 勾配の入力方法 -->
+  <div class="section-title" id="slopeTypeTitle">勾配の入力方法</div>
+
+  <div class="slope-type-buttons" id="slopeTypeButtons">
+    <button type="button" class="choice-btn active" data-slope-type="percent">
+      ％
+    </button>
+    <button type="button" class="choice-btn" data-slope-type="degree">
+      角度
+    </button>
+    <button type="button" class="choice-btn" data-slope-type="sun">
+      寸勾配
+    </button>
+  </div>
+
+  <!-- 高さ入力 -->
+  <div class="input-group hidden" id="heightInputGroup">
+    <label class="input-label" for="heightInput">高さ</label>
+    <div class="input-wrap">
+      <input
+        type="number"
+        id="heightInput"
+        step="any"
+        inputmode="decimal"
+        placeholder="例：120"
+      >
+      <span class="input-unit" id="heightInputUnit">mm</span>
+    </div>
+  </div>
+
+  <!-- 水平距離入力 -->
+  <div class="input-group hidden" id="distanceInputGroup">
+    <label class="input-label" for="distanceInput">水平距離</label>
+    <div class="input-wrap">
+      <input
+        type="number"
+        id="distanceInput"
+        step="any"
+        inputmode="decimal"
+        placeholder="例：900"
+      >
+      <span class="input-unit" id="distanceInputUnit">mm</span>
+    </div>
+  </div>
+
+  <!-- 勾配入力 -->
+  <div class="input-group hidden" id="slopeInputGroup">
+    <label class="input-label" for="slopeInput" id="slopeInputLabel">
+      勾配
+    </label>
+
+    <div class="input-wrap">
+      <input
+        type="number"
+        id="slopeInput"
+        step="any"
+        inputmode="decimal"
+        placeholder="例：1.3333"
+        class="slope-unit"
+      >
+      <span class="input-unit" id="slopeInputUnit">%</span>
+    </div>
+  </div>
+
+  <button type="button" class="calculate-btn" id="calculateBtn">
+    計算する
+  </button>
+
+  <div class="error-message" id="errorMessage"></div>
+
+  <!-- 結果 -->
+  <div class="result-box">
+
+    <div class="result-heading">📐 計算結果</div>
+
+    <div class="result-item">
+      <div class="result-label">高さ</div>
+      <div class="result-value" id="resultHeight">-</div>
+    </div>
+
+    <div class="result-item">
+      <div class="result-label">水平距離</div>
+      <div class="result-value" id="resultDistance">-</div>
+    </div>
+
+    <div class="result-item">
+      <div class="result-label">勾配（％）</div>
+      <div class="result-value" id="resultPercent">-</div>
+    </div>
+
+    <div class="result-item">
+      <div class="result-label">角度</div>
+      <div class="result-value" id="resultDegree">-</div>
+    </div>
+
+    <div class="result-item">
+      <div class="result-label">寸勾配</div>
+      <div class="result-value" id="resultSun">-</div>
+    </div>
+
+    <div class="result-item">
+      <div class="result-label">斜距離</div>
+      <div class="result-value" id="resultSlopedDistance">-</div>
+      <div class="result-sub">高さと水平距離から算出</div>
+    </div>
+
+    <button type="button" class="copy-btn" id="copyBtn">
+      結果をコピー
+    </button>
+
+    <div class="formula-box">
+      <div class="formula-title">計算式</div>
+      <div>高さ ＝ 水平距離 × 勾配</div>
+      <div>水平距離 ＝ 高さ ÷ 勾配</div>
+      <div>勾配(％) ＝ 高さ ÷ 水平距離 × 100</div>
+      <div>角度 ＝ arctan(高さ ÷ 水平距離)</div>
+      <div>寸勾配 ＝ 勾配(％) ÷ 10</div>
+      <div>斜距離 ＝ √(高さ² ＋ 水平距離²)</div>
+    </div>
+
+  </div>
 
   <!-- 広告 -->
   <div class="ad-box">
     【将来の広告枠】<br>
-    スポンサー広告・おすすめサービスなどを掲載予定
-    <br>
-    <a
-      href="https://x.com/cocoa_next7"
-      target="_blank"
-      rel="noopener noreferrer">
-      ココア＠プログラミング奮闘中 (@cocoa_next7)
+    スポンサー枠・広告掲載予定<br>
+    <a href="https://x.com/cocoa_next7" target="_blank" rel="noopener noreferrer">
+      ココア＠プログラミング奮闘中
     </a>
   </div>
 
   <!-- 免責事項 -->
   <div class="disclaimer">
-
-    <div class="disclaimer-title">
-      免責事項
+    <div class="disclaimer-title">⚠️ 免責事項</div>
+    <div class="disclaimer-text">
+      本ツールの計算結果は参考値です。実際の施工・設計・発注などに使用する場合は、
+      必ず現場の条件や仕様書、メーカー資料等をご確認ください。
+      本ツールの利用によって生じた損害について、当サイトは一切の責任を負いません。
     </div>
-
-    <p>
-      本ツールの計算結果は参考値です。
-      計算結果の正確性を保証するものではありません。
-      実際の施工・設計・発注などに使用する場合は、
-      必ず現場の条件や図面、関係資料などを確認してください。
-      本ツールの利用によって生じた損害について、
-      当サイトは一切の責任を負いません。
-    </p>
-
   </div>
 
   <!-- X -->
-  <footer class="footer">
-
+  <div class="footer">
     <a
       href="https://x.com/cocoa_next7"
       target="_blank"
-      rel="noopener noreferrer">
-      🐦 ココア＠プログラミング奮闘中 (@cocoa_next7)
+      rel="noopener noreferrer"
+    >
+      ココア＠プログラミング奮闘中 (@cocoa_next7)
     </a>
 
-  </footer>
+    <div class="footer-copy">
+      © COCOA TOOLS v2.0
+    </div>
+  </div>
 
 </div>
 
 <script>
 (() => {
+  "use strict";
 
-  const STORAGE_KEY = "cocoa_slope_calc_v1";
+  const STORAGE_KEY = "cocoa_slope_calc_v2";
 
-  let currentUnit = "mm";
   let currentMode = "height";
+  let currentUnit = "mm";
+  let currentSlopeType = "percent";
 
-  const unitButtons = document.querySelectorAll(".unit-button");
-  const modeButtons = document.querySelectorAll(".mode-button");
+  const unitMm = document.getElementById("unitMm");
+  const unitM = document.getElementById("unitM");
 
-  const heightInputs = document.getElementById("heightInputs");
-  const distanceInputs = document.getElementById("distanceInputs");
-  const slopeInputs = document.getElementById("slopeInputs");
+  const modeButtons = document.querySelectorAll("[data-mode]");
+  const slopeTypeButtons = document.querySelectorAll("[data-slope-type]");
 
-  const calculateButton =
-    document.getElementById("calculateButton");
+  const slopeTypeTitle = document.getElementById("slopeTypeTitle");
+  const slopeTypeButtonsBox = document.getElementById("slopeTypeButtons");
 
-  const copyButton =
-    document.getElementById("copyButton");
+  const heightInputGroup = document.getElementById("heightInputGroup");
+  const distanceInputGroup = document.getElementById("distanceInputGroup");
+  const slopeInputGroup = document.getElementById("slopeInputGroup");
 
-  const errorMessage =
-    document.getElementById("errorMessage");
+  const heightInput = document.getElementById("heightInput");
+  const distanceInput = document.getElementById("distanceInput");
+  const slopeInput = document.getElementById("slopeInput");
 
-  const resultHeight =
-    document.getElementById("resultHeight");
+  const heightInputUnit = document.getElementById("heightInputUnit");
+  const distanceInputUnit = document.getElementById("distanceInputUnit");
 
-  const resultDistance =
-    document.getElementById("resultDistance");
+  const slopeInputLabel = document.getElementById("slopeInputLabel");
+  const slopeInputUnit = document.getElementById("slopeInputUnit");
 
-  const resultSlope =
-    document.getElementById("resultSlope");
+  const calculateBtn = document.getElementById("calculateBtn");
+  const copyBtn = document.getElementById("copyBtn");
 
-  const unitDisplays =
-    document.querySelectorAll(".unit-display");
+  const errorMessage = document.getElementById("errorMessage");
 
-  /* ------------------------------
-     単位変更
-  ------------------------------ */
+  const resultHeight = document.getElementById("resultHeight");
+  const resultDistance = document.getElementById("resultDistance");
+  const resultPercent = document.getElementById("resultPercent");
+  const resultDegree = document.getElementById("resultDegree");
+  const resultSun = document.getElementById("resultSun");
+  const resultSlopedDistance = document.getElementById("resultSlopedDistance");
 
-  function updateUnit() {
-
-    unitDisplays.forEach(element => {
-      element.textContent = currentUnit;
-    });
-
-    updatePlaceholders();
-
-    saveState();
-  }
-
-  function updatePlaceholders() {
-
-    const values = {
-      mm: {
-        height: "例：1200",
-        distance: "例：6000"
-      },
-      m: {
-        height: "例：1.2",
-        distance: "例：6"
-      }
-    };
-
-    document.getElementById("heightDistance").placeholder =
-      values[currentUnit].distance;
-
-    document.getElementById("distanceHeight").placeholder =
-      values[currentUnit].height;
-
-    document.getElementById("slopeHeight").placeholder =
-      values[currentUnit].height;
-
-    document.getElementById("slopeDistance").placeholder =
-      values[currentUnit].distance;
-  }
-
-  unitButtons.forEach(button => {
-
-    button.addEventListener("click", () => {
-
-      currentUnit = button.dataset.unit;
-
-      unitButtons.forEach(item => {
-        item.classList.remove("active");
-      });
-
-      button.classList.add("active");
-
-      updateUnit();
-    });
-
-  });
-
-  /* ------------------------------
-     モード変更
-  ------------------------------ */
-
-  function updateMode() {
-
-    heightInputs.style.display =
-      currentMode === "height" ? "block" : "none";
-
-    distanceInputs.style.display =
-      currentMode === "distance" ? "block" : "none";
-
-    slopeInputs.style.display =
-      currentMode === "slope" ? "block" : "none";
-
-    modeButtons.forEach(button => {
-
-      button.classList.toggle(
-        "active",
-        button.dataset.mode === currentMode
-      );
-
-    });
-
-    hideError();
-
-    saveState();
-  }
-
-  modeButtons.forEach(button => {
-
-    button.addEventListener("click", () => {
-
-      currentMode = button.dataset.mode;
-
-      updateMode();
-
-    });
-
-  });
-
-  /* ------------------------------
-     数値整形
-  ------------------------------ */
-
-  function formatNumber(value) {
-
+  function formatNumber(value, digits = 4) {
     if (!Number.isFinite(value)) {
       return "-";
     }
 
-    const rounded =
-      Math.round((value + Number.EPSILON) * 100000) / 100000;
-
-    return rounded.toLocaleString("ja-JP", {
-      maximumFractionDigits: 5
+    return Number(value.toFixed(digits)).toLocaleString("ja-JP", {
+      maximumFractionDigits: digits
     });
   }
 
-  /* ------------------------------
-     結果表示
-  ------------------------------ */
+  function showError(message) {
+    errorMessage.textContent = message;
+    errorMessage.classList.add("show");
+  }
 
-  function setResults(height, distance, slope) {
+  function clearError() {
+    errorMessage.textContent = "";
+    errorMessage.classList.remove("show");
+  }
+
+  function saveState() {
+    const state = {
+      mode: currentMode,
+      unit: currentUnit,
+      slopeType: currentSlopeType,
+      height: heightInput.value,
+      distance: distanceInput.value,
+      slope: slopeInput.value
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function loadState() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+
+      if (!saved) {
+        return;
+      }
+
+      const state = JSON.parse(saved);
+
+      if (["height", "distance", "slope"].includes(state.mode)) {
+        currentMode = state.mode;
+      }
+
+      if (state.unit === "mm" || state.unit === "m") {
+        currentUnit = state.unit;
+      }
+
+      if (
+        state.slopeType === "percent" ||
+        state.slopeType === "degree" ||
+        state.slopeType === "sun"
+      ) {
+        currentSlopeType = state.slopeType;
+      }
+
+      if (state.height !== undefined) {
+        heightInput.value = state.height;
+      }
+
+      if (state.distance !== undefined) {
+        distanceInput.value = state.distance;
+      }
+
+      if (state.slope !== undefined) {
+        slopeInput.value = state.slope;
+      }
+    } catch (error) {
+      console.warn("LocalStorageの読み込みに失敗しました。", error);
+    }
+  }
+
+  function updateUnitButtons() {
+    unitMm.classList.toggle("active", currentUnit === "mm");
+    unitM.classList.toggle("active", currentUnit === "m");
+
+    heightInputUnit.textContent = currentUnit;
+    distanceInputUnit.textContent = currentUnit;
+  }
+
+  function updateModeButtons() {
+    modeButtons.forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.mode === currentMode
+      );
+    });
+  }
+
+  function updateSlopeTypeButtons() {
+    slopeTypeButtons.forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.slopeType === currentSlopeType
+      );
+    });
+  }
+
+  function updateSlopeInputUI() {
+    if (currentSlopeType === "percent") {
+      slopeInputLabel.textContent = "勾配";
+      slopeInputUnit.textContent = "%";
+      slopeInput.placeholder = "例：1.3333";
+    }
+
+    if (currentSlopeType === "degree") {
+      slopeInputLabel.textContent = "角度";
+      slopeInputUnit.textContent = "°";
+      slopeInput.placeholder = "例：0.7634";
+    }
+
+    if (currentSlopeType === "sun") {
+      slopeInputLabel.textContent = "寸勾配";
+      slopeInputUnit.textContent = "寸";
+      slopeInput.placeholder = "例：0.1333";
+    }
+  }
+
+  function updateInputVisibility() {
+    /*
+      高さモード：
+      水平距離 + 勾配 → 高さ
+
+      距離モード：
+      高さ + 勾配 → 水平距離
+
+      勾配モード：
+      高さ + 水平距離 → 勾配
+    */
+
+    heightInputGroup.classList.add("hidden");
+    distanceInputGroup.classList.add("hidden");
+    slopeInputGroup.classList.add("hidden");
+
+    if (currentMode === "height") {
+      distanceInputGroup.classList.remove("hidden");
+      slopeInputGroup.classList.remove("hidden");
+
+      slopeTypeTitle.classList.remove("hidden");
+      slopeTypeButtonsBox.classList.remove("hidden");
+    }
+
+    if (currentMode === "distance") {
+      heightInputGroup.classList.remove("hidden");
+      slopeInputGroup.classList.remove("hidden");
+
+      slopeTypeTitle.classList.remove("hidden");
+      slopeTypeButtonsBox.classList.remove("hidden");
+    }
+
+    if (currentMode === "slope") {
+      heightInputGroup.classList.remove("hidden");
+      distanceInputGroup.classList.remove("hidden");
+
+      slopeTypeTitle.classList.add("hidden");
+      slopeTypeButtonsBox.classList.add("hidden");
+    }
+
+    updateSlopeInputUI();
+  }
+
+  function updateUI() {
+    updateUnitButtons();
+    updateModeButtons();
+    updateSlopeTypeButtons();
+    updateInputVisibility();
+  }
+
+  /*
+    入力された勾配を「高さ / 水平距離」の比率に統一する。
+
+    ratio:
+      高さ ÷ 水平距離
+
+    ％:
+      ratio = percent / 100
+
+    角度:
+      ratio = tan(角度)
+
+    寸勾配:
+      10水平に対して何寸上がるか
+      ratio = 寸 / 10
+  */
+  function slopeToRatio(value) {
+    if (!Number.isFinite(value)) {
+      return NaN;
+    }
+
+    if (currentSlopeType === "percent") {
+      return value / 100;
+    }
+
+    if (currentSlopeType === "degree") {
+      return Math.tan(value * Math.PI / 180);
+    }
+
+    if (currentSlopeType === "sun") {
+      return value / 10;
+    }
+
+    return NaN;
+  }
+
+  function ratioToPercent(ratio) {
+    return ratio * 100;
+  }
+
+  function ratioToDegree(ratio) {
+    return Math.atan(ratio) * 180 / Math.PI;
+  }
+
+  function ratioToSun(ratio) {
+    return ratio * 10;
+  }
+
+  function setResults(height, distance) {
+    const ratio = height / distance;
+
+    if (!Number.isFinite(ratio)) {
+      throw new Error("勾配を計算できません。");
+    }
+
+    const percent = ratioToPercent(ratio);
+    const degree = ratioToDegree(ratio);
+    const sun = ratioToSun(ratio);
+
+    /*
+      斜距離
+      √(高さ² + 水平距離²)
+    */
+    const slopedDistance = Math.sqrt(
+      Math.pow(height, 2) + Math.pow(distance, 2)
+    );
 
     resultHeight.textContent =
       `${formatNumber(height)} ${currentUnit}`;
@@ -835,334 +836,232 @@ input:focus {
     resultDistance.textContent =
       `${formatNumber(distance)} ${currentUnit}`;
 
-    resultSlope.textContent =
-      `${formatNumber(slope)} %`;
+    resultPercent.textContent =
+      `${formatNumber(percent)} %`;
+
+    resultDegree.textContent =
+      `${formatNumber(degree)} °`;
+
+    resultSun.textContent =
+      `${formatNumber(sun)} 寸`;
+
+    resultSlopedDistance.textContent =
+      `${formatNumber(slopedDistance)} ${currentUnit}`;
   }
-
-  /* ------------------------------
-     エラー
-  ------------------------------ */
-
-  function showError(message) {
-
-    errorMessage.textContent = message;
-    errorMessage.style.display = "block";
-  }
-
-  function hideError() {
-
-    errorMessage.textContent = "";
-    errorMessage.style.display = "none";
-  }
-
-  /* ------------------------------
-     計算
-  ------------------------------ */
 
   function calculate() {
+    clearError();
 
-    hideError();
+    const heightValue = parseFloat(heightInput.value);
+    const distanceValue = parseFloat(distanceInput.value);
+    const slopeValue = parseFloat(slopeInput.value);
 
     let height;
     let distance;
-    let slope;
+    let ratio;
 
-    if (currentMode === "height") {
+    try {
+      /*
+        高さを計算
+        水平距離 × 勾配
+      */
+      if (currentMode === "height") {
+        if (!Number.isFinite(distanceValue) || distanceValue <= 0) {
+          showError("水平距離を正しく入力してください。");
+          return;
+        }
 
-      distance = parseFloat(
-        document.getElementById("heightDistance").value
-      );
+        if (!Number.isFinite(slopeValue)) {
+          showError("勾配を正しく入力してください。");
+          return;
+        }
 
-      slope = parseFloat(
-        document.getElementById("heightSlope").value
-      );
+        ratio = slopeToRatio(slopeValue);
 
-      if (
-        !Number.isFinite(distance) ||
-        distance <= 0
-      ) {
-        showError("水平距離を入力してください。");
+        if (!Number.isFinite(ratio) || ratio < 0) {
+          showError("勾配を正しく入力してください。");
+          return;
+        }
+
+        distance = distanceValue;
+        height = distance * ratio;
+      }
+
+      /*
+        距離を計算
+        高さ ÷ 勾配
+      */
+      if (currentMode === "distance") {
+        if (!Number.isFinite(heightValue) || heightValue < 0) {
+          showError("高さを正しく入力してください。");
+          return;
+        }
+
+        if (!Number.isFinite(slopeValue)) {
+          showError("勾配を正しく入力してください。");
+          return;
+        }
+
+        ratio = slopeToRatio(slopeValue);
+
+        if (!Number.isFinite(ratio) || ratio <= 0) {
+          showError("距離を計算するには、0より大きい勾配が必要です。");
+          return;
+        }
+
+        height = heightValue;
+        distance = height / ratio;
+      }
+
+      /*
+        勾配を計算
+        高さ ÷ 水平距離
+      */
+      if (currentMode === "slope") {
+        if (!Number.isFinite(heightValue) || heightValue < 0) {
+          showError("高さを正しく入力してください。");
+          return;
+        }
+
+        if (!Number.isFinite(distanceValue) || distanceValue <= 0) {
+          showError("水平距離を正しく入力してください。");
+          return;
+        }
+
+        height = heightValue;
+        distance = distanceValue;
+      }
+
+      if (!Number.isFinite(height) || !Number.isFinite(distance)) {
+        showError("入力内容を確認してください。");
         return;
       }
 
-      if (
-        !Number.isFinite(slope) ||
-        slope <= 0
-      ) {
-        showError("勾配を入力してください。");
+      if (distance <= 0) {
+        showError("水平距離は0より大きい値を入力してください。");
         return;
       }
 
-      height = distance * slope / 100;
+      setResults(height, distance);
 
-    } else if (currentMode === "distance") {
-
-      height = parseFloat(
-        document.getElementById("distanceHeight").value
-      );
-
-      slope = parseFloat(
-        document.getElementById("distanceSlope").value
-      );
-
-      if (
-        !Number.isFinite(height) ||
-        height <= 0
-      ) {
-        showError("高さを入力してください。");
-        return;
-      }
-
-      if (
-        !Number.isFinite(slope) ||
-        slope <= 0
-      ) {
-        showError("勾配を入力してください。");
-        return;
-      }
-
-      distance = height / slope * 100;
-
-    } else {
-
-      height = parseFloat(
-        document.getElementById("slopeHeight").value
-      );
-
-      distance = parseFloat(
-        document.getElementById("slopeDistance").value
-      );
-
-      if (
-        !Number.isFinite(height) ||
-        height <= 0
-      ) {
-        showError("高さを入力してください。");
-        return;
-      }
-
-      if (
-        !Number.isFinite(distance) ||
-        distance <= 0
-      ) {
-        showError("水平距離を入力してください。");
-        return;
-      }
-
-      slope = height / distance * 100;
+      saveState();
+    } catch (error) {
+      console.error(error);
+      showError("計算中にエラーが発生しました。");
     }
-
-    setResults(height, distance, slope);
-
-    saveState();
   }
 
-  calculateButton.addEventListener(
-    "click",
-    calculate
-  );
+  function getCopyText() {
+    return [
+      "【勾配計算結果】",
+      `高さ：${resultHeight.textContent}`,
+      `水平距離：${resultDistance.textContent}`,
+      `勾配（％）：${resultPercent.textContent}`,
+      `角度：${resultDegree.textContent}`,
+      `寸勾配：${resultSun.textContent}`,
+      `斜距離：${resultSlopedDistance.textContent}`
+    ].join("\n");
+  }
 
-  /* ------------------------------
-     Enterキーでも計算
-  ------------------------------ */
+  async function copyResult() {
+    const text = getCopyText();
 
-  document.querySelectorAll("input").forEach(input => {
+    try {
+      await navigator.clipboard.writeText(text);
+
+      const originalText = copyBtn.textContent;
+      copyBtn.textContent = "コピーしました！";
+
+      setTimeout(() => {
+        copyBtn.textContent = originalText;
+      }, 1500);
+    } catch (error) {
+      /*
+        Clipboard APIが使えない環境用の簡易フォールバック
+      */
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      try {
+        document.execCommand("copy");
+
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = "コピーしました！";
+
+        setTimeout(() => {
+          copyBtn.textContent = originalText;
+        }, 1500);
+      } catch (copyError) {
+        showError("コピーできませんでした。結果を手動でコピーしてください。");
+      }
+
+      document.body.removeChild(textarea);
+    }
+  }
+
+  unitMm.addEventListener("click", () => {
+    currentUnit = "mm";
+    updateUI();
+    saveState();
+  });
+
+  unitM.addEventListener("click", () => {
+    currentUnit = "m";
+    updateUI();
+    saveState();
+  });
+
+  modeButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      currentMode = button.dataset.mode;
+
+      clearError();
+      updateUI();
+      saveState();
+    });
+  });
+
+  slopeTypeButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      currentSlopeType = button.dataset.slopeType;
+
+      clearError();
+      updateUI();
+      saveState();
+    });
+  });
+
+  [
+    heightInput,
+    distanceInput,
+    slopeInput
+  ].forEach(input => {
+    input.addEventListener("input", () => {
+      saveState();
+    });
 
     input.addEventListener("keydown", event => {
-
       if (event.key === "Enter") {
         calculate();
       }
-
     });
-
-    input.addEventListener("input", saveState);
-
   });
 
-  /* ------------------------------
-     コピー
-  ------------------------------ */
+  calculateBtn.addEventListener("click", calculate);
+  copyBtn.addEventListener("click", copyResult);
 
-  async function copyResults() {
-
-    const height = resultHeight.textContent;
-    const distance = resultDistance.textContent;
-    const slope = resultSlope.textContent;
-
-    if (
-      height === "-" ||
-      distance === "-" ||
-      slope === "-"
-    ) {
-      showError("先に計算してください。");
-      return;
-    }
-
-    const text =
-`📐 勾配計算
-
-高さ：${height}
-水平距離：${distance}
-勾配：${slope}`;
-
-    try {
-
-      await navigator.clipboard.writeText(text);
-
-      const originalText =
-        copyButton.textContent;
-
-      copyButton.textContent =
-        "✓ コピーしました";
-
-      copyButton.style.background =
-        "#a3e635";
-
-      copyButton.style.color =
-        "#111827";
-
-      setTimeout(() => {
-
-        copyButton.textContent =
-          originalText;
-
-        copyButton.style.background =
-          "transparent";
-
-        copyButton.style.color =
-          "#a3e635";
-
-      }, 1500);
-
-    } catch (error) {
-
-      showError(
-        "コピーできませんでした。結果を長押ししてコピーしてください。"
-      );
-
-    }
-
-  }
-
-  copyButton.addEventListener(
-    "click",
-    copyResults
-  );
-
-  /* ------------------------------
-     LocalStorage
-  ------------------------------ */
-
-  function saveState() {
-
-    const state = {
-
-      unit: currentUnit,
-      mode: currentMode,
-
-      values: {
-
-        heightDistance:
-          document.getElementById("heightDistance").value,
-
-        heightSlope:
-          document.getElementById("heightSlope").value,
-
-        distanceHeight:
-          document.getElementById("distanceHeight").value,
-
-        distanceSlope:
-          document.getElementById("distanceSlope").value,
-
-        slopeHeight:
-          document.getElementById("slopeHeight").value,
-
-        slopeDistance:
-          document.getElementById("slopeDistance").value
-      }
-
-    };
-
-    try {
-
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(state)
-      );
-
-    } catch (error) {
-      // LocalStorageが使えない環境では何もしない
-    }
-  }
-
-  function loadState() {
-
-    try {
-
-      const saved =
-        localStorage.getItem(STORAGE_KEY);
-
-      if (!saved) {
-        updateUnit();
-        updateMode();
-        return;
-      }
-
-      const state =
-        JSON.parse(saved);
-
-      if (
-        state.unit === "mm" ||
-        state.unit === "m"
-      ) {
-        currentUnit = state.unit;
-      }
-
-      if (
-        state.mode === "height" ||
-        state.mode === "distance" ||
-        state.mode === "slope"
-      ) {
-        currentMode = state.mode;
-      }
-
-      if (state.values) {
-
-        Object.keys(state.values).forEach(id => {
-
-          const element =
-            document.getElementById(id);
-
-          if (element) {
-            element.value =
-              state.values[id] || "";
-          }
-
-        });
-
-      }
-
-      updateUnit();
-      updateMode();
-
-    } catch (error) {
-
-      updateUnit();
-      updateMode();
-
-    }
-  }
-
-  /* ------------------------------
-     初期化
-  ------------------------------ */
-
+  /*
+    初期化
+  */
   loadState();
-
+  updateUI();
 })();
 </script>
 
 </body>
 </html>
-```
