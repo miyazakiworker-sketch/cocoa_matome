@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="窓・ドアなどの開口部面積と有効開口面積を一瞬で計算できる無料ツール。">
+<title>🚪 開口部面積 一瞬計算｜COCOA TOOLS v2.0</title>
+
+<style>
+*{box-sizing:border-box}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  background:#0d0f12;
+  color:#e2e8f0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
+  line-height:1.6;
+}
+
+.container{
+  width:min(100% - 24px,480px);
+  margin:0 auto;
+  padding:24px 0 40px;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.header h1{
+  margin:0;
+  font-size:1.55rem;
+  line-height:1.35;
+}
+
+.header p{
+  margin:8px 0 0;
+  color:#a0aec0;
+  font-size:.9rem;
+}
+
+.card{
+  background:#1a1f26;
+  border:1px solid #2d3748;
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.18);
+}
+
+.section-title{
+  margin:0 0 14px;
+  font-size:1rem;
+  color:#e2e8f0;
+}
+
+.field{
+  margin-bottom:14px;
+}
+
+.field:last-child{
+  margin-bottom:0;
+}
+
+label{
+  display:block;
+  margin-bottom:7px;
+  font-size:.88rem;
+  color:#cbd5e0;
+}
+
+.input-row{
+  display:grid;
+  grid-template-columns:1fr 88px;
+  gap:8px;
+}
+
+input,
+select{
+  width:100%;
+  border:1px solid #2d3748;
+  border-radius:10px;
+  background:#0d0f12;
+  color:#e2e8f0;
+  padding:12px;
+  font-size:16px;
+  outline:none;
+}
+
+input:focus,
+select:focus{
+  border-color:#718096;
+  box-shadow:0 0 0 2px rgba(163,230,53,.08);
+}
+
+.unit-note{
+  margin-top:5px;
+  color:#718096;
+  font-size:.75rem;
+}
+
+button{
+  width:100%;
+  border:0;
+  border-radius:10px;
+  padding:13px 14px;
+  font-size:1rem;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.calc-btn{
+  background:#a3e635;
+  color:#10130b;
+  margin-top:4px;
+}
+
+.copy-btn{
+  background:#2d3748;
+  color:#e2e8f0;
+  margin-top:12px;
+}
+
+.copy-btn.copied{
+  background:#a3e635;
+  color:#10130b;
+}
+
+.result{
+  margin-top:16px;
+  border:1px solid #2d3748;
+  border-radius:12px;
+  background:#11151a;
+  padding:15px;
+}
+
+.result-row{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:8px 0;
+  border-bottom:1px solid #242c36;
+}
+
+.result-row:last-child{
+  border-bottom:0;
+}
+
+.result-label{
+  color:#a0aec0;
+  font-size:.88rem;
+}
+
+.result-value{
+  font-weight:700;
+  text-align:right;
+}
+
+.result-row.main .result-value{
+  color:#a3e635;
+  font-size:1.18rem;
+}
+
+.hint{
+  margin:0 0 14px;
+  color:#a0aec0;
+  font-size:.82rem;
+}
+
+.ad{
+  min-height:90px;
+  border:1px dashed #2d3748;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#718096;
+  font-size:.8rem;
+  margin-bottom:16px;
+}
+
+.disclaimer{
+  font-size:.78rem;
+  color:#718096;
+}
+
+.disclaimer strong{
+  color:#a0aec0;
+}
+
+.footer{
+  text-align:center;
+  color:#718096;
+  font-size:.8rem;
+  padding-top:4px;
+}
+
+.footer a{
+  color:#a0aec0;
+  text-decoration:none;
+}
+
+.footer a:hover{
+  color:#a3e635;
+}
+
+.status{
+  min-height:1.3em;
+  margin-top:8px;
+  text-align:center;
+  color:#a3e635;
+  font-size:.8rem;
+}
+
+@media (min-width:481px){
+  .container{
+    padding-top:36px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main class="container">
+
+<header class="header">
+  <h1>🚪 開口部面積 一瞬計算</h1>
+  <p>窓・ドアの面積と有効開口面積をサクッと計算</p>
+</header>
+
+<section class="card">
+
+  <h2 class="section-title">開口部の寸法</h2>
+
+  <p class="hint">
+    幅・高さ・個数を入力すると、開口部の合計面積を計算します。
+  </p>
+
+  <div class="field">
+    <label for="width">幅</label>
+
+    <div class="input-row">
+      <input
+        id="width"
+        type="number"
+        inputmode="decimal"
+        min="0"
+        step="any"
+        placeholder="例：900"
+      >
+
+      <select id="widthUnit" aria-label="幅の単位">
+        <option value="mm">mm</option>
+        <option value="m">m</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="height">高さ</label>
+
+    <div class="input-row">
+      <input
+        id="height"
+        type="number"
+        inputmode="decimal"
+        min="0"
+        step="any"
+        placeholder="例：1800"
+      >
+
+      <select id="heightUnit" aria-label="高さの単位">
+        <option value="mm">mm</option>
+        <option value="m">m</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="count">開口数</label>
+
+    <input
+      id="count"
+      type="number"
+      inputmode="numeric"
+      min="1"
+      step="1"
+      value="1"
+      placeholder="例：2"
+    >
+  </div>
+
+  <div class="field">
+    <label for="effectiveRate">有効開口率（％）</label>
+
+    <input
+      id="effectiveRate"
+      type="number"
+      inputmode="decimal"
+      min="0"
+      max="100"
+      step="any"
+      placeholder="例：50"
+    >
+
+    <div class="unit-note">
+      有効開口率が分かっている場合に入力してください。
+    </div>
+  </div>
+
+  <button class="calc-btn" id="calcBtn" type="button">
+    計算する
+  </button>
+
+</section>
+
+
+<section class="card">
+
+  <h2 class="section-title">計算結果</h2>
+
+  <div class="result" id="resultBox">
+
+    <div class="result-row">
+      <span class="result-label">1か所あたり</span>
+      <span class="result-value" id="singleArea">—</span>
+    </div>
+
+    <div class="result-row main">
+      <span class="result-label">開口部合計</span>
+      <span class="result-value" id="totalArea">—</span>
+    </div>
+
+    <div class="result-row">
+      <span class="result-label">有効開口率</span>
+      <span class="result-value" id="rateResult">—</span>
+    </div>
+
+    <div class="result-row main">
+      <span class="result-label">有効開口面積</span>
+      <span class="result-value" id="effectiveArea">—</span>
+    </div>
+
+  </div>
+
+  <button class="copy-btn" id="copyBtn" type="button">
+    結果をコピー
+  </button>
+
+  <div class="status" id="status" aria-live="polite"></div>
+
+</section>
+
+
+<div class="ad">
+  広告スペース
+</div>
+
+
+<section class="card disclaimer">
+
+  <strong>免責事項</strong><br>
+
+  このツールの計算結果は目安です。
+  実際の設計・施工・申請などに使用する場合は、
+  関係する基準・仕様書・メーカー資料などを確認してください。
+  有効開口率は製品や仕様によって異なるため、
+  適切な数値を入力してください。
+
+</section>
+
+
+<footer class="footer">
+
+  <a
+    href="https://x.com/cocoa_next7"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    ココア＠プログラミング奮闘中 (@cocoa_next7)
+  </a>
+
+  <p>© COCOA TOOLS v2.0</p>
+
+</footer>
+
+</main>
+
+
+<script>
+(() => {
+
+  'use strict';
+
+  const STORAGE_KEY = 'cocoa_opening_area_calc_v1';
+
+  const $ = (id) => document.getElementById(id);
+
+  const width = $('width');
+  const height = $('height');
+  const count = $('count');
+  const effectiveRate = $('effectiveRate');
+
+  const widthUnit = $('widthUnit');
+  const heightUnit = $('heightUnit');
+
+  const calcBtn = $('calcBtn');
+  const copyBtn = $('copyBtn');
+
+  const singleArea = $('singleArea');
+  const totalArea = $('totalArea');
+  const rateResult = $('rateResult');
+  const effectiveArea = $('effectiveArea');
+
+  const status = $('status');
+
+
+  const toMeters = (value, unit) => {
+    return unit === 'mm' ? value / 1000 : value;
+  };
+
+
+  const formatArea = (value) => {
+
+    if (!Number.isFinite(value)) {
+      return '—';
+    }
+
+    return value
+      .toFixed(4)
+      .replace(/\.?0+$/, '') + ' ㎡';
+  };
+
+
+  const formatNumber = (value) => {
+
+    if (!Number.isFinite(value)) {
+      return '—';
+    }
+
+    return value
+      .toFixed(2)
+      .replace(/\.?0+$/, '');
+  };
+
+
+  function save() {
+
+    const data = {
+      width: width.value,
+      height: height.value,
+      count: count.value,
+      effectiveRate: effectiveRate.value,
+      widthUnit: widthUnit.value,
+      heightUnit: heightUnit.value
+    };
+
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(data)
+      );
+    } catch (e) {}
+
+  }
+
+
+  function restore() {
+
+    try {
+
+      const saved = JSON.parse(
+        localStorage.getItem(STORAGE_KEY) || 'null'
+      );
+
+      if (!saved) {
+        return;
+      }
+
+      width.value = saved.width ?? '';
+      height.value = saved.height ?? '';
+      count.value = saved.count ?? '1';
+      effectiveRate.value = saved.effectiveRate ?? '';
+
+      widthUnit.value =
+        saved.widthUnit === 'm' ? 'm' : 'mm';
+
+      heightUnit.value =
+        saved.heightUnit === 'm' ? 'm' : 'mm';
+
+    } catch (e) {}
+
+  }
+
+
+  function calculate() {
+
+    const w = parseFloat(width.value);
+    const h = parseFloat(height.value);
+    const c = parseFloat(count.value);
+
+    const r =
+      effectiveRate.value === ''
+        ? null
+        : parseFloat(effectiveRate.value);
+
+
+    if (
+      !Number.isFinite(w) ||
+      w <= 0 ||
+      !Number.isFinite(h) ||
+      h <= 0 ||
+      !Number.isFinite(c) ||
+      c <= 0
+    ) {
+
+      singleArea.textContent = '入力してください';
+      totalArea.textContent = '—';
+      rateResult.textContent = '—';
+      effectiveArea.textContent = '—';
+
+      status.textContent = '';
+
+      return;
+    }
+
+
+    if (
+      r !== null &&
+      (
+        !Number.isFinite(r) ||
+        r < 0 ||
+        r > 100
+      )
+    ) {
+
+      singleArea.textContent = '—';
+      totalArea.textContent = '—';
+      rateResult.textContent = '0〜100％で入力';
+      effectiveArea.textContent = '—';
+
+      status.textContent = '';
+
+      return;
+    }
+
+
+    const widthM =
+      toMeters(w, widthUnit.value);
+
+    const heightM =
+      toMeters(h, heightUnit.value);
+
+
+    const one =
+      widthM * heightM;
+
+    const total =
+      one * c;
+
+    const effective =
+      r === null
+        ? null
+        : total * r / 100;
+
+
+    singleArea.textContent =
+      formatArea(one);
+
+    totalArea.textContent =
+      formatArea(total);
+
+    rateResult.textContent =
+      r === null
+        ? '未入力'
+        : formatNumber(r) + '％';
+
+    effectiveArea.textContent =
+      effective === null
+        ? '有効開口率を入力'
+        : formatArea(effective);
+
+
+    status.textContent = '';
+
+    save();
+
+  }
+
+
+  async function copyResult() {
+
+    const totalText =
+      totalArea.textContent;
+
+
+    if (
+      totalText === '—' ||
+      totalText === '入力してください'
+    ) {
+
+      status.textContent =
+        '先に計算してください。';
+
+      return;
+    }
+
+
+    const text = [
+
+      '【開口部面積 一瞬計算】',
+
+      `幅：${width.value} ${widthUnit.value}`,
+
+      `高さ：${height.value} ${heightUnit.value}`,
+
+      `開口数：${count.value}`,
+
+      `1か所あたり：${singleArea.textContent}`,
+
+      `開口部合計：${totalArea.textContent}`,
+
+      `有効開口率：${rateResult.textContent}`,
+
+      `有効開口面積：${effectiveArea.textContent}`
+
+    ].join('\n');
+
+
+    try {
+
+      await navigator.clipboard.writeText(text);
+
+    } catch (e) {
+
+      const ta =
+        document.createElement('textarea');
+
+      ta.value = text;
+
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+
+      document.body.appendChild(ta);
+
+      ta.focus();
+      ta.select();
+
+      document.execCommand('copy');
+
+      ta.remove();
+
+    }
+
+
+    copyBtn.classList.add('copied');
+
+    copyBtn.textContent =
+      'コピーしました ✓';
+
+    status.textContent =
+      '計算結果をコピーしました。';
+
+
+    setTimeout(() => {
+
+      copyBtn.classList.remove('copied');
+
+      copyBtn.textContent =
+        '結果をコピー';
+
+      status.textContent = '';
+
+    }, 1800);
+
+  }
+
+
+  [
+    width,
+    height,
+    count,
+    effectiveRate,
+    widthUnit,
+    heightUnit
+  ].forEach(el => {
+
+    el.addEventListener(
+      'input',
+      save
+    );
+
+    el.addEventListener(
+      'change',
+      save
+    );
+
+  });
+
+
+  calcBtn.addEventListener(
+    'click',
+    calculate
+  );
+
+
+  copyBtn.addEventListener(
+    'click',
+    copyResult
+  );
+
+
+  restore();
+
+
+  if (
+    width.value &&
+    height.value
+  ) {
+
+    calculate();
+
+  }
+
+})();
+</script>
+
+</body>
+</html>
