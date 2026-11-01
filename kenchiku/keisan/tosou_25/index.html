@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>塗装面積・塗料必要量 一瞬計算｜COCOA TOOLS</title>
+<meta name="description" content="幅・高さ・面数・塗布量を入れるだけで、塗装面積と仕上げ塗料（中塗り・上塗り）の必要量を一瞬で計算。無料ツール。">
+<style>
+:root{
+  --bg:#0f1112;
+  --panel:#181b1c;
+  --line:#2a2f31;
+  --text:#ecefe9;
+  --sub:#98a09a;
+  --accent:#a3e635;
+  --accent-ink:#14200a;
+  --warn:#f5b84b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  -webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:480px;margin:0 auto;padding:20px 16px 40px}
+.brand{font-size:12px;color:var(--sub);letter-spacing:.04em;margin:0 0 6px}
+.brand b{color:var(--accent)}
+h1{font-size:22px;line-height:1.35;margin:0 0 6px}
+.lead{font-size:13px;color:var(--sub);margin:0 0 20px;line-height:1.6}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.row{display:flex;gap:10px}
+.field{flex:1;min-width:0;margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+label,.lbl{display:block;font-size:13px;color:var(--sub);margin-bottom:6px}
+.input{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+  padding:0 12px;transition:border-color .15s}
+.input:focus-within{border-color:var(--accent)}
+input{width:100%;min-width:0;background:transparent;border:0;outline:0;color:var(--text);
+  font-size:20px;font-weight:600;padding:12px 0;font-variant-numeric:tabular-nums}
+input::placeholder{color:#4a5250;font-weight:400}
+.unit{font-size:13px;color:var(--sub);margin-left:6px;white-space:nowrap}
+
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:transparent;color:var(--sub);font:inherit;font-size:14px;font-weight:600;
+  padding:9px 0;border-radius:8px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.note{font-size:12.5px;color:var(--sub);line-height:1.7;border-left:3px solid var(--accent);padding:2px 0 2px 12px;margin:0 0 14px}
+
+.result{border-color:#3b4a1c}
+.big{display:flex;align-items:baseline;gap:6px;margin:2px 0 14px}
+.big .num{font-size:44px;font-weight:800;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums}
+.big .u{font-size:18px;color:var(--accent);font-weight:700}
+.big .cap{font-size:13px;color:var(--sub);margin-left:auto}
+dl{margin:0;font-size:14px}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
+dt{color:var(--sub)}
+dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.empty{font-size:14px;color:var(--sub);margin:0}
+
+.actions{display:flex;gap:10px;margin-top:14px}
+.btn{flex:1;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;
+  padding:12px;border-radius:10px;cursor:pointer;text-align:center;text-decoration:none}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+.ad{min-height:90px;border:1px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;
+  color:#566;font-size:12px;margin:18px 0}
+.disclaimer{font-size:12px;color:var(--sub);line-height:1.7}
+.disclaimer strong{color:var(--warn);font-weight:600}
+footer{margin-top:18px;font-size:13px;color:var(--sub);text-align:center;line-height:1.7}
+footer a{color:var(--accent);text-decoration:none;font-weight:600}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);
+  background:var(--accent);color:var(--accent-ink);padding:10px 18px;border-radius:999px;font-size:13px;font-weight:700;
+  opacity:0;pointer-events:none;transition:.2s}
+.toast.show{opacity:1;transform:translateX(-50%)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="brand"><b>COCOA TOOLS</b> ／ 建築・現場</p>
+  <h1>🎨 塗装面積・塗料必要量 一瞬計算</h1>
+  <p class="lead">面積を出して、仕上げ塗料の必要量を出す。それだけのツールです。</p>
+
+  <section class="card" aria-label="入力">
+    <div class="lbl">幅・高さの単位</div>
+    <div class="seg" role="group" aria-label="単位">
+      <button type="button" id="u-m" aria-pressed="true">m</button>
+      <button type="button" id="u-mm" aria-pressed="false">mm</button>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="w">幅</label>
+        <div class="input"><input id="w" type="number" inputmode="decimal" min="0" step="any" placeholder="3"><span class="unit" data-unit>m</span></div>
+      </div>
+      <div class="field">
+        <label for="h">高さ</label>
+        <div class="input"><input id="h" type="number" inputmode="decimal" min="0" step="any" placeholder="2.5"><span class="unit" data-unit>m</span></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="n">面数</label>
+        <div class="input"><input id="n" type="number" inputmode="numeric" min="1" step="1" placeholder="4"><span class="unit">面</span></div>
+      </div>
+      <div class="field">
+        <label for="c">塗布量</label>
+        <div class="input"><input id="c" type="number" inputmode="decimal" min="0" step="any" placeholder="10"><span class="unit">㎡/L</span></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">基本は3回塗り（下塗り・中塗り・上塗り）。中塗り・上塗りは同じ塗料を使うことが多いため、仕上げ塗料は塗装面積×2で計算します。</p>
+
+  <section class="card result" aria-live="polite" aria-label="計算結果">
+    <div id="empty"><p class="empty">幅・高さ・面数・塗布量を入力すると、ここに結果が出ます。</p></div>
+    <div id="out" hidden>
+      <div class="lbl">仕上げ塗料（中塗り・上塗り）の必要量</div>
+      <div class="big"><span class="num" id="r-paint">0</span><span class="u">L</span><span class="cap">目安</span></div>
+      <dl>
+        <div><dt>1面あたりの塗装面積</dt><dd id="r-one">-</dd></div>
+        <div><dt>合計塗装面積</dt><dd id="r-total">-</dd></div>
+        <div><dt>延べ塗装面積（×2）</dt><dd id="r-gross">-</dd></div>
+      </dl>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn primary" id="copy" disabled>結果をコピー</button>
+      <button type="button" class="btn" id="reset">クリア</button>
+    </div>
+  </section>
+
+  <div class="ad" aria-label="広告スペース">広告スペース</div>
+
+  <p class="disclaimer">
+    <strong>ご注意：</strong>計算結果は目安です。必要な塗料量は、製品ごとの標準塗布量や下地・施工条件によって変わります。実際の施工では、必ずメーカーの仕様・塗布量を確認してください。本ツールの利用による損害について、責任は負いかねます。
+  </p>
+
+  <footer>
+    <span>開発者：<a id="x-link" href="https://x.com/cocoa_next7" target="_blank" rel="noopener noreferrer">ココア@プログラミング奮闘中 (@cocoa_next7) ↗</a></span>
+  </footer>
+</main>
+<div class="toast" id="toast" role="status">コピーしました</div>
+
+<script>
+(function(){
+  var KEY = "cocoatools_tosou_25";
+  var $ = function(id){ return document.getElementById(id); };
+  var els = { w:$("w"), h:$("h"), n:$("n"), c:$("c") };
+  var unit = "m";
+  var lastText = "";
+
+  function setUnit(u){
+    unit = u;
+    $("u-m").setAttribute("aria-pressed", u === "m");
+    $("u-mm").setAttribute("aria-pressed", u === "mm");
+    document.querySelectorAll("[data-unit]").forEach(function(e){ e.textContent = u; });
+  }
+
+  function fmt(v, d){
+    return (Math.round(v * Math.pow(10, d)) / Math.pow(10, d)).toLocaleString("ja-JP", {maximumFractionDigits: d});
+  }
+
+  function save(){
+    try{
+      localStorage.setItem(KEY, JSON.stringify({unit:unit, w:els.w.value, h:els.h.value, n:els.n.value, c:els.c.value}));
+    }catch(e){}
+  }
+
+  function load(){
+    try{
+      var d = JSON.parse(localStorage.getItem(KEY) || "null");
+      if(!d) return;
+      setUnit(d.unit === "mm" ? "mm" : "m");
+      els.w.value = d.w || ""; els.h.value = d.h || "";
+      els.n.value = d.n || ""; els.c.value = d.c || "";
+    }catch(e){}
+  }
+
+  function calc(){
+    var w = parseFloat(els.w.value), h = parseFloat(els.h.value);
+    var n = parseFloat(els.n.value), c = parseFloat(els.c.value);
+    var ok = w > 0 && h > 0 && n > 0 && c > 0;
+    $("empty").hidden = ok;
+    $("out").hidden = !ok;
+    $("copy").disabled = !ok;
+    save();
+    if(!ok){ lastText = ""; return; }
+
+    var k = unit === "mm" ? 0.001 : 1;
+    var one = (w * k) * (h * k);
+    var total = one * n;
+    var gross = total * 2;
+    var paint = gross / c;
+
+    $("r-one").textContent = fmt(one, 2) + " ㎡";
+    $("r-total").textContent = fmt(total, 2) + " ㎡";
+    $("r-gross").textContent = fmt(gross, 2) + " ㎡";
+    $("r-paint").textContent = fmt(paint, 2);
+
+    lastText = [
+      "【塗装面積・塗料必要量】",
+      "幅 " + w + unit + " × 高さ " + h + unit + " × " + n + "面",
+      "塗布量 " + c + "㎡/L",
+      "1面あたり：" + fmt(one, 2) + "㎡",
+      "合計塗装面積：" + fmt(total, 2) + "㎡",
+      "延べ塗装面積（中塗り・上塗り ×2）：" + fmt(gross, 2) + "㎡",
+      "仕上げ塗料の必要量：" + fmt(paint, 2) + "L（目安）",
+      "※下塗り塗料は別途。メーカー仕様を確認してください。",
+      "COCOA TOOLS"
+    ].join("\n");
+  }
+
+  function toast(msg){
+    var t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(function(){ t.classList.remove("show"); }, 1600);
+  }
+
+  function copy(){
+    if(!lastText) return;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(lastText).then(function(){ toast("コピーしました"); }, fallback);
+    }else{
+      fallback();
+    }
+  }
+  function fallback(){
+    var ta = document.createElement("textarea");
+    ta.value = lastText;
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); toast("コピーしました"); }catch(e){ toast("コピーに失敗しました"); }
+    document.body.removeChild(ta);
+  }
+
+  function reset(){
+    ["w","h","n","c"].forEach(function(k){ els[k].value = ""; });
+    calc();
+    els.w.focus();
+  }
+
+  $("u-m").addEventListener("click", function(){ setUnit("m"); calc(); });
+  $("u-mm").addEventListener("click", function(){ setUnit("mm"); calc(); });
+  Object.keys(els).forEach(function(k){ els[k].addEventListener("input", calc); });
+  $("copy").addEventListener("click", copy);
+  $("reset").addEventListener("click", reset);
+
+  load();
+  calc();
+})();
+</script>
+</body>
+</html>
