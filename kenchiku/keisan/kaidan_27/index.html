@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>値上げ・値下げ率 一瞬計算｜COCOA TOOLS</title>
+<meta name="description" content="変更前後の金額から変更率を、元の金額と率から値上げ後・値下げ後の金額を一瞬で計算。無料ツール。">
+<style>
+:root{
+  --bg:#0f1112;
+  --panel:#181b1c;
+  --line:#2a2f31;
+  --text:#ecefe9;
+  --sub:#98a09a;
+  --accent:#a3e635;
+  --accent-ink:#14200a;
+  --down:#fb7185;
+  --warn:#f5b84b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  -webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:480px;margin:0 auto;padding:20px 16px 40px}
+.brand{font-size:12px;color:var(--sub);letter-spacing:.04em;margin:0 0 6px}
+.brand b{color:var(--accent)}
+h1{font-size:22px;line-height:1.35;margin:0 0 6px}
+.lead{font-size:13px;color:var(--sub);margin:0 0 20px;line-height:1.6}
+
+.seg{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:transparent;color:var(--sub);font:inherit;font-size:13px;font-weight:700;
+  padding:11px 2px;border-radius:9px;cursor:pointer;line-height:1.3}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+label,.lbl{display:block;font-size:13px;color:var(--sub);margin-bottom:6px}
+.input{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:0 14px;transition:border-color .15s}
+.input:focus-within{border-color:var(--accent)}
+input{width:100%;min-width:0;background:transparent;border:0;outline:0;color:var(--text);
+  font-size:22px;font-weight:600;padding:12px 0;font-variant-numeric:tabular-nums}
+input::placeholder{color:#4a5250;font-weight:400}
+.unit{font-size:15px;color:var(--sub);margin-left:8px;white-space:nowrap;font-weight:600}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.result{border-color:#3b4a1c}
+.big{display:flex;align-items:baseline;gap:6px;margin:2px 0 14px;flex-wrap:wrap}
+.big .num{font-size:44px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:var(--accent)}
+.big .u{font-size:18px;font-weight:700;color:var(--accent)}
+.big.down .num,.big.down .u{color:var(--down)}
+dl{margin:0;font-size:14px}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
+dt{color:var(--sub)}
+dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+dd.down{color:var(--down)}
+dd.up{color:var(--accent)}
+.empty{font-size:14px;color:var(--sub);margin:0}
+.err{font-size:14px;color:var(--warn);margin:0}
+
+.actions{display:flex;gap:10px;margin-top:14px}
+.btn{flex:1;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;
+  padding:12px;border-radius:10px;cursor:pointer;text-align:center}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+.ad{min-height:90px;border:1px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;
+  color:#566;font-size:12px;margin:18px 0}
+.disclaimer{font-size:12px;color:var(--sub);line-height:1.7}
+.disclaimer strong{color:var(--warn);font-weight:600}
+footer{margin-top:18px;font-size:13px;color:var(--sub);text-align:center;line-height:1.7}
+footer a{color:var(--accent);text-decoration:none;font-weight:600}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);
+  background:var(--accent);color:var(--accent-ink);padding:10px 18px;border-radius:999px;font-size:13px;font-weight:700;
+  opacity:0;pointer-events:none;transition:.2s}
+.toast.show{opacity:1;transform:translateX(-50%)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="brand"><b>COCOA TOOLS</b> ／ 仕事効率化</p>
+  <h1>📈 値上げ・値下げ率 一瞬計算</h1>
+  <p class="lead">金額から率を、率から金額を。3つのモードで一瞬で計算します。</p>
+
+  <div class="seg" role="group" aria-label="モード">
+    <button type="button" data-mode="rate" aria-pressed="true">金額 → 率</button>
+    <button type="button" data-mode="up" aria-pressed="false">値上げ率 → 金額</button>
+    <button type="button" data-mode="down" aria-pressed="false">値下げ率 → 金額</button>
+  </div>
+
+  <section class="card" aria-label="入力">
+    <div class="field" data-for="rate">
+      <label for="before">変更前の金額</label>
+      <div class="input"><input id="before" type="number" inputmode="decimal" min="0" step="any" placeholder="10000"><span class="unit">円</span></div>
+    </div>
+    <div class="field" data-for="rate">
+      <label for="after">変更後の金額</label>
+      <div class="input"><input id="after" type="number" inputmode="decimal" min="0" step="any" placeholder="12000"><span class="unit">円</span></div>
+    </div>
+
+    <div class="field" data-for="up down" hidden>
+      <label for="base">元の金額</label>
+      <div class="input"><input id="base" type="number" inputmode="decimal" min="0" step="any" placeholder="10000"><span class="unit">円</span></div>
+    </div>
+    <div class="field" data-for="up down" hidden>
+      <label for="pct" id="pct-label">率</label>
+      <div class="input"><span class="unit" style="margin:0 10px 0 0">率</span><input id="pct" type="number" inputmode="decimal" min="0" step="any" placeholder="15"><span class="unit">％</span></div>
+    </div>
+  </section>
+
+  <section class="card result" aria-live="polite" aria-label="計算結果">
+    <p class="empty" id="empty">金額を入力すると、ここに結果が出ます。</p>
+    <p class="err" id="err" hidden></p>
+    <div id="out" hidden>
+      <div class="lbl" id="r-cap"></div>
+      <div class="big" id="r-big"><span class="num" id="r-main">0</span><span class="u" id="r-unit">円</span></div>
+      <dl>
+        <div><dt id="r-l1"></dt><dd id="r-v1"></dd></div>
+        <div><dt id="r-l2"></dt><dd id="r-v2"></dd></div>
+      </dl>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn primary" id="copy" disabled>結果をコピー</button>
+      <button type="button" class="btn" id="reset">クリア</button>
+    </div>
+  </section>
+
+  <div class="ad" aria-label="広告スペース">広告スペース</div>
+
+  <p class="disclaimer">
+    <strong>ご注意：</strong>計算結果は目安です。税込・税抜、端数処理の違いなどにより、実際の金額と異なる場合があります。重要な判断の際は、必ずご自身で再確認してください。本ツールの利用による損害について、責任は負いかねます。
+  </p>
+
+  <footer>
+    <span>開発者：<a id="x-link" href="https://x.com/cocoa_next7" target="_blank" rel="noopener noreferrer">ココア@プログラミング奮闘中 (@cocoa_next7) ↗</a></span>
+  </footer>
+</main>
+<div class="toast" id="toast" role="status">コピーしました</div>
+
+<script>
+(function(){
+  var KEY = "cocoatools_neage_26";
+  var $ = function(id){ return document.getElementById(id); };
+  var els = { before:$("before"), after:$("after"), base:$("base"), pct:$("pct") };
+  var mode = "rate";
+  var lastText = "";
+
+  function yen(v){ return Math.round(v).toLocaleString("ja-JP"); }
+  function sgn(v, s){ return (v > 0 ? "+" : v < 0 ? "-" : "") + s; }
+  function pctFmt(v){ return (Math.round(v * 100) / 100).toLocaleString("ja-JP", {maximumFractionDigits: 2}); }
+
+  function save(){
+    try{
+      localStorage.setItem(KEY, JSON.stringify({mode:mode, before:els.before.value, after:els.after.value, base:els.base.value, pct:els.pct.value}));
+    }catch(e){}
+  }
+  function load(){
+    try{
+      var d = JSON.parse(localStorage.getItem(KEY) || "null");
+      if(!d) return;
+      if(d.mode === "up" || d.mode === "down" || d.mode === "rate") mode = d.mode;
+      ["before","after","base","pct"].forEach(function(k){ els[k].value = d[k] || ""; });
+    }catch(e){}
+  }
+
+  function applyMode(){
+    document.querySelectorAll("[data-mode]").forEach(function(b){
+      b.setAttribute("aria-pressed", b.getAttribute("data-mode") === mode);
+    });
+    document.querySelectorAll("[data-for]").forEach(function(f){
+      f.hidden = f.getAttribute("data-for").split(" ").indexOf(mode) === -1;
+    });
+    $("pct-label").textContent = mode === "down" ? "値下げ率" : "値上げ率";
+  }
+
+  function show(state, msg){
+    $("empty").hidden = state !== "empty";
+    $("err").hidden = state !== "err";
+    $("out").hidden = state !== "out";
+    if(state === "err") $("err").textContent = msg;
+    $("copy").disabled = state !== "out";
+    if(state !== "out") lastText = "";
+  }
+
+  function render(o){
+    $("r-cap").textContent = o.cap;
+    $("r-main").textContent = o.main;
+    $("r-unit").textContent = o.unit;
+    $("r-big").className = "big" + (o.dir < 0 ? " down" : "");
+    $("r-l1").textContent = o.l1; $("r-v1").textContent = o.v1;
+    $("r-l2").textContent = o.l2; $("r-v2").textContent = o.v2;
+    $("r-v1").className = o.dir < 0 ? "down" : o.dir > 0 ? "up" : "";
+    show("out");
+    lastText = o.text;
+  }
+
+  function calc(){
+    save();
+    var a, b, r, diff, rate, amt;
+
+    if(mode === "rate"){
+      a = parseFloat(els.before.value); b = parseFloat(els.after.value);
+      if(isNaN(a) || isNaN(b)) return show("empty");
+      if(a <= 0) return show("err", "変更前の金額は0より大きい数値を入力してください。");
+      if(b < 0) return show("err", "変更後の金額は0以上で入力してください。");
+      diff = b - a; rate = diff / a * 100;
+      var kind = diff > 0 ? "値上げ" : diff < 0 ? "値下げ" : "変化なし";
+      render({
+        cap: "変更率（" + kind + "）", main: sgn(rate, pctFmt(Math.abs(rate))), unit: "％", dir: diff,
+        l1: "変更額", v1: sgn(diff, yen(Math.abs(diff))) + "円",
+        l2: "変更前 → 変更後", v2: yen(a) + "円 → " + yen(b) + "円",
+        text: ["【値上げ・値下げ率】", "変更前 " + yen(a) + "円 → 変更後 " + yen(b) + "円",
+               "変更額：" + sgn(diff, yen(Math.abs(diff))) + "円", "変更率：" + sgn(rate, pctFmt(Math.abs(rate))) + "％",
+               "COCOA TOOLS"].join("\n")
+      });
+      return;
+    }
+
+    a = parseFloat(els.base.value); r = parseFloat(els.pct.value);
+    if(isNaN(a) || isNaN(r)) return show("empty");
+    if(a < 0 || r < 0) return show("err", "0以上の数値を入力してください。");
+    if(mode === "down" && r > 100) return show("err", "値下げ率は100％以下で入力してください。");
+
+    amt = a * r / 100;
+    var isUp = mode === "up";
+    var name = isUp ? "値上げ" : "値下げ";
+    var signed = isUp ? amt : -amt;
+    var result = isUp ? a + amt : a - amt;
+    var dir = amt === 0 ? 0 : (isUp ? 1 : -1);
+    var amtText = (amt === 0 ? "" : isUp ? "+" : "-") + yen(amt) + "円";
+    render({
+      cap: name + "後の金額", main: yen(result), unit: "円", dir: dir,
+      l1: name + "額", v1: amtText,
+      l2: "元の金額 / " + name + "率", v2: yen(a) + "円 / " + pctFmt(r) + "％",
+      text: ["【" + name + "率 → 金額】", "元の金額 " + yen(a) + "円 / " + name + "率 " + pctFmt(r) + "％",
+             name + "額：" + amtText, name + "後の金額：" + yen(result) + "円", "COCOA TOOLS"].join("\n")
+    });
+  }
+
+  function toast(msg){
+    var t = $("toast");
+    t.textContent = msg; t.classList.add("show");
+    setTimeout(function(){ t.classList.remove("show"); }, 1600);
+  }
+  function fallback(){
+    var ta = document.createElement("textarea");
+    ta.value = lastText; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); toast("コピーしました"); }catch(e){ toast("コピーに失敗しました"); }
+    document.body.removeChild(ta);
+  }
+  function copy(){
+    if(!lastText) return;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(lastText).then(function(){ toast("コピーしました"); }, fallback);
+    }else{ fallback(); }
+  }
+
+  document.querySelectorAll("[data-mode]").forEach(function(b){
+    b.addEventListener("click", function(){ mode = b.getAttribute("data-mode"); applyMode(); calc(); });
+  });
+  Object.keys(els).forEach(function(k){ els[k].addEventListener("input", calc); });
+  $("copy").addEventListener("click", copy);
+  $("reset").addEventListener("click", function(){
+    Object.keys(els).forEach(function(k){ els[k].value = ""; });
+    calc();
+  });
+
+  load();
+  applyMode();
+  calc();
+})();
+</script>
+</body>
+</html>
