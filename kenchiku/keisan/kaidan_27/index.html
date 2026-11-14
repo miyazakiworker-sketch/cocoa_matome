@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<title>値上げ・値下げ率 一瞬計算｜COCOA TOOLS</title>
-<meta name="description" content="変更前後の金額から変更率を、元の金額と率から値上げ後・値下げ後の金額を一瞬で計算。無料ツール。">
+<title>階段計算 一瞬計算｜COCOA TOOLS</title>
+<meta name="description" content="階高・蹴上げ数・踏面から階段寸法を計算し、現場で分かっている寸法から逆算。勾配・角度・斜距離も一瞬で。無料ツール。">
 <style>
 :root{
   --bg:#0f1112;
@@ -15,7 +15,6 @@
   --sub:#98a09a;
   --accent:#a3e635;
   --accent-ink:#14200a;
-  --down:#fb7185;
   --warn:#f5b84b;
 }
 *{box-sizing:border-box}
@@ -29,37 +28,44 @@ body{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
 h1{font-size:22px;line-height:1.35;margin:0 0 6px}
 .lead{font-size:13px;color:var(--sub);margin:0 0 20px;line-height:1.6}
 
-.seg{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:14px}
+.seg{display:flex;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px}
 .seg button{flex:1;border:0;background:transparent;color:var(--sub);font:inherit;font-size:13px;font-weight:700;
-  padding:11px 2px;border-radius:9px;cursor:pointer;line-height:1.3}
+  padding:10px 6px;border-radius:8px;cursor:pointer;line-height:1.3}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg.v{flex-direction:column}
+.seg.main{background:var(--panel);border-radius:12px;padding:4px;margin-bottom:14px}
+.seg.main button{font-size:14px;padding:12px 6px}
 
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
-.field{margin-bottom:14px}
-.field:last-child{margin-bottom:0}
+.block{margin-bottom:14px}
+.block:last-child{margin-bottom:0}
+.row{display:flex;gap:10px}
+.field{flex:1;min-width:0;margin-bottom:14px}
 label,.lbl{display:block;font-size:13px;color:var(--sub);margin-bottom:6px}
-.input{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:0 14px;transition:border-color .15s}
+.input{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:0 12px;transition:border-color .15s}
 .input:focus-within{border-color:var(--accent)}
 input{width:100%;min-width:0;background:transparent;border:0;outline:0;color:var(--text);
-  font-size:22px;font-weight:600;padding:12px 0;font-variant-numeric:tabular-nums}
+  font-size:20px;font-weight:600;padding:12px 0;font-variant-numeric:tabular-nums}
 input::placeholder{color:#4a5250;font-weight:400}
-.unit{font-size:15px;color:var(--sub);margin-left:8px;white-space:nowrap;font-weight:600}
+.unit{font-size:13px;color:var(--sub);margin-left:6px;white-space:nowrap}
 [hidden]{display:none!important}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
+.note{font-size:12.5px;color:var(--sub);line-height:1.7;border-left:3px solid var(--accent);padding:2px 0 2px 12px;margin:0 0 14px}
+
 .result{border-color:#3b4a1c}
-.big{display:flex;align-items:baseline;gap:6px;margin:2px 0 14px;flex-wrap:wrap}
-.big .num{font-size:44px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:var(--accent)}
-.big .u{font-size:18px;font-weight:700;color:var(--accent)}
-.big.down .num,.big.down .u{color:var(--down)}
+.hl{display:flex;gap:10px;margin-bottom:12px}
+.hl div{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.hl .k{font-size:12px;color:var(--sub)}
+.hl .v{font-size:24px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1.3}
+.hl .v small{font-size:13px;font-weight:700}
 dl{margin:0;font-size:14px}
 dl div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line)}
 dt{color:var(--sub)}
 dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
-dd.down{color:var(--down)}
-dd.up{color:var(--accent)}
 .empty{font-size:14px;color:var(--sub);margin:0}
 .err{font-size:14px;color:var(--warn);margin:0}
+.info{font-size:12.5px;color:var(--warn);margin:12px 0 0;line-height:1.6}
 
 .actions{display:flex;gap:10px;margin-top:14px}
 .btn{flex:1;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;
@@ -82,46 +88,84 @@ footer a{color:var(--accent);text-decoration:none;font-weight:600}
 </head>
 <body>
 <main class="wrap">
-  <p class="brand"><b>COCOA TOOLS</b> ／ 仕事効率化</p>
-  <h1>📈 値上げ・値下げ率 一瞬計算</h1>
-  <p class="lead">金額から率を、率から金額を。3つのモードで一瞬で計算します。</p>
+  <p class="brand"><b>COCOA TOOLS</b> ／ 建築・現場</p>
+  <h1>📐 階段計算 一瞬計算</h1>
+  <p class="lead">階段の寸法計算と、現場で分かっている寸法からの逆算。</p>
 
-  <div class="seg" role="group" aria-label="モード">
-    <button type="button" data-mode="rate" aria-pressed="true">金額 → 率</button>
-    <button type="button" data-mode="up" aria-pressed="false">値上げ率 → 金額</button>
-    <button type="button" data-mode="down" aria-pressed="false">値下げ率 → 金額</button>
+  <div class="seg main" role="group" aria-label="モード">
+    <button type="button" data-mode="calc" aria-pressed="true">寸法計算</button>
+    <button type="button" data-mode="site" aria-pressed="false">現場計算</button>
   </div>
 
   <section class="card" aria-label="入力">
-    <div class="field" data-for="rate">
-      <label for="before">変更前の金額</label>
-      <div class="input"><input id="before" type="number" inputmode="decimal" min="0" step="any" placeholder="10000"><span class="unit">円</span></div>
+    <div class="block" id="b-rise" hidden>
+      <div class="lbl">蹴上げは何が分かっている？</div>
+      <div class="seg" role="group" aria-label="蹴上げの入力方法">
+        <button type="button" data-rise="count">蹴上げ数</button>
+        <button type="button" data-rise="size">蹴上げ寸法</button>
+      </div>
     </div>
-    <div class="field" data-for="rate">
-      <label for="after">変更後の金額</label>
-      <div class="input"><input id="after" type="number" inputmode="decimal" min="0" step="any" placeholder="12000"><span class="unit">円</span></div>
+    <div class="block">
+      <div class="lbl" id="tread-lbl">踏面の計算方法</div>
+      <div class="seg v" role="group" aria-label="踏面の計算方法">
+        <button type="button" data-tread="dist_n"></button>
+        <button type="button" data-tread="size_n"></button>
+        <button type="button" data-tread="dist_size"></button>
+      </div>
     </div>
 
-    <div class="field" data-for="up down" hidden>
-      <label for="base">元の金額</label>
-      <div class="input"><input id="base" type="number" inputmode="decimal" min="0" step="any" placeholder="10000"><span class="unit">円</span></div>
-    </div>
-    <div class="field" data-for="up down" hidden>
-      <label for="pct" id="pct-label">率</label>
-      <div class="input"><span class="unit" style="margin:0 10px 0 0">率</span><input id="pct" type="number" inputmode="decimal" min="0" step="any" placeholder="15"><span class="unit">％</span></div>
+    <div class="block">
+      <div class="field" style="margin:0 0 14px" data-f="H">
+        <label for="H">階高</label>
+        <div class="input"><input id="H" type="number" inputmode="decimal" min="0" step="any" placeholder="2800"><span class="unit">mm</span></div>
+      </div>
+      <div class="row">
+        <div class="field" data-f="rn">
+          <label for="rn">蹴上げ数</label>
+          <div class="input"><input id="rn" type="number" inputmode="decimal" min="0" step="any" placeholder="15"><span class="unit">段</span></div>
+        </div>
+        <div class="field" data-f="rs">
+          <label for="rs">蹴上げ寸法</label>
+          <div class="input"><input id="rs" type="number" inputmode="decimal" min="0" step="any" placeholder="187"><span class="unit">mm</span></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field" data-f="D">
+          <label for="D">水平距離</label>
+          <div class="input"><input id="D" type="number" inputmode="decimal" min="0" step="any" placeholder="3640"><span class="unit">mm</span></div>
+        </div>
+        <div class="field" data-f="tn">
+          <label for="tn">踏面数</label>
+          <div class="input"><input id="tn" type="number" inputmode="decimal" min="0" step="any" placeholder="14"><span class="unit">段</span></div>
+        </div>
+        <div class="field" data-f="ts">
+          <label for="ts">踏面寸法</label>
+          <div class="input"><input id="ts" type="number" inputmode="decimal" min="0" step="any" placeholder="260"><span class="unit">mm</span></div>
+        </div>
+      </div>
     </div>
   </section>
 
+  <p class="note">蹴上げ数と踏面数は別々に入力します。最上段の床を踏面数に含めるかどうかで数が変わるため、数え方は現場の図面に合わせて入力してください。</p>
+
   <section class="card result" aria-live="polite" aria-label="計算結果">
-    <p class="empty" id="empty">金額を入力すると、ここに結果が出ます。</p>
+    <p class="empty" id="empty">必要な寸法を入力すると、ここに結果が出ます。</p>
     <p class="err" id="err" hidden></p>
     <div id="out" hidden>
-      <div class="lbl" id="r-cap"></div>
-      <div class="big" id="r-big"><span class="num" id="r-main">0</span><span class="u" id="r-unit">円</span></div>
+      <div class="hl">
+        <div><div class="k">階段勾配</div><div class="v" id="r-pct">-</div></div>
+        <div><div class="k">勾配角度</div><div class="v" id="r-ang">-</div></div>
+      </div>
       <dl>
-        <div><dt id="r-l1"></dt><dd id="r-v1"></dd></div>
-        <div><dt id="r-l2"></dt><dd id="r-v2"></dd></div>
+        <div><dt>蹴上げ数</dt><dd id="r-rn"></dd></div>
+        <div><dt>蹴上げ寸法</dt><dd id="r-rs"></dd></div>
+        <div><dt>踏面数</dt><dd id="r-tn"></dd></div>
+        <div><dt>踏面寸法</dt><dd id="r-ts"></dd></div>
+        <div><dt>階高</dt><dd id="r-H"></dd></div>
+        <div><dt>水平距離</dt><dd id="r-D"></dd></div>
+        <div><dt>階段の斜距離</dt><dd id="r-L"></dd></div>
       </dl>
+      <p class="info" id="info" hidden></p>
     </div>
     <div class="actions">
       <button type="button" class="btn primary" id="copy" disabled>結果をコピー</button>
@@ -132,7 +176,7 @@ footer a{color:var(--accent);text-decoration:none;font-weight:600}
   <div class="ad" aria-label="広告スペース">広告スペース</div>
 
   <p class="disclaimer">
-    <strong>ご注意：</strong>計算結果は目安です。税込・税抜、端数処理の違いなどにより、実際の金額と異なる場合があります。重要な判断の際は、必ずご自身で再確認してください。本ツールの利用による損害について、責任は負いかねます。
+    <strong>ご注意：</strong>計算結果は寸法確認の目安です。実際の設計・施工では、建物用途や条件に応じた関係法令・基準・設計条件を確認してください。このツールは法規適合性や安全性を判定するものではありません。本ツールの利用による損害について、責任は負いかねます。
   </p>
 
   <footer>
@@ -143,102 +187,141 @@ footer a{color:var(--accent);text-decoration:none;font-weight:600}
 
 <script>
 (function(){
-  var KEY = "cocoatools_neage_26";
+  var KEY = "cocoatools_kaidan_27";
   var $ = function(id){ return document.getElementById(id); };
-  var els = { before:$("before"), after:$("after"), base:$("base"), pct:$("pct") };
-  var mode = "rate";
+  var ids = ["H","rn","rs","D","tn","ts"];
+  var els = {};
+  ids.forEach(function(k){ els[k] = $(k); });
+  var st = { mode:"calc", rise:"count", tread:"dist_n" };
   var lastText = "";
 
-  function yen(v){ return Math.round(v).toLocaleString("ja-JP"); }
-  function sgn(v, s){ return (v > 0 ? "+" : v < 0 ? "-" : "") + s; }
-  function pctFmt(v){ return (Math.round(v * 100) / 100).toLocaleString("ja-JP", {maximumFractionDigits: 2}); }
+  var LABEL = {
+    calc: { dist_n:"A：水平距離から踏面寸法を計算", size_n:"B：踏面寸法から水平距離を計算" },
+    site: { dist_n:"水平距離 ＋ 踏面数 が分かる", size_n:"踏面寸法 ＋ 踏面数 が分かる", dist_size:"水平距離 ＋ 踏面寸法 が分かる" }
+  };
+
+  function num(v, d){
+    return (Math.round(v * Math.pow(10, d)) / Math.pow(10, d)).toLocaleString("ja-JP", {maximumFractionDigits: d});
+  }
+  function isInt(v){ return Math.abs(v - Math.round(v)) < 1e-9; }
 
   function save(){
-    try{
-      localStorage.setItem(KEY, JSON.stringify({mode:mode, before:els.before.value, after:els.after.value, base:els.base.value, pct:els.pct.value}));
-    }catch(e){}
+    var o = { st: st };
+    ids.forEach(function(k){ o[k] = els[k].value; });
+    try{ localStorage.setItem(KEY, JSON.stringify(o)); }catch(e){}
   }
   function load(){
     try{
       var d = JSON.parse(localStorage.getItem(KEY) || "null");
       if(!d) return;
-      if(d.mode === "up" || d.mode === "down" || d.mode === "rate") mode = d.mode;
-      ["before","after","base","pct"].forEach(function(k){ els[k].value = d[k] || ""; });
+      if(d.st){
+        if(d.st.mode === "site" || d.st.mode === "calc") st.mode = d.st.mode;
+        if(d.st.rise === "size" || d.st.rise === "count") st.rise = d.st.rise;
+        if(["dist_n","size_n","dist_size"].indexOf(d.st.tread) > -1) st.tread = d.st.tread;
+      }
+      ids.forEach(function(k){ els[k].value = d[k] || ""; });
     }catch(e){}
   }
 
-  function applyMode(){
+  function layout(){
+    var site = st.mode === "site";
+    if(!site){ st.rise = "count"; if(st.tread === "dist_size") st.tread = "dist_n"; }
+
     document.querySelectorAll("[data-mode]").forEach(function(b){
-      b.setAttribute("aria-pressed", b.getAttribute("data-mode") === mode);
+      b.setAttribute("aria-pressed", b.getAttribute("data-mode") === st.mode);
     });
-    document.querySelectorAll("[data-for]").forEach(function(f){
-      f.hidden = f.getAttribute("data-for").split(" ").indexOf(mode) === -1;
+    $("b-rise").hidden = !site;
+    document.querySelectorAll("[data-rise]").forEach(function(b){
+      b.setAttribute("aria-pressed", b.getAttribute("data-rise") === st.rise);
     });
-    $("pct-label").textContent = mode === "down" ? "値下げ率" : "値上げ率";
+    $("tread-lbl").textContent = site ? "踏面は何が分かっている？" : "踏面の計算方法";
+    document.querySelectorAll("[data-tread]").forEach(function(b){
+      var v = b.getAttribute("data-tread");
+      b.hidden = !LABEL[st.mode][v];
+      b.textContent = LABEL[st.mode][v] || "";
+      b.setAttribute("aria-pressed", v === st.tread);
+    });
+
+    var show = {
+      H:true,
+      rn: st.rise === "count",
+      rs: st.rise === "size",
+      D: st.tread !== "size_n",
+      tn: st.tread !== "dist_size",
+      ts: st.tread !== "dist_n"
+    };
+    ids.forEach(function(k){
+      document.querySelector('[data-f="' + k + '"]').hidden = !show[k];
+    });
   }
 
-  function show(state, msg){
-    $("empty").hidden = state !== "empty";
-    $("err").hidden = state !== "err";
-    $("out").hidden = state !== "out";
-    if(state === "err") $("err").textContent = msg;
-    $("copy").disabled = state !== "out";
-    if(state !== "out") lastText = "";
-  }
-
-  function render(o){
-    $("r-cap").textContent = o.cap;
-    $("r-main").textContent = o.main;
-    $("r-unit").textContent = o.unit;
-    $("r-big").className = "big" + (o.dir < 0 ? " down" : "");
-    $("r-l1").textContent = o.l1; $("r-v1").textContent = o.v1;
-    $("r-l2").textContent = o.l2; $("r-v2").textContent = o.v2;
-    $("r-v1").className = o.dir < 0 ? "down" : o.dir > 0 ? "up" : "";
-    show("out");
-    lastText = o.text;
+  function state(s, msg){
+    $("empty").hidden = s !== "empty";
+    $("err").hidden = s !== "err";
+    $("out").hidden = s !== "out";
+    if(s === "err") $("err").textContent = msg;
+    $("copy").disabled = s !== "out";
+    if(s !== "out") lastText = "";
   }
 
   function calc(){
     save();
-    var a, b, r, diff, rate, amt;
+    var v = {};
+    ids.forEach(function(k){ v[k] = parseFloat(els[k].value); });
 
-    if(mode === "rate"){
-      a = parseFloat(els.before.value); b = parseFloat(els.after.value);
-      if(isNaN(a) || isNaN(b)) return show("empty");
-      if(a <= 0) return show("err", "変更前の金額は0より大きい数値を入力してください。");
-      if(b < 0) return show("err", "変更後の金額は0以上で入力してください。");
-      diff = b - a; rate = diff / a * 100;
-      var kind = diff > 0 ? "値上げ" : diff < 0 ? "値下げ" : "変化なし";
-      render({
-        cap: "変更率（" + kind + "）", main: sgn(rate, pctFmt(Math.abs(rate))), unit: "％", dir: diff,
-        l1: "変更額", v1: sgn(diff, yen(Math.abs(diff))) + "円",
-        l2: "変更前 → 変更後", v2: yen(a) + "円 → " + yen(b) + "円",
-        text: ["【値上げ・値下げ率】", "変更前 " + yen(a) + "円 → 変更後 " + yen(b) + "円",
-               "変更額：" + sgn(diff, yen(Math.abs(diff))) + "円", "変更率：" + sgn(rate, pctFmt(Math.abs(rate))) + "％",
-               "COCOA TOOLS"].join("\n")
-      });
-      return;
-    }
+    var need = ["H"];
+    need.push(st.rise === "count" ? "rn" : "rs");
+    if(st.tread === "dist_n") need.push("D","tn");
+    else if(st.tread === "size_n") need.push("ts","tn");
+    else need.push("D","ts");
 
-    a = parseFloat(els.base.value); r = parseFloat(els.pct.value);
-    if(isNaN(a) || isNaN(r)) return show("empty");
-    if(a < 0 || r < 0) return show("err", "0以上の数値を入力してください。");
-    if(mode === "down" && r > 100) return show("err", "値下げ率は100％以下で入力してください。");
+    var missing = need.some(function(k){ return isNaN(v[k]); });
+    if(missing) return state("empty");
+    if(need.some(function(k){ return v[k] <= 0; })) return state("err", "すべて0より大きい数値を入力してください。");
 
-    amt = a * r / 100;
-    var isUp = mode === "up";
-    var name = isUp ? "値上げ" : "値下げ";
-    var signed = isUp ? amt : -amt;
-    var result = isUp ? a + amt : a - amt;
-    var dir = amt === 0 ? 0 : (isUp ? 1 : -1);
-    var amtText = (amt === 0 ? "" : isUp ? "+" : "-") + yen(amt) + "円";
-    render({
-      cap: name + "後の金額", main: yen(result), unit: "円", dir: dir,
-      l1: name + "額", v1: amtText,
-      l2: "元の金額 / " + name + "率", v2: yen(a) + "円 / " + pctFmt(r) + "％",
-      text: ["【" + name + "率 → 金額】", "元の金額 " + yen(a) + "円 / " + name + "率 " + pctFmt(r) + "％",
-             name + "額：" + amtText, name + "後の金額：" + yen(result) + "円", "COCOA TOOLS"].join("\n")
-    });
+    var H = v.H, rn, rs, D, tn, ts;
+    if(st.rise === "count"){ rn = v.rn; rs = H / rn; }
+    else { rs = v.rs; rn = H / rs; }
+
+    if(st.tread === "dist_n"){ D = v.D; tn = v.tn; ts = D / tn; }
+    else if(st.tread === "size_n"){ ts = v.ts; tn = v.tn; D = ts * tn; }
+    else { D = v.D; ts = v.ts; tn = D / ts; }
+
+    var pct = H / D * 100;
+    var ang = Math.atan(H / D) * 180 / Math.PI;
+    var L = Math.sqrt(H * H + D * D);
+
+    var t = {
+      rn: num(rn, 2) + " 段", rs: num(rs, 2) + " mm",
+      tn: num(tn, 2) + " 段", ts: num(ts, 2) + " mm",
+      H: num(H, 1) + " mm", D: num(D, 1) + " mm", L: num(L, 1) + " mm",
+      pct: num(pct, 1) + " ％", ang: num(ang, 1) + " °"
+    };
+    $("r-pct").textContent = t.pct;
+    $("r-ang").textContent = t.ang;
+    ["rn","rs","tn","ts","H","D"].forEach(function(k){ $("r-" + k).textContent = t[k]; });
+    $("r-L").textContent = t.L;
+
+    var info = [];
+    if(!isInt(rn)) info.push("蹴上げ数が整数になっていません。");
+    if(!isInt(tn)) info.push("踏面数が整数になっていません。");
+    $("info").hidden = info.length === 0;
+    $("info").textContent = info.join("") + (info.length ? "入力した寸法・段数を確認してください。" : "");
+
+    $("empty").hidden = true; $("err").hidden = true; $("out").hidden = false;
+    $("copy").disabled = false;
+
+    lastText = [
+      "【階段計算】（" + (st.mode === "calc" ? "寸法計算" : "現場計算") + "）",
+      "階高：" + t.H,
+      "蹴上げ数：" + t.rn + " ／ 蹴上げ寸法：" + t.rs,
+      "踏面数：" + t.tn + " ／ 踏面寸法：" + t.ts,
+      "水平距離：" + t.D,
+      "階段勾配：" + t.pct + " ／ 勾配角度：" + t.ang,
+      "階段の斜距離：" + t.L,
+      "※寸法確認の目安です。法規適合性は判定していません。",
+      "COCOA TOOLS"
+    ].join("\n");
   }
 
   function toast(msg){
@@ -260,18 +343,23 @@ footer a{color:var(--accent);text-decoration:none;font-weight:600}
     }else{ fallback(); }
   }
 
-  document.querySelectorAll("[data-mode]").forEach(function(b){
-    b.addEventListener("click", function(){ mode = b.getAttribute("data-mode"); applyMode(); calc(); });
-  });
-  Object.keys(els).forEach(function(k){ els[k].addEventListener("input", calc); });
+  function bind(attr, key){
+    document.querySelectorAll("[" + attr + "]").forEach(function(b){
+      b.addEventListener("click", function(){ st[key] = b.getAttribute(attr); layout(); calc(); });
+    });
+  }
+  bind("data-mode", "mode");
+  bind("data-rise", "rise");
+  bind("data-tread", "tread");
+  ids.forEach(function(k){ els[k].addEventListener("input", calc); });
   $("copy").addEventListener("click", copy);
   $("reset").addEventListener("click", function(){
-    Object.keys(els).forEach(function(k){ els[k].value = ""; });
+    ids.forEach(function(k){ els[k].value = ""; });
     calc();
   });
 
   load();
-  applyMode();
+  layout();
   calc();
 })();
 </script>
