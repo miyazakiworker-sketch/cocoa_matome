@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>利益率計算｜COCOA TOOLS</title>
+<meta name="description" content="売上金額と原価を入力するだけで、利益額・利益率・原価率を一瞬で計算。無料ツール。">
+<style>
+:root{
+  --bg:#0d0f12;
+  --panel:#1a1f26;
+  --line:#2d3748;
+  --text:#e2e8f0;
+  --sub:#a0aec0;
+  --accent:#a3e635;
+  --accent-ink:#14200a;
+  --down:#fb7185;
+  --warn:#f5b84b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  -webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:480px;margin:0 auto;padding:20px 16px 40px}
+.brand{font-size:12px;color:var(--sub);letter-spacing:.04em;margin:0 0 6px}
+.brand b{color:var(--accent)}
+h1{font-size:22px;line-height:1.35;margin:0 0 6px}
+.lead{font-size:13px;color:var(--sub);margin:0 0 20px;line-height:1.6}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+label,.lbl{display:block;font-size:13px;color:var(--sub);margin-bottom:6px}
+.input{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:0 14px;transition:border-color .15s}
+.input:focus-within{border-color:var(--accent)}
+input{width:100%;min-width:0;background:transparent;border:0;outline:0;color:var(--text);
+  font-size:22px;font-weight:600;padding:13px 0;font-variant-numeric:tabular-nums}
+input::placeholder{color:#4a5568;font-weight:400}
+.unit{font-size:15px;color:var(--sub);margin-left:8px;font-weight:600}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.result{border-color:#3b4a1c}
+.empty{font-size:14px;color:var(--sub);margin:0}
+.big{display:flex;align-items:baseline;gap:6px;margin:2px 0 14px}
+.big .num{font-size:48px;font-weight:800;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums}
+.big .u{font-size:20px;font-weight:700;color:var(--accent)}
+.big.loss .num,.big.loss .u{color:var(--down)}
+dl{margin:0;font-size:15px}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+dt{color:var(--sub)}
+dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+dd.loss{color:var(--down)}
+.info{font-size:12.5px;color:var(--warn);margin:12px 0 0;line-height:1.6}
+
+.actions{margin-top:14px}
+.btn{width:100%;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;
+  padding:12px;border-radius:12px;cursor:pointer}
+
+.ad{min-height:90px;border:1px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;
+  color:#5a6578;font-size:12px;margin:18px 0}
+.disclaimer{font-size:12px;color:var(--sub);line-height:1.7}
+.disclaimer strong{color:var(--warn);font-weight:600}
+footer{margin-top:18px;font-size:13px;color:var(--sub);text-align:center;line-height:1.7}
+footer a{color:var(--accent);text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="brand"><b>COCOA TOOLS</b> ／ お金</p>
+  <h1>💰 利益率計算</h1>
+  <p class="lead">売上と原価を入れるだけ。利益額・利益率・原価率が3秒で分かります。</p>
+
+  <section class="card" aria-label="入力">
+    <div class="field">
+      <label for="sales">売上金額</label>
+      <div class="input"><input id="sales" type="text" inputmode="numeric" autocomplete="off" placeholder="100,000"><span class="unit">円</span></div>
+    </div>
+    <div class="field">
+      <label for="cost">原価</label>
+      <div class="input"><input id="cost" type="text" inputmode="numeric" autocomplete="off" placeholder="60,000"><span class="unit">円</span></div>
+    </div>
+  </section>
+
+  <section class="card result" aria-live="polite" aria-label="計算結果">
+    <p class="empty" id="empty">売上金額と原価を入力すると、ここに結果が出ます。</p>
+    <div id="out" hidden>
+      <div class="lbl">利益率</div>
+      <div class="big" id="big"><span class="num" id="r-rate">-</span><span class="u" id="r-rate-u">％</span></div>
+      <dl>
+        <div><dt>利益額</dt><dd id="r-profit">-</dd></div>
+        <div><dt>原価率</dt><dd id="r-cr">-</dd></div>
+      </dl>
+      <p class="info" id="info" hidden>売上金額が0円のため、率は計算できません。</p>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn" id="reset">リセット</button>
+    </div>
+  </section>
+
+  <div class="ad" aria-label="広告スペース">広告スペース</div>
+
+  <p class="disclaimer">
+    <strong>ご注意：</strong>計算結果は目安です。消費税・手数料・送料などの扱いにより、実際の利益と異なる場合があります。重要な判断の際は、必ずご自身で再確認してください。本ツールの利用による損害について、責任は負いかねます。
+  </p>
+
+  <footer>
+    <span>開発者：<a id="x-link" href="https://x.com/cocoa_next7" target="_blank" rel="noopener noreferrer">ココア@プログラミング奮闘中 (@cocoa_next7) ↗</a></span>
+  </footer>
+</main>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var sales = $("sales"), cost = $("cost");
+
+  function comma(s){ return s.replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+  function yen(v){
+    return (v < 0 ? "-" : "") + comma(String(Math.abs(Math.round(v)))) + "円";
+  }
+  function pct(v){
+    var s = (Math.round(v * 10) / 10).toFixed(1);
+    return s === "-0.0" ? "0.0" : s;
+  }
+
+  // 入力欄：数字のみ・3桁カンマ・カーソル位置を維持
+  function format(input){
+    var pos = input.selectionStart;
+    var before = input.value.slice(0, pos).replace(/\D/g, "").length;
+    var digits = input.value.replace(/\D/g, "").slice(0, 15).replace(/^0+(?=\d)/, "");
+    input.value = comma(digits);
+    var p = 0, seen = 0;
+    while(p < input.value.length && seen < before){
+      if(/\d/.test(input.value[p])) seen++;
+      p++;
+    }
+    try{ input.setSelectionRange(p, p); }catch(e){}
+  }
+  function val(input){
+    var d = input.value.replace(/\D/g, "");
+    return d === "" ? null : parseInt(d, 10);
+  }
+
+  function calc(){
+    var s = val(sales), c = val(cost);
+    if(s === null || c === null){
+      $("empty").hidden = false; $("out").hidden = true; return;
+    }
+    var profit = s - c;
+    var loss = profit < 0;
+
+    $("empty").hidden = true; $("out").hidden = false;
+    $("r-profit").textContent = yen(profit);
+    $("r-profit").className = loss ? "loss" : "";
+    $("big").className = "big" + (loss ? " loss" : "");
+
+    if(s === 0){
+      $("r-rate").textContent = "-";
+      $("r-rate-u").textContent = "";
+      $("r-cr").textContent = "-";
+      $("info").hidden = false;
+    }else{
+      $("r-rate").textContent = pct(profit / s * 100);
+      $("r-rate-u").textContent = "％";
+      $("r-cr").textContent = pct(c / s * 100) + "％";
+      $("info").hidden = true;
+    }
+  }
+
+  [sales, cost].forEach(function(el){
+    el.addEventListener("input", function(){ format(el); calc(); });
+  });
+  $("reset").addEventListener("click", function(){
+    sales.value = ""; cost.value = "";
+    calc();
+    sales.focus();
+  });
+
+  calc();
+})();
+</script>
+</body>
+</html>
