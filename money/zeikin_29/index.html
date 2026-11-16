@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>税込・税抜計算｜COCOA TOOLS</title>
+<meta name="description" content="金額を入力して税率（10％・8％）を選ぶだけで、税抜金額・消費税額・税込金額を一瞬で計算。無料ツール。">
+<style>
+:root{
+  --bg:#0d0f12;
+  --panel:#1a1f26;
+  --line:#2d3748;
+  --text:#e2e8f0;
+  --sub:#a0aec0;
+  --accent:#a3e635;
+  --accent-ink:#14200a;
+  --warn:#f5b84b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  -webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:480px;margin:0 auto;padding:20px 16px 40px}
+.brand{font-size:12px;color:var(--sub);letter-spacing:.04em;margin:0 0 6px}
+.brand b{color:var(--accent)}
+h1{font-size:22px;line-height:1.35;margin:0 0 6px}
+.lead{font-size:13px;color:var(--sub);margin:0 0 20px;line-height:1.6}
+
+.seg{display:flex;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg button{flex:1;border:0;background:transparent;color:var(--sub);font:inherit;font-size:14px;font-weight:700;
+  padding:11px 6px;border-radius:9px;cursor:pointer;line-height:1.3}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg.main{background:var(--panel);padding:4px;margin-bottom:14px}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+label,.lbl{display:block;font-size:13px;color:var(--sub);margin-bottom:6px}
+.input{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:0 14px;transition:border-color .15s}
+.input:focus-within{border-color:var(--accent)}
+input{width:100%;min-width:0;background:transparent;border:0;outline:0;color:var(--text);
+  font-size:22px;font-weight:600;padding:13px 0;font-variant-numeric:tabular-nums}
+input::placeholder{color:#4a5568;font-weight:400}
+.unit{font-size:15px;color:var(--sub);margin-left:8px;font-weight:600}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.result{border-color:#3b4a1c}
+.empty{font-size:14px;color:var(--sub);margin:0}
+.big{display:flex;align-items:baseline;gap:6px;margin:2px 0 14px}
+.big .num{font-size:44px;font-weight:800;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums;word-break:break-all}
+.big .u{font-size:20px;font-weight:700;color:var(--accent)}
+dl{margin:0;font-size:15px}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+dt{color:var(--sub)}
+dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+dl div.hit dt,dl div.hit dd{color:var(--accent)}
+.fine{font-size:12px;color:var(--sub);margin:12px 0 0;line-height:1.6}
+
+.actions{margin-top:14px}
+.btn{width:100%;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;
+  padding:12px;border-radius:12px;cursor:pointer}
+
+.ad{min-height:90px;border:1px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;
+  color:#5a6578;font-size:12px;margin:18px 0}
+.disclaimer{font-size:12px;color:var(--sub);line-height:1.7}
+.disclaimer strong{color:var(--warn);font-weight:600}
+footer{margin-top:18px;font-size:13px;color:var(--sub);text-align:center;line-height:1.7}
+footer a{color:var(--accent);text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="brand"><b>COCOA TOOLS</b> ／ お金</p>
+  <h1>🧾 税込・税抜計算</h1>
+  <p class="lead">金額を入れて税率を選ぶだけ。税抜・消費税・税込が一瞬で分かります。</p>
+
+  <div class="seg main" role="group" aria-label="計算方向">
+    <button type="button" data-dir="ex2in" aria-pressed="true">税抜 → 税込</button>
+    <button type="button" data-dir="in2ex" aria-pressed="false">税込 → 税抜</button>
+  </div>
+
+  <section class="card" aria-label="入力">
+    <div class="field">
+      <div class="lbl">消費税率</div>
+      <div class="seg" role="group" aria-label="消費税率">
+        <button type="button" data-rate="10" aria-pressed="true">10％</button>
+        <button type="button" data-rate="8" aria-pressed="false">8％</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="amount" id="amount-label">税抜金額</label>
+      <div class="input"><input id="amount" type="text" inputmode="numeric" autocomplete="off" placeholder="10,000"><span class="unit">円</span></div>
+    </div>
+  </section>
+
+  <section class="card result" aria-live="polite" aria-label="計算結果">
+    <p class="empty" id="empty">金額を入力すると、ここに結果が出ます。</p>
+    <div id="out" hidden>
+      <div class="lbl" id="r-cap">税込金額</div>
+      <div class="big"><span class="num" id="r-main">0</span><span class="u">円</span></div>
+      <dl>
+        <div id="row-ex"><dt>税抜金額</dt><dd id="r-ex">-</dd></div>
+        <div><dt id="r-tax-l">消費税額</dt><dd id="r-tax">-</dd></div>
+        <div id="row-in"><dt>税込金額</dt><dd id="r-in">-</dd></div>
+      </dl>
+      <p class="fine">1円未満は切り捨て。消費税額は税込金額と税抜金額の差額です。</p>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn" id="reset">リセット</button>
+    </div>
+  </section>
+
+  <div class="ad" aria-label="広告スペース">広告スペース</div>
+
+  <p class="disclaimer">
+    <strong>ご注意：</strong>計算結果は目安です。実際の請求書・レジ・会計処理では、端数処理（切り捨て・切り上げ・四捨五入）や税額の算出単位（商品ごと・伝票ごと）が異なる場合があります。重要な判断の際は、必ずご自身で再確認してください。本ツールの利用による損害について、責任は負いかねます。
+  </p>
+
+  <footer>
+    <span>開発者：<a id="x-link" href="https://x.com/cocoa_next7" target="_blank" rel="noopener noreferrer">ココア@プログラミング奮闘中 (@cocoa_next7) ↗</a></span>
+  </footer>
+</main>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var amount = $("amount");
+  var dir = "ex2in";   // ex2in: 税抜→税込 / in2ex: 税込→税抜
+  var rate = 10;       // 10 or 8（整数％で計算し、浮動小数点の誤差を避ける）
+
+  function comma(s){ return s.replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+  function yen(v){ return comma(String(v)); }
+
+  // 数字のみ・3桁カンマ・カーソル位置を維持
+  function format(input){
+    var pos = input.selectionStart;
+    var before = input.value.slice(0, pos).replace(/\D/g, "").length;
+    var digits = input.value.replace(/\D/g, "").slice(0, 13).replace(/^0+(?=\d)/, "");
+    input.value = comma(digits);
+    var p = 0, seen = 0;
+    while(p < input.value.length && seen < before){
+      if(/\d/.test(input.value[p])) seen++;
+      p++;
+    }
+    try{ input.setSelectionRange(p, p); }catch(e){}
+  }
+
+  function layout(){
+    document.querySelectorAll("[data-dir]").forEach(function(b){
+      b.setAttribute("aria-pressed", b.getAttribute("data-dir") === dir);
+    });
+    document.querySelectorAll("[data-rate]").forEach(function(b){
+      b.setAttribute("aria-pressed", b.getAttribute("data-rate") === String(rate));
+    });
+    $("amount-label").textContent = dir === "ex2in" ? "税抜金額" : "税込金額";
+    $("amount").placeholder = dir === "ex2in" ? "10,000" : "11,000";
+  }
+
+  function calc(){
+    var d = amount.value.replace(/\D/g, "");
+    if(d === ""){ $("empty").hidden = false; $("out").hidden = true; return; }
+    var v = parseInt(d, 10), ex, inc;
+
+    // 整数演算で計算し、1円未満は切り捨て
+    if(dir === "ex2in"){
+      ex = v;
+      inc = Math.floor(ex * (100 + rate) / 100);
+    }else{
+      inc = v;
+      ex = Math.floor(inc * 100 / (100 + rate));
+    }
+    var tax = inc - ex;
+
+    $("empty").hidden = true; $("out").hidden = false;
+    $("r-cap").textContent = dir === "ex2in" ? "税込金額" : "税抜金額";
+    $("r-main").textContent = yen(dir === "ex2in" ? inc : ex);
+    $("r-ex").textContent = yen(ex) + "円";
+    $("r-in").textContent = yen(inc) + "円";
+    $("r-tax-l").textContent = "消費税額（" + rate + "％）";
+    $("r-tax").textContent = yen(tax) + "円";
+    $("row-ex").className = dir === "in2ex" ? "hit" : "";
+    $("row-in").className = dir === "ex2in" ? "hit" : "";
+  }
+
+  document.querySelectorAll("[data-dir]").forEach(function(b){
+    b.addEventListener("click", function(){ dir = b.getAttribute("data-dir"); layout(); calc(); });
+  });
+  document.querySelectorAll("[data-rate]").forEach(function(b){
+    b.addEventListener("click", function(){ rate = parseInt(b.getAttribute("data-rate"), 10); layout(); calc(); });
+  });
+  amount.addEventListener("input", function(){ format(amount); calc(); });
+  $("reset").addEventListener("click", function(){
+    amount.value = ""; dir = "ex2in"; rate = 10;
+    layout(); calc();
+    amount.focus();
+  });
+
+  layout();
+  calc();
+})();
+</script>
+</body>
+</html>
