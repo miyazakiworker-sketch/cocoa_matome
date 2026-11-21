@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>FP6つの係数計算｜COCOA TOOLS</title>
+<meta name="description" content="終価係数・現価係数・年金終価係数・年金現価係数・減債基金係数・資本回収係数を、金額・年利・年数を入れるだけで一瞬で計算。FP試験や資産形成の試算に。無料ツール。">
+<style>
+:root{
+  --bg:#0d0f12;
+  --panel:#1a1f26;
+  --line:#2d3748;
+  --text:#e2e8f0;
+  --sub:#a0aec0;
+  --accent:#a3e635;
+  --accent-ink:#14200a;
+  --warn:#f5b84b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  -webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:480px;margin:0 auto;padding:20px 16px 40px}
+.brand{font-size:12px;color:var(--sub);letter-spacing:.04em;margin:0 0 6px}
+.brand b{color:var(--accent)}
+h1{font-size:22px;line-height:1.35;margin:0 0 6px}
+.lead{font-size:13px;color:var(--sub);margin:0 0 20px;line-height:1.6}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* 係数一覧 */
+.picks{display:grid;gap:10px;margin-bottom:14px}
+.pick{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);
+  border-radius:16px;padding:14px 16px;color:var(--text);font:inherit;cursor:pointer;transition:border-color .15s}
+.pick:hover,.pick:active{border-color:var(--accent)}
+.pick .no{flex:none;width:32px;height:32px;border-radius:50%;background:var(--bg);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--accent)}
+.pick .t{font-size:16px;font-weight:700;line-height:1.3}
+.pick .s{font-size:12.5px;color:var(--sub);margin-top:2px;line-height:1.5}
+
+/* 計算画面 */
+.back{background:none;border:0;color:var(--accent);font:inherit;font-size:14px;font-weight:700;cursor:pointer;padding:6px 0;margin-bottom:8px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.card h2{font-size:18px;margin:0 0 6px}
+.card .desc{font-size:13px;color:var(--sub);line-height:1.6;margin:0 0 16px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+label,.lbl{display:block;font-size:13px;color:var(--sub);margin-bottom:6px}
+.input{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:0 14px;transition:border-color .15s}
+.input:focus-within{border-color:var(--accent)}
+input{width:100%;min-width:0;background:transparent;border:0;outline:0;color:var(--text);
+  font-size:22px;font-weight:600;padding:13px 0;font-variant-numeric:tabular-nums}
+input::placeholder{color:#4a5568;font-weight:400}
+.unit{font-size:15px;color:var(--sub);margin-left:8px;font-weight:600;white-space:nowrap}
+.row{display:flex;gap:10px}
+.row .field{flex:1;min-width:0}
+
+.result{border-color:#3b4a1c}
+.empty{font-size:14px;color:var(--sub);margin:0}
+.err{font-size:14px;color:var(--warn);margin:0}
+.big{display:flex;align-items:baseline;gap:6px;margin:2px 0 14px}
+.big .num{font-size:40px;font-weight:800;color:var(--accent);line-height:1.1;font-variant-numeric:tabular-nums;word-break:break-all}
+.big .u{font-size:20px;font-weight:700;color:var(--accent)}
+dl{margin:0;font-size:15px}
+dl div{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+dt{color:var(--sub)}
+dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.formula{margin-top:12px;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:12px;font-size:12.5px;line-height:1.8;color:var(--sub)}
+.formula b{color:var(--text);font-weight:600}
+
+.actions{margin-top:14px}
+.btn{width:100%;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;
+  padding:12px;border-radius:12px;cursor:pointer}
+
+.ad{min-height:90px;border:1px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;
+  color:#5a6578;font-size:12px;margin:18px 0}
+.disclaimer{font-size:12px;color:var(--sub);line-height:1.7}
+.disclaimer strong{color:var(--warn);font-weight:600}
+footer{margin-top:18px;font-size:13px;color:var(--sub);text-align:center;line-height:1.7}
+footer a{color:var(--accent);text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="brand"><b>COCOA TOOLS</b> ／ お金</p>
+  <h1>📊 FP6つの係数計算</h1>
+
+  <!-- 係数一覧 -->
+  <section id="v-list">
+    <p class="lead">知りたい内容を選んでください。金額・年利・年数を入れるだけで計算できます。</p>
+    <div class="picks" id="picks"></div>
+  </section>
+
+  <!-- 計算画面 -->
+  <section id="v-calc" hidden>
+    <button type="button" class="back" id="back">← 係数一覧に戻る</button>
+
+    <div class="card">
+      <h2 id="c-name"></h2>
+      <p class="desc" id="c-desc"></p>
+
+      <div class="field">
+        <label for="amount" id="l-amount">金額</label>
+        <div class="input"><input id="amount" type="text" inputmode="numeric" autocomplete="off" placeholder="1,000,000"><span class="unit">円</span></div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="rate">年利</label>
+          <div class="input"><input id="rate" type="text" inputmode="decimal" autocomplete="off" placeholder="2"><span class="unit">％</span></div>
+        </div>
+        <div class="field">
+          <label for="years" id="l-years">年数</label>
+          <div class="input"><input id="years" type="text" inputmode="numeric" autocomplete="off" placeholder="10"><span class="unit">年</span></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="card result" aria-live="polite" aria-label="計算結果">
+      <p class="empty" id="empty">金額・年利・年数を入力すると、ここに結果が出ます。</p>
+      <p class="err" id="err" hidden></p>
+      <div id="out" hidden>
+        <div class="lbl" id="r-cap"></div>
+        <div class="big"><span class="num" id="r-main">0</span><span class="u">円</span></div>
+        <dl>
+          <div><dt id="r-coef-l">係数</dt><dd id="r-coef">-</dd></div>
+        </dl>
+        <div class="formula" id="r-formula"></div>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn" id="reset">リセット</button>
+      </div>
+    </section>
+  </section>
+
+  <div class="ad" aria-label="広告スペース">広告スペース</div>
+
+  <p class="disclaimer">
+    <strong>ご注意：</strong>計算結果は試算の目安です。実際の運用では、利率の変動・税金・手数料などにより結果は変わります。積立・受取・返済は各年の期末に行う前提で計算しています。重要な判断の際は、必ずご自身で再確認し、必要に応じて専門家にご相談ください。本ツールの利用による損害について、責任は負いかねます。
+  </p>
+
+  <footer>
+    <span>開発者：<a id="x-link" href="https://x.com/cocoa_next7" target="_blank" rel="noopener noreferrer">ココア@プログラミング奮闘中 (@cocoa_next7) ↗</a></span>
+  </footer>
+</main>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+
+  // r：利率（小数）、n：年数。内部計算は丸めずに行い、表示時のみ丸める。
+  var pow = function(r, n){ return Math.pow(1 + r, n); };
+  var COEFS = [
+    { key:"syuka", no:"①", name:"終価係数", sub:"今の元本が、将来いくらになる？",
+      desc:"現在の元本を一定の利率で運用したとき、将来の元利合計がいくらになるかを求めます。",
+      lAmount:"現在の元本", lYears:"運用年数", lResult:"将来の元利合計", step:"将来の元利合計 ＝ 現在の元本 × 終価係数",
+      formula:"終価係数 ＝ (1＋利率)^年数", end:false,
+      f:function(r, n){ return r === 0 ? 1 : pow(r, n); } },
+    { key:"genka", no:"②", name:"現価係数", sub:"将来の目標に、今いくら必要？",
+      desc:"将来必要な金額を用意するために、現在いくらの元本が必要かを求めます。",
+      lAmount:"将来必要な金額", lYears:"年数", lResult:"現在必要な元本", step:"現在必要な元本 ＝ 将来必要な金額 × 現価係数",
+      formula:"現価係数 ＝ 1 ÷ (1＋利率)^年数", end:false,
+      f:function(r, n){ return r === 0 ? 1 : 1 / pow(r, n); } },
+    { key:"nsyuka", no:"③", name:"年金終価係数", sub:"毎年積み立てると、将来いくら？",
+      desc:"毎年一定額を積み立てたとき、将来の積立総額がいくらになるかを求めます。",
+      lAmount:"毎年の積立額", lYears:"積立年数", lResult:"将来の積立総額", step:"将来の積立総額 ＝ 毎年の積立額 × 年金終価係数",
+      formula:"年金終価係数 ＝ ((1＋利率)^年数 − 1) ÷ 利率", end:true,
+      f:function(r, n){ return r === 0 ? n : (pow(r, n) - 1) / r; } },
+    { key:"ngenka", no:"④", name:"年金現価係数", sub:"毎年受け取るには、今いくら必要？",
+      desc:"一定期間、毎年一定額を受け取るために、現在いくらの元本が必要かを求めます。",
+      lAmount:"毎年受け取りたい金額", lYears:"受取年数", lResult:"現在必要な元本", step:"現在必要な元本 ＝ 毎年の受取額 × 年金現価係数",
+      formula:"年金現価係数 ＝ {1 − (1＋利率)^(−年数)} ÷ 利率", end:true,
+      f:function(r, n){ return r === 0 ? n : (1 - 1 / pow(r, n)) / r; } },
+    { key:"gensai", no:"⑤", name:"減債基金係数", sub:"目標額のために、毎年いくら積立？",
+      desc:"将来の目標金額を準備するために、毎年いくら積み立てればよいかを求めます。",
+      lAmount:"将来の目標金額", lYears:"積立年数", lResult:"毎年必要な積立額", step:"毎年の積立額 ＝ 将来の目標金額 × 減債基金係数",
+      formula:"減債基金係数 ＝ 利率 ÷ ((1＋利率)^年数 − 1)", end:true,
+      f:function(r, n){ return r === 0 ? 1 / n : r / (pow(r, n) - 1); } },
+    { key:"shihon", no:"⑥", name:"資本回収係数", sub:"元本から、毎年いくら受取・返済？",
+      desc:"現在の元本から、一定期間にわたって毎年いくら受け取れるか（返済できるか）を求めます。",
+      lAmount:"現在の元本", lYears:"回収年数", lResult:"毎年の受取額・返済額", step:"毎年の受取額・返済額 ＝ 現在の元本 × 資本回収係数",
+      formula:"資本回収係数 ＝ {利率 × (1＋利率)^年数} ÷ {(1＋利率)^年数 − 1}", end:true,
+      f:function(r, n){ return r === 0 ? 1 / n : (r * pow(r, n)) / (pow(r, n) - 1); } }
+  ];
+
+  var cur = null;
+  var amount = $("amount"), rate = $("rate"), years = $("years");
+
+  function comma(s){ return s.replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+
+  // 金額：数字のみ・3桁カンマ・カーソル位置維持
+  function fmtAmount(input){
+    var pos = input.selectionStart;
+    var before = input.value.slice(0, pos).replace(/\D/g, "").length;
+    var d = input.value.replace(/\D/g, "").slice(0, 13).replace(/^0+(?=\d)/, "");
+    input.value = comma(d);
+    var p = 0, seen = 0;
+    while(p < input.value.length && seen < before){ if(/\d/.test(input.value[p])) seen++; p++; }
+    try{ input.setSelectionRange(p, p); }catch(e){}
+  }
+  // 年利：数字と小数点1つ（小数4桁まで）
+  function fmtRate(input){
+    var s = input.value.replace(/[^\d.]/g, "");
+    var i = s.indexOf(".");
+    if(i > -1) s = s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, "").slice(0, 4);
+    input.value = s.slice(0, 8);
+  }
+  // 年数：整数のみ
+  function fmtYears(input){
+    input.value = input.value.replace(/\D/g, "").slice(0, 3).replace(/^0+(?=\d)/, "");
+  }
+
+  function show(state, msg){
+    $("empty").hidden = state !== "empty";
+    $("err").hidden = state !== "err";
+    $("out").hidden = state !== "out";
+    if(state === "err") $("err").textContent = msg;
+  }
+
+  function calc(){
+    if(!cur) return;
+    var a = amount.value.replace(/\D/g, "");
+    var rs = rate.value, ys = years.value;
+    if(a === "" || rs === "" || rs === "." || ys === "") return show("empty");
+
+    var A = parseInt(a, 10), rPct = parseFloat(rs), n = parseInt(ys, 10);
+    if(isNaN(rPct) || rPct < 0 || rPct > 100) return show("err", "年利は0〜100％の範囲で入力してください。");
+    if(n < 1) return show("err", "年数は1以上の整数で入力してください。");
+
+    var r = rPct / 100;
+    var k = cur.f(r, n);
+    var result = A * k;
+    if(!isFinite(k) || !isFinite(result) || result > 9e15) return show("err", "計算結果が大きすぎます。入力値を小さくしてください。");
+
+    var rateText = (Math.round(rPct * 10000) / 10000).toString();
+    $("r-cap").textContent = cur.lResult;
+    $("r-main").textContent = comma(String(Math.round(result)));
+    $("r-coef-l").textContent = cur.name;
+    $("r-coef").textContent = k.toLocaleString("ja-JP", {minimumFractionDigits:4, maximumFractionDigits:4});
+    $("r-formula").innerHTML =
+      "<b>" + cur.formula + "</b><br>" + cur.step + "<br>" +
+      "利率 " + rateText + "％（" + (r === 0 ? "0％のため特別計算" : r) + "）／ 年数 " + n + "年" +
+      (cur.end ? "<br>※各年の期末に行う前提" : "") +
+      "<br>※1円未満は四捨五入して表示";
+    show("out");
+  }
+
+  function clearInputs(){ amount.value = ""; rate.value = ""; years.value = ""; }
+
+  function open(i){
+    cur = COEFS[i];
+    $("c-name").textContent = cur.no + " " + cur.name;
+    $("c-desc").textContent = cur.desc;
+    $("l-amount").textContent = cur.lAmount;
+    $("l-years").textContent = cur.lYears;
+    clearInputs();
+    $("v-list").hidden = true;
+    $("v-calc").hidden = false;
+    show("empty");
+    window.scrollTo(0, 0);
+    amount.focus();
+  }
+  function backToList(){
+    cur = null;
+    $("v-calc").hidden = true;
+    $("v-list").hidden = false;
+    window.scrollTo(0, 0);
+  }
+
+  // 一覧カード生成
+  var picks = $("picks");
+  COEFS.forEach(function(c, i){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "pick";
+    b.innerHTML = '<span class="no">' + (i + 1) + '</span><span><div class="t">' + c.name + '</div><div class="s">' + c.sub + '</div></span>';
+    b.addEventListener("click", function(){ open(i); });
+    picks.appendChild(b);
+  });
+
+  amount.addEventListener("input", function(){ fmtAmount(amount); calc(); });
+  rate.addEventListener("input", function(){ fmtRate(rate); calc(); });
+  years.addEventListener("input", function(){ fmtYears(years); calc(); });
+  $("back").addEventListener("click", backToList);
+  $("reset").addEventListener("click", function(){
+    clearInputs(); show("empty"); amount.focus();
+  });
+})();
+</script>
+</body>
+</html>
