@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>住宅ローン返済・金利上昇シミュレーター｜COCOA TOOLS</title>
+<meta name="description" content="元利均等返済と元金均等返済を同じ条件で比較。金利が上昇したときの毎月の返済額・利息の変化をグラフで確認できます。無料ツール。">
+<style>
+:root{
+  --bg:#0d0f12;
+  --panel:#1a1f26;
+  --line:#2d3748;
+  --text:#e2e8f0;
+  --sub:#a0aec0;
+  --accent:#a3e635;
+  --accent-ink:#14200a;
+  --blue:#60a5fa;
+  --warn:#f5b84b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  -webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:480px;margin:0 auto;padding:20px 16px 40px}
+.brand{font-size:12px;color:var(--sub);letter-spacing:.04em;margin:0 0 6px}
+.brand b{color:var(--accent)}
+h1{font-size:21px;line-height:1.35;margin:0 0 6px}
+.lead{font-size:13px;color:var(--sub);margin:0 0 20px;line-height:1.6}
+h2{font-size:15px;margin:0 0 10px}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.row{display:flex;gap:10px}
+.row .field{flex:1;min-width:0}
+label,.lbl{display:block;font-size:13px;color:var(--sub);margin-bottom:6px}
+.input{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:0 14px;transition:border-color .15s}
+.input:focus-within{border-color:var(--accent)}
+input{width:100%;min-width:0;background:transparent;border:0;outline:0;color:var(--text);
+  font-size:20px;font-weight:600;padding:12px 0;font-variant-numeric:tabular-nums}
+input::placeholder{color:#4a5568;font-weight:400}
+.unit{font-size:14px;color:var(--sub);margin-left:8px;font-weight:600;white-space:nowrap}
+.hint{font-size:12px;color:var(--sub);margin:6px 0 0;line-height:1.5}
+
+.empty{font-size:14px;color:var(--sub);margin:0 0 14px}
+.err{font-size:14px;color:var(--warn);margin:0 0 14px}
+
+.up{border-color:#3b4a1c}
+.stats{display:flex;gap:10px}
+.stat{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.stat .k{font-size:12px;color:var(--sub)}
+.stat .v{font-size:19px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1.35;word-break:break-all}
+.stat .v.minus{color:var(--blue)}
+
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.tbl th,.tbl td{padding:9px 0;border-top:1px solid var(--line);text-align:right;vertical-align:top}
+.tbl th:first-child,.tbl td:first-child{text-align:left;color:var(--sub);font-weight:400;width:27%;padding-right:6px}
+.tbl thead th{border-top:0;color:var(--text);font-weight:700;font-size:12px;padding-top:0}
+.tbl td{font-weight:700}
+.tbl td.after{color:var(--accent)}
+.tbl td small{display:block;font-weight:400;color:var(--sub);font-size:11px}
+.sub-ttl{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:14px;font-weight:700}
+.dot{width:10px;height:10px;border-radius:50%}
+.gap{height:16px}
+
+.seg{display:flex;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px;margin-bottom:12px}
+.seg button{flex:1;border:0;background:transparent;color:var(--sub);font:inherit;font-size:13px;font-weight:700;
+  padding:10px 4px;border-radius:9px;cursor:pointer;line-height:1.3}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.chart svg{display:block;width:100%;height:auto}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .ax{fill:var(--sub);font-size:10px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--sub);margin-top:8px}
+.legend span::before{content:"";display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle;background:var(--c)}
+
+.assume{font-size:12.5px;color:var(--sub);line-height:1.8;margin:0;padding-left:18px}
+.btn{width:100%;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:14px;font-weight:600;
+  padding:12px;border-radius:12px;cursor:pointer;margin-bottom:14px}
+
+.ad{min-height:90px;border:1px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;
+  color:#5a6578;font-size:12px;margin:18px 0}
+.disclaimer{font-size:12px;color:var(--sub);line-height:1.7}
+.disclaimer strong{color:var(--warn);font-weight:600}
+footer{margin-top:18px;font-size:13px;color:var(--sub);text-align:center;line-height:1.7}
+footer a{color:var(--accent);text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="brand"><b>COCOA TOOLS</b> ／ お金</p>
+  <h1>🏠 住宅ローン返済・金利上昇シミュレーター</h1>
+  <p class="lead">元利均等返済と元金均等返済を同じ条件で比較し、金利が上がったときの返済額・利息の変化を確認します。</p>
+
+  <section class="card" aria-label="入力">
+    <div class="field">
+      <label for="bal">借入残高</label>
+      <div class="input"><input id="bal" type="text" inputmode="numeric" autocomplete="off" placeholder="30,000,000"><span class="unit">円</span></div>
+      <p class="hint">新規借入は借入予定額、返済中は現在のローン残高を入力します。</p>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="r1">現在の金利（年利）</label>
+        <div class="input"><input id="r1" type="text" inputmode="decimal" autocomplete="off" placeholder="0.5"><span class="unit">％</span></div>
+      </div>
+      <div class="field">
+        <label for="r2">上昇後の金利（年利）</label>
+        <div class="input"><input id="r2" type="text" inputmode="decimal" autocomplete="off" placeholder="1.5"><span class="unit">％</span></div>
+      </div>
+    </div>
+    <div class="field">
+      <label for="yr">返済期間</label>
+      <div class="input"><input id="yr" type="text" inputmode="decimal" autocomplete="off" placeholder="35"><span class="unit">年</span></div>
+      <p class="hint">新規借入は予定返済年数、返済中は残り返済年数を入力します。</p>
+    </div>
+    <button type="button" class="btn" id="reset" style="margin:14px 0 0">リセット</button>
+  </section>
+
+  <p class="empty" id="empty">借入残高・金利・返済期間を入力すると、結果とグラフが表示されます。</p>
+  <p class="err" id="err" hidden></p>
+
+  <div id="out" hidden>
+    <section class="card up" aria-live="polite">
+      <h2 id="inc-ttl">金利上昇による利息総額の増加</h2>
+      <div class="stats">
+        <div class="stat"><div class="k">元利均等返済</div><div class="v" id="inc-ep">-</div></div>
+        <div class="stat"><div class="k">元金均等返済</div><div class="v" id="inc-eq">-</div></div>
+      </div>
+      <p class="hint" id="cond"></p>
+    </section>
+
+    <section class="card">
+      <div class="sub-ttl"><span class="dot" style="background:var(--accent)"></span>元利均等返済</div>
+      <div id="t-ep"></div>
+      <div class="gap"></div>
+      <div class="sub-ttl"><span class="dot" style="background:var(--blue)"></span>元金均等返済</div>
+      <div id="t-eq"></div>
+    </section>
+
+    <section class="card chart">
+      <h2>毎月の返済額の推移</h2>
+      <div class="seg" role="group" aria-label="金利条件">
+        <button type="button" data-case="cur" aria-pressed="true" id="b-cur">現在金利</button>
+        <button type="button" data-case="up" aria-pressed="false" id="b-up">上昇後金利</button>
+      </div>
+      <div id="svg"></div>
+      <div class="legend">
+        <span style="--c:var(--accent)">元利均等返済</span>
+        <span style="--c:var(--blue)">元金均等返済</span>
+      </div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>計算の前提</h2>
+    <ul class="assume">
+      <li>毎月返済で、年利を12で割った月利で計算します（ボーナス返済は対象外）。</li>
+      <li>金利は返済期間中ずっと一定と仮定します。</li>
+      <li>金利上昇後は、入力した借入残高・返済期間に対して上昇後の金利で最初から返済するものとして再計算した単純な試算です。実際の変動金利ローンの返済額変更を再現するものではありません。</li>
+      <li>5年ルール・125％ルールなど、金融機関ごとのルールや個別条件は反映していません。</li>
+      <li>元金均等返済は、元金を円単位で均等に割り、端数は最終回で調整します。</li>
+      <li>このツールはどちらかの返済方式をおすすめするものではありません。違いを比べる材料としてご利用ください。</li>
+    </ul>
+  </section>
+
+  <div class="ad" aria-label="広告スペース">広告スペース</div>
+
+  <p class="disclaimer">
+    <strong>ご注意：</strong>このツールは入力条件に基づく比較・概算試算であり、実際の返済額を保証するものではありません。実際の返済額や返済条件は金融機関・契約内容によって異なります。正確な返済予定額や適用条件は、必ずご利用の金融機関にご確認ください。入力した内容は外部に送信されず、ブラウザ内だけで計算されます。本ツールの利用による損害について、責任は負いかねます。
+  </p>
+
+  <footer>
+    <span>開発者：<a id="x-link" href="https://x.com/cocoa_next7" target="_blank" rel="noopener noreferrer">ココア@プログラミング奮闘中 (@cocoa_next7) ↗</a></span>
+  </footer>
+</main>
+
+<script>
+/*CALC_START*/
+// 元利均等返済：毎月一定。金利0％は元本÷回数。
+function calcEqualPayment(P, ratePct, n){
+  var i = ratePct / 1200;
+  var pay = i === 0 ? P / n : P * i / (1 - Math.pow(1 + i, -n));
+  var total = pay * n;
+  return { first: pay, last: pay, pay: pay, total: total, interest: total - P, n: n };
+}
+// 元金均等返済：元金は円単位で均等、端数は最終回で調整（元金合計＝借入残高）。
+function calcEqualPrincipal(P, ratePct, n){
+  var i = ratePct / 1200;
+  var base = Math.floor(P / n);
+  var bal = P, interest = 0, series = new Array(n), princSum = 0;
+  for(var k = 0; k < n; k++){
+    var princ = (k === n - 1) ? bal : base;
+    var int = bal * i;
+    series[k] = princ + int;
+    interest += int;
+    princSum += princ;
+    bal -= princ;
+  }
+  return { first: series[0], last: series[n - 1], decline: base * i, total: P + interest, interest: interest, series: series, princSum: princSum, n: n };
+}
+/*CALC_END*/
+
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var bal = $("bal"), r1 = $("r1"), r2 = $("r2"), yr = $("yr");
+  var theCase = "cur";
+  var data = null;
+
+  function comma(s){ return s.replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+  function yen(v){ return (v < 0 ? "-" : "") + comma(String(Math.abs(Math.round(v)))) + "円"; }
+  function plus(v){ var r = Math.round(v); return (r > 0 ? "+" : r < 0 ? "-" : "") + comma(String(Math.abs(r))) + "円"; }
+  function trim(n){ return String(Math.round(n * 10000) / 10000); }
+
+  function fmtBal(input){
+    var pos = input.selectionStart;
+    var before = input.value.slice(0, pos).replace(/\D/g, "").length;
+    var d = input.value.replace(/\D/g, "").slice(0, 12).replace(/^0+(?=\d)/, "");
+    input.value = comma(d);
+    var p = 0, seen = 0;
+    while(p < input.value.length && seen < before){ if(/\d/.test(input.value[p])) seen++; p++; }
+    try{ input.setSelectionRange(p, p); }catch(e){}
+  }
+  function fmtDec(input, maxDec){
+    var s = input.value.replace(/[^\d.]/g, "");
+    var i = s.indexOf(".");
+    if(i > -1) s = s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, "").slice(0, maxDec);
+    input.value = s.slice(0, 7);
+  }
+
+  function status(kind, msg){
+    $("empty").hidden = kind !== "empty";
+    $("err").hidden = kind !== "err";
+    $("out").hidden = kind !== "out";
+    if(kind === "err") $("err").textContent = msg;
+  }
+
+  function table(a, b, isEP, ra, rb){
+    function cell(x, cls){
+      var m = isEP ? yen(x.pay) : "約" + yen(x.decline) + "ずつ減少";
+      return [yen(x.first), yen(x.last), m, yen(x.total), yen(x.interest)].map(function(t){ return t; });
+    }
+    var A = cell(a), B = cell(b);
+    var labels = ["初回返済額", "最終回返済額", "毎月の返済額", "返済総額", "利息総額"];
+    var h = '<table class="tbl"><thead><tr><th></th><th>現在 ' + trim(ra) + '％</th><th>上昇後 ' + trim(rb) + '％</th></tr></thead><tbody>';
+    labels.forEach(function(l, i){
+      h += "<tr><td>" + l + "</td><td>" + A[i] + '</td><td class="after">' + B[i] + "</td></tr>";
+    });
+    return h + "</tbody></table>";
+  }
+
+  function niceStep(max, ticks){
+    var raw = max / ticks, mag = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10)), f = raw / mag;
+    return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * mag;
+  }
+  function yLabel(v){
+    if(v >= 10000){ var m = Math.round(v / 1000) / 10; return String(m) + "万"; }
+    return comma(String(Math.round(v)));
+  }
+
+  function chart(){
+    var d = data; if(!d) return;
+    var ep = theCase === "cur" ? d.ep1 : d.ep2;
+    var eq = theCase === "cur" ? d.eq1 : d.eq2;
+    var W = 360, H = 230, L = 46, R = 12, T = 22, B = 36;
+    var Y = d.n / 12;
+    var maxV = Math.max(ep.pay, eq.first);
+    var ys = niceStep(maxV, 4), ymax = Math.ceil(maxV / ys) * ys;
+    var xs = [0.5, 1, 2, 5, 10, 20].filter(function(s){ return Y / s <= 7; })[0] || 20;
+    var X = function(y){ return L + (y / Y) * (W - L - R); };
+    var Yp = function(v){ return T + (1 - v / ymax) * (H - T - B); };
+
+    var g = "";
+    for(var v = 0; v <= ymax + ys / 2; v += ys){
+      g += '<line class="grid" x1="' + L + '" x2="' + (W - R) + '" y1="' + Yp(v) + '" y2="' + Yp(v) + '"/>' +
+           '<text class="ax" x="' + (L - 6) + '" y="' + (Yp(v) + 3) + '" text-anchor="end">' + yLabel(v) + "</text>";
+    }
+    for(var t = 0; t <= Y + 1e-9; t += xs){
+      g += '<text class="ax" x="' + X(t) + '" y="' + (H - B + 14) + '" text-anchor="middle">' + (Math.round(t * 10) / 10) + "</text>";
+    }
+    var pts = [];
+    for(var k = 0; k < eq.series.length; k++) pts.push(X((k + 1) / 12).toFixed(1) + "," + Yp(eq.series[k]).toFixed(1));
+    var eqLine = '<polyline fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linejoin="round" points="' + pts.join(" ") + '"/>';
+    var epLine = '<line stroke="#a3e635" stroke-width="2.5" stroke-linecap="round" x1="' + X(1 / 12) + '" x2="' + X(Y) + '" y1="' + Yp(ep.pay) + '" y2="' + Yp(ep.pay) + '"/>';
+    $("svg").innerHTML =
+      '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="毎月の返済額の推移（折れ線グラフ）">' + g +
+      '<text class="ax" x="' + L + '" y="12">毎月の返済額（円）</text>' +
+      '<text class="ax" x="' + ((L + W - R) / 2) + '" y="' + (H - 4) + '" text-anchor="middle">返済期間（年）</text>' +
+      eqLine + epLine + "</svg>";
+  }
+
+  function calc(){
+    var bs = bal.value.replace(/\D/g, ""), a = r1.value, b = r2.value, y = yr.value;
+    if(bs === "" || a === "" || a === "." || b === "" || b === "." || y === "" || y === ".") return status("empty");
+    var P = parseInt(bs, 10), ra = parseFloat(a), rb = parseFloat(b), years = parseFloat(y);
+    if(!(P > 0)) return status("err", "借入残高は1円以上で入力してください。");
+    if(isNaN(ra) || isNaN(rb) || ra < 0 || rb < 0 || ra > 30 || rb > 30) return status("err", "金利は0〜30％の範囲で入力してください。");
+    if(isNaN(years) || years < 1 || years > 50) return status("err", "返済期間は1〜50年の範囲で入力してください。");
+    var n = Math.round(years * 12);
+
+    var ep1 = calcEqualPayment(P, ra, n), ep2 = calcEqualPayment(P, rb, n);
+    var eq1 = calcEqualPrincipal(P, ra, n), eq2 = calcEqualPrincipal(P, rb, n);
+    data = { n: n, ep1: ep1, ep2: ep2, eq1: eq1, eq2: eq2 };
+
+    var dEP = ep2.interest - ep1.interest, dEQ = eq2.interest - eq1.interest;
+    var down = rb < ra;
+    $("inc-ttl").textContent = down ? "金利低下による利息総額の減少" : "金利上昇による利息総額の増加";
+    $("inc-ep").textContent = plus(dEP); $("inc-eq").textContent = plus(dEQ);
+    $("inc-ep").className = "v" + (dEP < 0 ? " minus" : "");
+    $("inc-eq").className = "v" + (dEQ < 0 ? " minus" : "");
+    $("cond").textContent = "借入残高 " + yen(P) + "／返済 " + n + "回（毎月）／現在 " + trim(ra) + "％ → 上昇後 " + trim(rb) + "％";
+
+    $("t-ep").innerHTML = table(ep1, ep2, true, ra, rb);
+    $("t-eq").innerHTML = table(eq1, eq2, false, ra, rb);
+    $("b-cur").textContent = "現在金利（" + trim(ra) + "％）";
+    $("b-up").textContent = "上昇後金利（" + trim(rb) + "％）";
+    status("out");
+    chart();
+  }
+
+  bal.addEventListener("input", function(){ fmtBal(bal); calc(); });
+  r1.addEventListener("input", function(){ fmtDec(r1, 3); calc(); });
+  r2.addEventListener("input", function(){ fmtDec(r2, 3); calc(); });
+  yr.addEventListener("input", function(){ fmtDec(yr, 1); calc(); });
+  document.querySelectorAll("[data-case]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      theCase = btn.getAttribute("data-case");
+      document.querySelectorAll("[data-case]").forEach(function(x){
+        x.setAttribute("aria-pressed", x.getAttribute("data-case") === theCase);
+      });
+      chart();
+    });
+  });
+  $("reset").addEventListener("click", function(){
+    bal.value = r1.value = r2.value = yr.value = "";
+    theCase = "cur"; data = null;
+    document.querySelectorAll("[data-case]").forEach(function(x){
+      x.setAttribute("aria-pressed", x.getAttribute("data-case") === "cur");
+    });
+    calc();
+    bal.focus();
+  });
+  calc();
+})();
+</script>
+</body>
+</html>
