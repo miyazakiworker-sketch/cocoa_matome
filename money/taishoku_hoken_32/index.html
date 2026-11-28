@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>退職後の健康保険比較ツール｜COCOA TOOLS</title>
+<meta name="description" content="退職後の国民健康保険・任意継続・家族の被扶養者を、加入資格の判定から比較。月額・1年・2年の目安を確認できます。無料ツール。">
+<style>
+:root{
+  --bg:#0d0f12;--panel:#1a1f26;--line:#2d3748;--text:#e2e8f0;--sub:#a0aec0;
+  --accent:#a3e635;--accent-ink:#14200a;--warn:#f5b84b;--ng:#fb7185;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;-webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:480px;margin:0 auto;padding:20px 16px 40px}
+.brand{font-size:12px;color:var(--sub);letter-spacing:.04em;margin:0 0 6px}
+.brand b{color:var(--accent)}
+h1{font-size:21px;line-height:1.35;margin:0 0 6px}
+h2{font-size:17px;margin:0 0 4px}
+h3{font-size:15px;margin:0}
+.lead{font-size:13px;color:var(--sub);margin:0 0 16px;line-height:1.7}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.step{font-size:12px;color:var(--accent);font-weight:700;margin:0 0 4px}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+label,.lbl{display:block;font-size:13px;color:var(--sub);margin-bottom:6px}
+.input,select{display:flex;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:0 14px;transition:border-color .15s;width:100%}
+.input:focus-within,select:focus{border-color:var(--accent);outline:0}
+input,select{min-width:0;background:transparent;border:0;outline:0;color:var(--text);font:inherit;font-size:17px;font-weight:600;padding:12px 0}
+input{width:100%;font-variant-numeric:tabular-nums}
+select{padding:12px 14px;appearance:auto;color-scheme:dark;background:var(--bg)}
+input::placeholder{color:#4a5568;font-weight:400}
+.unit{font-size:14px;color:var(--sub);margin-left:8px;font-weight:600;white-space:nowrap}
+.hint{font-size:12px;color:var(--sub);margin:6px 0 0;line-height:1.6}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--text);margin:0 0 10px;line-height:1.5}
+.chk input{width:20px;height:20px;margin:2px 0 0;flex:none;accent-color:#a3e635;padding:0}
+.err{font-size:14px;color:var(--warn);margin:0 0 12px}
+.nav{display:flex;gap:10px;margin-top:6px}
+.btn{flex:1;border:1px solid var(--line);background:transparent;color:var(--text);font:inherit;font-size:15px;font-weight:700;padding:14px;border-radius:12px;cursor:pointer;text-align:center;text-decoration:none;display:block}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+ul.plain{margin:8px 0 0;padding-left:18px;font-size:13px;line-height:1.8;color:var(--sub)}
+.box{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:12px;font-size:13px;color:var(--sub);line-height:1.7;margin:0 0 14px}
+.box b{color:var(--text)}
+.box.warn{border-color:#5a4a1c}
+.box.warn b{color:var(--warn)}
+
+.res{border-left:4px solid var(--line)}
+.res.ok{border-left-color:var(--accent)}
+.res.chk{border-left-color:var(--warn)}
+.res.ng{border-left-color:var(--ng)}
+.rhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.badge{font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.badge.ok{background:var(--accent);color:var(--accent-ink)}
+.badge.chk{background:var(--warn);color:#2a1d00}
+.badge.ng{background:var(--ng);color:#2a0b12}
+.reasons{margin:0 0 10px;padding-left:18px;font-size:13px;line-height:1.7}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.tbl td{padding:8px 0;border-top:1px solid var(--line)}
+.tbl td:last-child{text-align:right;font-weight:700}
+.refnote{font-size:12px;color:var(--warn);margin:6px 0 0}
+.cheap{border-color:#3b4a1c}
+.cheap .big{font-size:18px;font-weight:800;color:var(--accent);margin:4px 0}
+details{margin-top:10px;font-size:12.5px;color:var(--sub);line-height:1.7}
+summary{cursor:pointer;color:var(--text);font-weight:600;font-size:13px}
+details ul{margin:6px 0 0;padding-left:18px}
+.todo{margin-top:6px}
+a.link{color:var(--accent);font-weight:600}
+
+.ad{min-height:90px;border:1px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#5a6578;font-size:12px;margin:18px 0}
+.disclaimer{font-size:12px;color:var(--sub);line-height:1.8}
+.disclaimer strong{color:var(--warn);font-weight:600}
+footer{margin-top:18px;font-size:13px;color:var(--sub);text-align:center;line-height:1.7}
+footer a{color:var(--accent);text-decoration:none;font-weight:600}
+.clear{background:none;border:0;color:var(--sub);font:inherit;font-size:12.5px;text-decoration:underline;cursor:pointer;padding:6px 0}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <p class="brand"><b>COCOA TOOLS</b> ／ お金</p>
+  <h1>🏥 退職後の健康保険比較ツール</h1>
+
+  <!-- 0 スタート -->
+  <section id="s0">
+    <p class="lead">先に「加入できるか」を判定し、そのうえで費用を比べます。金額だけで最安を決めません。</p>
+    <div class="card">
+      <h3>比較する3つの制度</h3>
+      <ul class="plain">
+        <li>国民健康保険（国保）</li>
+        <li>退職前の健康保険の任意継続</li>
+        <li>家族の健康保険の被扶養者</li>
+      </ul>
+      <p class="hint" style="margin-top:12px">本ツールは75歳未満の方が対象です。75歳以上の方は後期高齢者医療制度の対象となるため、比較・試算はできません。</p>
+      <p class="hint">入力内容はブラウザ内だけで処理され、外部送信も保存もされません。</p>
+    </div>
+    <div class="nav"><button type="button" class="btn primary" id="start">比較を始める</button></div>
+  </section>
+
+  <!-- 1 基本情報 -->
+  <section id="s1" hidden>
+    <p class="step">STEP 1 / 5　基本情報</p>
+    <div class="card">
+      <div class="field"><label for="retire">退職日</label><div class="input"><input id="retire" type="date"></div></div>
+      <div class="field"><label for="loss">現在の健康保険の資格喪失日</label><div class="input"><input id="loss" type="date"></div>
+        <p class="hint">原則は退職日の翌日です。異なる場合は、結果で「要確認」として案内します。</p></div>
+      <div class="field"><label for="sw">退職後の保険の切替予定日</label><div class="input"><input id="sw" type="date"></div>
+        <p class="hint">75歳以上かどうかは、この日の年齢で判定します。</p></div>
+      <div class="field"><label for="birth">生年月日</label><div class="input"><input id="birth" type="date"></div></div>
+      <div class="field"><label for="insurer">退職前に加入していた健康保険</label>
+        <select id="insurer">
+          <option value="">選択してください</option>
+          <option value="kyoukai">協会けんぽ</option>
+          <option value="kumiai">健康保険組合</option>
+          <option value="kyousai">共済組合</option>
+          <option value="unknown">その他／不明</option>
+        </select></div>
+      <div class="field"><label for="muni">居住自治体（都道府県・市区町村）</label><div class="input"><input id="muni" type="text" autocomplete="off" placeholder="例：〇〇県△△市"></div></div>
+    </div>
+    <p class="err" id="e1" hidden></p>
+    <div class="nav"><button type="button" class="btn" data-back="s0">戻る</button><button type="button" class="btn primary" id="n1">次へ</button></div>
+  </section>
+
+  <!-- 2 年齢・例外 -->
+  <section id="s2" hidden>
+    <p class="step">STEP 2 / 5　年齢・例外の確認</p>
+    <div class="card">
+      <p class="lead" style="margin-bottom:12px">65〜74歳で一定の障害がある方は、後期高齢者医療制度に加入している場合があります。</p>
+      <div class="field"><label for="dcert">一定の障害があり、障害認定の対象になる可能性がありますか？</label>
+        <select id="dcert"><option value="">選択してください</option><option value="no">いいえ</option><option value="yes">はい</option><option value="unknown">分からない</option></select></div>
+      <div class="field" id="f-denroll" hidden><label for="denroll">障害認定により、後期高齢者医療制度に加入していますか？</label>
+        <select id="denroll"><option value="">選択してください</option><option value="enrolled">加入している</option><option value="not">加入していない</option><option value="unknown">分からない</option></select>
+        <p class="hint">障害認定の対象であることと、加入していることは同じではありません。</p></div>
+    </div>
+    <p class="err" id="e2" hidden></p>
+    <div class="nav"><button type="button" class="btn" data-back="s1">戻る</button><button type="button" class="btn primary" id="n2">次へ</button></div>
+  </section>
+
+  <!-- 後期高齢者 -->
+  <section id="sK" hidden>
+    <div class="card">
+      <h2>後期高齢者医療制度のご案内</h2>
+      <p class="lead" style="margin:8px 0 12px">本ツールは75歳未満の方を対象としています。75歳以上の方は後期高齢者医療制度の対象となるため、本ツールでの比較・試算はできません。</p>
+      <p class="hint" id="kreason"></p>
+      <p class="hint">加入手続き・保険料は、お住まいの市区町村の窓口、または都道府県の後期高齢者医療広域連合の公式案内でご確認ください。生活保護を受けている方など制度上の例外がある場合は、個別の窓口へご確認ください。</p>
+      <p class="hint"><a class="link" href="https://www.mhlw.go.jp/content/12400000/001150521.pdf" target="_blank" rel="noopener noreferrer">厚生労働省：後期高齢者医療広域連合の一覧（PDF）↗</a><br>最新の連絡先は各広域連合の公式サイトで確認してください。</p>
+    </div>
+    <div class="nav"><button type="button" class="btn" id="kback">入力に戻る</button></div>
+  </section>
+
+  <!-- 3 国保 -->
+  <section id="s3" hidden>
+    <p class="step">STEP 3 / 5　国民健康保険</p>
+    <div class="card">
+      <div class="box warn"><b id="muni-label"></b><br>この自治体の国保料の自動計算には未対応です（自治体ごとに料率・計算方法が異なるため、全国共通の料率では計算しません）。市区町村の窓口や試算サービスで出した金額を入力してください。</div>
+      <div class="field"><label for="k1">国保の年間保険料（12か月分）</label>
+        <div class="input"><input id="k1" type="text" inputmode="numeric" autocomplete="off" placeholder="例：240,000"><span class="unit">円</span></div>
+        <p class="hint">通知額または自治体の試算額。ご自身が加入する分だけを入力します。分からなければ空欄でも進めます（費用比較には含まれません）。</p></div>
+      <div class="field"><label for="k2">2年目の年間保険料（分かる場合）</label>
+        <div class="input"><input id="k2" type="text" inputmode="numeric" autocomplete="off" placeholder="空欄＝1年目と同額と仮定"><span class="unit">円</span></div>
+        <p class="hint">国保料は前年の所得で決まるため、2年目は変わることがあります。</p></div>
+      <div class="lbl" style="margin-top:6px">当てはまるものにチェック（金額に反映されているか確認が必要です）</div>
+      <label class="chk"><input type="checkbox" id="c-hijihatsu">非自発的失業者の軽減の対象になる可能性がある（倒産・解雇・雇止め等）</label>
+      <label class="chk"><input type="checkbox" id="c-lowinc">低所得世帯の軽減（7割・5割・2割）の対象になる可能性がある</label>
+      <label class="chk"><input type="checkbox" id="c-kyufu">旧被扶養者の軽減の対象になる可能性がある</label>
+    </div>
+    <div class="nav"><button type="button" class="btn" id="b3">戻る</button><button type="button" class="btn primary" id="n3">次へ</button></div>
+  </section>
+
+  <!-- 4 任意継続 -->
+  <section id="s4" hidden>
+    <p class="step">STEP 4 / 5　任意継続</p>
+    <div class="card">
+      <div class="field"><label for="period">退職日までの被保険者期間は、継続して2か月以上ありますか？</label>
+        <select id="period"><option value="">選択してください</option><option value="yes">はい</option><option value="no">いいえ</option><option value="unknown">分からない</option></select></div>
+      <div class="field"><label for="apply">任意継続の申請予定日</label><div class="input"><input id="apply" type="date"></div>
+        <p class="hint" id="deadline-hint">申請期限は、資格喪失日から20日以内が目安です。</p></div>
+      <div class="field" id="f-method" hidden><label for="method">月額保険料の入力方法</label>
+        <select id="method"><option value="notice">通知額・見込額を入力する</option><option value="kenpo">協会けんぽの料率で概算する</option></select></div>
+      <div id="g-notice">
+        <div class="field"><label for="ninkei-name">保険者名（任意）</label><div class="input"><input id="ninkei-name" type="text" autocomplete="off" placeholder="例：〇〇健康保険組合"></div></div>
+        <div class="field"><label for="m1">任意継続の月額保険料</label>
+          <div class="input"><input id="m1" type="text" inputmode="numeric" autocomplete="off" placeholder="例：25,000"><span class="unit">円</span></div>
+          <p class="hint">保険者から案内された金額を入力します。組合ごとに料率が異なるため、協会けんぽの計算式は使いません。</p></div>
+      </div>
+      <div id="g-kenpo" hidden>
+        <div class="field"><label for="std">退職時の標準報酬月額</label>
+          <div class="input"><input id="std" type="text" inputmode="numeric" autocomplete="off" placeholder="例：300,000"><span class="unit">円</span></div></div>
+        <div class="field"><label for="cap">標準報酬月額の上限（分かる場合）</label>
+          <div class="input"><input id="cap" type="text" inputmode="numeric" autocomplete="off" placeholder="空欄＝上限なしで計算"><span class="unit">円</span></div>
+          <p class="hint">任意継続には標準報酬月額の上限があります。協会けんぽの公式案内で確認してください。</p></div>
+        <div class="field"><label for="rk">健康保険料率（都道府県別）</label>
+          <div class="input"><input id="rk" type="text" inputmode="decimal" autocomplete="off" placeholder="例：10.00"><span class="unit">％</span></div></div>
+        <div class="field" id="f-rn"><label for="rn">介護保険料率（40〜64歳のみ）</label>
+          <div class="input"><input id="rn" type="text" inputmode="decimal" autocomplete="off" placeholder="例：1.60"><span class="unit">％</span></div>
+          <p class="hint">料率は<a class="link" href="https://www.kyoukaikenpo.or.jp/" target="_blank" rel="noopener noreferrer">協会けんぽ公式サイト↗</a>の「保険料額表」で、お住まいの都道府県・対象年度の値を確認して入力します。このツールには料率を登録していません。</p></div>
+      </div>
+    </div>
+    <p class="err" id="e4" hidden></p>
+    <div class="nav"><button type="button" class="btn" id="b4">戻る</button><button type="button" class="btn primary" id="n4">次へ</button></div>
+  </section>
+
+  <!-- 5 扶養 -->
+  <section id="s5" hidden>
+    <p class="step">STEP 5 / 5　家族の被扶養者</p>
+    <div class="card">
+      <div class="field"><label for="rel">扶養してくれる家族との続柄</label>
+        <select id="rel"><option value="">選択してください</option><option value="spouse">配偶者（事実婚を含む）</option><option value="child">子・孫（直系卑属）</option><option value="parent">父母・祖父母（直系尊属）</option><option value="sibling">兄弟姉妹</option><option value="other3">その他の3親等内の親族</option></select></div>
+      <div class="field"><label for="live">同居／別居</label>
+        <select id="live"><option value="">選択してください</option><option value="same">同居</option><option value="apart">別居</option></select></div>
+      <div class="field"><label for="famins">家族が加入している健康保険</label>
+        <select id="famins"><option value="">選択してください</option><option value="kyoukai">協会けんぽ</option><option value="kumiai">健康保険組合</option><option value="kyousai">共済組合</option><option value="unknown">その他／不明</option></select></div>
+      <div class="field"><label for="inc">あなたの今後12か月の年間収入見込み</label>
+        <div class="input"><input id="inc" type="text" inputmode="numeric" autocomplete="off" placeholder="例：0"><span class="unit">円</span></div>
+        <p class="hint">給与・賞与・年金・失業給付・傷病手当金・出産手当金など、継続的な収入をすべて含めた見込みです。直近の収入を単純に12倍するのではなく、今後の見込みで入力してください。</p></div>
+      <div class="field" id="f-fam"><label for="fam">扶養してくれる家族の年間収入（同居の場合）</label>
+        <div class="input"><input id="fam" type="text" inputmode="numeric" autocomplete="off" placeholder="例：5,000,000"><span class="unit">円</span></div></div>
+      <div class="field" id="f-remit" hidden><label for="remit">家族からの年間仕送り額（別居の場合）</label>
+        <div class="input"><input id="remit" type="text" inputmode="numeric" autocomplete="off" placeholder="例：1,200,000"><span class="unit">円</span></div></div>
+      <label class="chk"><input type="checkbox" id="c-dis">一定の障害がある</label>
+      <label class="chk"><input type="checkbox" id="c-ben">失業給付・傷病手当金・出産手当金のいずれかを受給する予定がある</label>
+    </div>
+    <p class="err" id="e5" hidden></p>
+    <div class="nav"><button type="button" class="btn" id="b5">戻る</button><button type="button" class="btn primary" id="n5">結果を見る</button></div>
+  </section>
+
+  <!-- 6 結果 -->
+  <section id="s6" hidden>
+    <h2 style="margin-bottom:10px">比較結果</h2>
+    <div id="cheap"></div>
+    <div id="results"></div>
+    <div class="box">
+      <b>データ・確認日</b><br>
+      任意継続の加入条件：<a class="link" href="https://www.kyoukaikenpo.or.jp/benefit/voluntary_continuation/index.html" target="_blank" rel="noopener noreferrer">協会けんぽ公式サイト↗</a>（2026年11月28日確認）<br>
+      国保・任意継続の保険料：登録データはなく、すべて入力いただいた金額で計算しています。
+    </div>
+    <div class="nav"><button type="button" class="btn" id="b6">入力を修正</button></div>
+  </section>
+
+  <div style="text-align:center"><button type="button" class="clear" id="clear">入力内容をすべて消去する</button></div>
+
+  <div class="ad" aria-label="広告スペース">広告スペース</div>
+
+  <p class="disclaimer">
+    <strong>ご注意：</strong>本ツールは、退職後の健康保険の加入先や保険料の目安を比較するための試算ツールです。表示結果は入力内容に基づく概算であり、実際の加入資格・保険料・認定結果を保証するものではありません。国民健康保険料は自治体・年度・世帯状況等により異なります。任意継続の保険料や加入条件は加入していた保険者によって異なります。家族の健康保険の被扶養者認定は、家族が加入する健康保険者が最終判断します。正式な金額・加入資格・軽減制度については、市区町村または各健康保険者へ必ず確認してください。
+  </p>
+
+  <footer>
+    <span>開発者：<a id="x-link" href="https://x.com/cocoa_next7" target="_blank" rel="noopener noreferrer">ココア@プログラミング奮闘中 (@cocoa_next7) ↗</a></span>
+  </footer>
+</main>
+
+<script>
+/*CALC_START*/
+// ---------- 日付 ----------
+function pd(s){ if(!s) return null; var p = s.split("-"); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])); }
+function fd(d){ return d.getUTCFullYear() + "年" + (d.getUTCMonth() + 1) + "月" + d.getUTCDate() + "日"; }
+function addD(d, n){ return new Date(d.getTime() + n * 86400000); }
+function ageAt(birth, at){
+  var a = at.getUTCFullYear() - birth.getUTCFullYear();
+  var m = at.getUTCMonth() - birth.getUTCMonth();
+  if(m < 0 || (m === 0 && at.getUTCDate() < birth.getUTCDate())) a--;
+  return a;
+}
+function yenS(v){ return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "円"; }
+
+// ---------- STEP1：年齢・制度対象外 ----------
+// 戻り値 route: normal（通常比較）/ koki（後期高齢者医療へ案内）/ confirm（要確認）
+function routeAge(age, dcert, denroll){
+  if(age >= 75) return { route: "koki", reason: "切替予定日時点で75歳以上です。" };
+  if(age >= 65){
+    if(dcert === "no") return { route: "normal" };
+    if(denroll === "enrolled") return { route: "koki", reason: "障害認定により後期高齢者医療制度に加入済みのため、通常の比較対象外です。" };
+    if(denroll === "not") return { route: "normal" };
+    return { route: "confirm", reason: "後期高齢者医療制度への加入状況が確認できていません。" };
+  }
+  return { route: "normal" };
+}
+
+// ---------- STEP2：加入資格の判定（費用計算とは分離） ----------
+// 判定結果：{ status: "加入可能" | "対象外" | "要確認", reasons: [], checks: [] }
+function finalize(ng, chk, okReasons, notes){
+  if(ng.length) return { status: "対象外", reasons: ng, checks: notes || [] };
+  if(chk.length) return { status: "要確認", reasons: chk, checks: notes || [] };
+  return { status: "加入可能", reasons: okReasons, checks: notes || [] };
+}
+
+function judgeKokuho(c){
+  var notes = [];
+  if(c.age >= 40 && c.age < 65) notes.push("40〜64歳は国保に介護分が含まれます。入力する金額に含まれているか確認してください。");
+  if(c.age >= 65) notes.push("65歳以上は、国保とは別に介護保険料が発生します。この比較には含めていません。");
+  if(c.flags && c.flags.length) notes.push("軽減の可能性（" + c.flags.join("・") + "）があります。入力した金額に反映されているか、自治体に確認してください。");
+  var chk = [];
+  if(c.route === "confirm") chk.push(c.routeReason);
+  return finalize([], chk, ["75歳未満で、他の健康保険に加入しない場合の受け皿となる制度です。"], notes);
+}
+
+function judgeNinkei(c){
+  var ng = [], chk = [], notes = [];
+  var loss = pd(c.loss), apply = pd(c.apply), retire = pd(c.retire);
+  if(c.route === "confirm") chk.push(c.routeReason);
+  if(c.insurer === "unknown") chk.push("加入していた健康保険の種類が不明のため、任意継続の条件を確認できません。");
+  if(c.period === "no") ng.push("退職日までの被保険者期間が継続して2か月以上ないため、一般的な条件を満たしません。");
+  else if(c.period === "unknown") chk.push("被保険者期間が継続して2か月以上あるか確認できていません。");
+  var deadline = addD(loss, 19);
+  var dl = fd(deadline);
+  if(!apply) chk.push("申請予定日が未入力のため、申請期限（" + dl + "が目安）に間に合うか確認できません。");
+  else if(apply.getTime() > deadline.getTime()){
+    var over = Math.round((apply - deadline) / 86400000);
+    if(over <= 3) chk.push("申請予定日が目安の期限（" + dl + "）を過ぎています。期限日が土日・祝日の場合の扱いを保険者に確認してください。");
+    else ng.push("申請予定日が期限（資格喪失日から20日以内・" + dl + "が目安）を過ぎているため、原則として対象外です。個別の事情がある場合は保険者に確認してください。");
+  }
+  if(retire && addD(retire, 1).getTime() !== loss.getTime()) chk.push("資格喪失日が退職日の翌日と異なります。期限の起算日を保険者に確認してください。");
+  if(c.insurer === "kumiai" || c.insurer === "kyousai") notes.push("組合・共済は、保険料や条件が独自に定められている場合があります。保険者の案内を確認してください。");
+  notes.push("任意継続は最長2年です。本人の申出等で途中で資格を失うこともあり、2年間必ず加入する前提ではありません。");
+  return finalize(ng, chk, ["被保険者期間2か月以上・申請期限内という一般的な条件を満たす見込みです（期限の目安：" + dl + "）。"], notes);
+}
+
+function fuyoThreshold(age, disabled, rel){
+  if(disabled || age >= 60) return 1800000;
+  if(age >= 19 && age < 23 && rel !== "spouse") return 1500000;
+  return 1300000;
+}
+
+function judgeFuyo(c){
+  var ng = [], chk = [], notes = [];
+  var th = fuyoThreshold(c.age, c.disabled, c.rel);
+  if(c.route === "confirm") chk.push(c.routeReason);
+  if(c.income >= th) ng.push("今後12か月の年間収入見込み（" + yenS(c.income) + "）が、一般的な基準（" + yenS(th) + "未満）以上です。");
+  if(c.rel === "other3" && c.live === "apart") ng.push("その他の3親等内の親族は、原則として同居が必要です。");
+  if(!ng.length){
+    if(c.benefit) chk.push("失業給付・傷病手当金・出産手当金は、日額や受給期間の扱いが保険者ごとに異なります。受給中は認定されない場合があります。");
+    if(c.live === "apart"){
+      if(c.remit === null) chk.push("別居のため、家族からの仕送り額の確認が必要です（未入力）。");
+      else if(c.income >= c.remit) chk.push("別居の場合、収入が仕送り額より少ないことが目安です。入力内容ではこれを満たしていません。");
+    }else if(c.live === "same"){
+      if(c.famIncome === null) chk.push("同居のため、家族の年間収入との関係の確認が必要です（未入力）。");
+      else if(c.income * 2 >= c.famIncome) chk.push("同居の場合、収入が扶養する家族の収入の2分の1未満であることが目安です。入力内容ではこれを満たしていません。");
+    }
+    if(c.famIns !== "kyoukai") chk.push("家族が協会けんぽ以外の場合、保険者が独自の認定基準を設けていることがあります。");
+  }
+  notes.push("認定の最終判断は、家族が加入する健康保険者が行います。");
+  notes.push("収入基準は一般的な目安です（原則130万円未満／60歳以上または障害がある場合180万円未満／19歳以上23歳未満（配偶者を除く）150万円未満）。");
+  return finalize(ng, chk, ["年間収入見込み（" + yenS(c.income) + "）が一般的な基準（" + yenS(th) + "未満）の範囲内です。"], notes);
+}
+
+// ---------- STEP3：費用（加入資格の判定とは分離） ----------
+function costKokuho(y1, y2){
+  if(y1 === null) return null;
+  var second = (y2 === null) ? y1 : y2;
+  return { monthly: y1 / 12, year1: y1, year2: y1 + second, assumption: (y2 === null) ? "2年目は1年目と同額と仮定" : "2年目は入力された金額で計算" };
+}
+function costNinkei(m){
+  if(m === null) return null;
+  return { monthly: m, year1: m * 12, year2: m * 24, assumption: "2年間同じ保険料と仮定（料率・標準報酬月額・制度は将来変わる可能性があります）" };
+}
+function costFuyo(){
+  return { monthly: 0, year1: 0, year2: 0, assumption: "認定された場合、本人が個別に負担する保険料は原則0円（最終認定前は確定額ではありません）" };
+}
+// 協会けんぽ：標準報酬月額×保険料率。被保険者負担の端数処理（50銭以下切り捨て・50銭超切り上げ）を整数演算で。
+function kenpoMonthly(base, ratePct){
+  var num = base * Math.round(ratePct * 100);   // 率は小数第2位まで（例 10.00% → 1000）
+  var yen = Math.floor(num / 10000), rem = num % 10000;
+  return rem > 5000 ? yen + 1 : yen;
+}
+
+// ---------- STEP4：比較（最安は「加入可能」かつ金額あり、2制度以上のときのみ） ----------
+function pickCheapest(items){
+  var el = items.filter(function(x){ return x.judge.status === "加入可能" && x.cost; });
+  if(el.length < 2) return { shown: false, eligible: el.length, winners: [] };
+  var min = Math.min.apply(null, el.map(function(x){ return x.cost.year2; }));
+  return { shown: true, eligible: el.length, winners: el.filter(function(x){ return x.cost.year2 === min; }) };
+}
+/*CALC_END*/
+
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var SECTIONS = ["s0","s1","s2","sK","s3","s4","s5","s6"];
+  var NAMES = { kyoukai:"協会けんぽ", kumiai:"健康保険組合", kyousai:"共済組合", unknown:"その他／不明" };
+  var ctx = {};
+
+  // 検証済みの自治体データ（現状は登録なし＝すべて手入力方式）。
+  // 追加する場合は 自治体コード・年度・計算方式・料率・上限額・端数処理・月割条件・軽減条件・出典URL・確認日・検証ステータスをセットで管理すること。
+  var MUNI_DATA = {};
+
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function comma(s){ return s.replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+  function go(id){
+    SECTIONS.forEach(function(s){ $(s).hidden = s !== id; });
+    window.scrollTo(0, 0);
+  }
+  function err(id, msg){ var e = $(id); e.hidden = !msg; e.textContent = msg || ""; return !msg; }
+  function num(id){ var d = $(id).value.replace(/\D/g, ""); return d === "" ? null : parseInt(d, 10); }
+  function dec(id){ var v = parseFloat($(id).value); return isNaN(v) ? null : v; }
+
+  // 金額入力のカンマ整形
+  ["k1","k2","m1","std","cap","inc","fam","remit"].forEach(function(id){
+    $(id).addEventListener("input", function(){
+      var el = $(id), pos = el.selectionStart;
+      var before = el.value.slice(0, pos).replace(/\D/g, "").length;
+      var d = el.value.replace(/\D/g, "").slice(0, 11).replace(/^0+(?=\d)/, "");
+      el.value = comma(d);
+      var p = 0, seen = 0;
+      while(p < el.value.length && seen < before){ if(/\d/.test(el.value[p])) seen++; p++; }
+      try{ el.setSelectionRange(p, p); }catch(e){}
+    });
+  });
+  ["rk","rn"].forEach(function(id){
+    $(id).addEventListener("input", function(){
+      var s = $(id).value.replace(/[^\d.]/g, ""), i = s.indexOf(".");
+      if(i > -1) s = s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, "").slice(0, 2);
+      $(id).value = s.slice(0, 6);
+    });
+  });
+
+  $("retire").addEventListener("change", function(){
+    var r = pd($("retire").value);
+    if(r){
+      var next = fd(addD(r, 1)) && addD(r, 1).toISOString().slice(0, 10);
+      if(!$("loss").dataset.edited) $("loss").value = next;
+      if(!$("sw").dataset.edited) $("sw").value = next;
+    }
+  });
+  $("loss").addEventListener("change", function(){ $("loss").dataset.edited = "1"; if(!$("sw").dataset.edited) $("sw").value = $("loss").value; });
+  $("sw").addEventListener("change", function(){ $("sw").dataset.edited = "1"; });
+  $("dcert").addEventListener("change", function(){ $("f-denroll").hidden = $("dcert").value === "no" || $("dcert").value === ""; });
+  $("live").addEventListener("change", function(){
+    $("f-fam").hidden = $("live").value === "apart";
+    $("f-remit").hidden = $("live").value !== "apart";
+  });
+  $("method").addEventListener("change", showMethod);
+  function showMethod(){
+    var k = !$("f-method").hidden && $("method").value === "kenpo";
+    $("g-kenpo").hidden = !k; $("g-notice").hidden = k;
+  }
+
+  document.querySelectorAll("[data-back]").forEach(function(b){ b.addEventListener("click", function(){ go(b.getAttribute("data-back")); }); });
+  $("start").addEventListener("click", function(){ go("s1"); });
+
+  // STEP1 → 年齢判定
+  $("n1").addEventListener("click", function(){
+    var retire = pd($("retire").value), loss = pd($("loss").value), sw = pd($("sw").value), birth = pd($("birth").value);
+    if(!retire || !loss || !sw || !birth || !$("insurer").value || !$("muni").value.trim()) return err("e1", "すべての項目を入力してください。");
+    if(birth.getTime() >= sw.getTime()) return err("e1", "生年月日は切替予定日より前の日付にしてください。");
+    if(loss.getTime() < retire.getTime()) return err("e1", "資格喪失日は退職日以降の日付にしてください。");
+    err("e1", "");
+    ctx.retire = $("retire").value; ctx.loss = $("loss").value; ctx.sw = $("sw").value;
+    ctx.insurer = $("insurer").value; ctx.muni = $("muni").value.trim();
+    ctx.age = ageAt(birth, sw);
+    if(ctx.age < 0 || ctx.age > 120) return err("e1", "生年月日と切替予定日を確認してください。");
+    if(ctx.age >= 75){ ctx.route = routeAge(ctx.age); $("kreason").textContent = "切替予定日（" + fd(sw) + "）時点の年齢は" + ctx.age + "歳です。"; return go("sK"); }
+    if(ctx.age >= 65) return go("s2");
+    ctx.route = "normal"; ctx.routeReason = ""; prep3();
+  });
+  $("n2").addEventListener("click", function(){
+    var dc = $("dcert").value, de = $("denroll").value;
+    if(!dc) return err("e2", "選択してください。");
+    if(dc !== "no" && !de) return err("e2", "加入状況を選択してください。");
+    err("e2", "");
+    var r = routeAge(ctx.age, dc, de);
+    ctx.route = r.route; ctx.routeReason = r.reason || "";
+    if(r.route === "koki"){ $("kreason").textContent = r.reason; return go("sK"); }
+    prep3();
+  });
+  $("kback").addEventListener("click", function(){ go("s1"); });
+
+  function prep3(){
+    var known = MUNI_DATA[ctx.muni];   // 検証済みデータがあれば自動計算に使える設計（現在は常に未登録）
+    $("muni-label").textContent = ctx.muni + "（" + (known ? "登録データあり" : "自動計算未対応・手入力方式") + "）";
+    go("s3");
+  }
+  $("b3").addEventListener("click", function(){ go(ctx.age >= 65 && ctx.age < 75 ? "s2" : "s1"); });
+  $("n3").addEventListener("click", function(){
+    ctx.k1 = num("k1"); ctx.k2 = num("k2");
+    ctx.kflags = [];
+    if($("c-hijihatsu").checked) ctx.kflags.push("非自発的失業者の軽減");
+    if($("c-lowinc").checked) ctx.kflags.push("低所得世帯の軽減");
+    if($("c-kyufu").checked) ctx.kflags.push("旧被扶養者の軽減");
+    var isK = ctx.insurer === "kyoukai";
+    $("f-method").hidden = !isK; $("f-rn").hidden = !(ctx.age >= 40 && ctx.age < 65);
+    var dl = addD(pd(ctx.loss), 19);
+    $("deadline-hint").textContent = "申請期限は、資格喪失日（" + fd(pd(ctx.loss)) + "）から20日以内が目安です（" + fd(dl) + "）。保険者の最新の案内で確認してください。";
+    showMethod();
+    go("s4");
+  });
+  $("b4").addEventListener("click", function(){ go("s3"); });
+  $("n4").addEventListener("click", function(){
+    var useKenpo = !$("f-method").hidden && $("method").value === "kenpo";
+    if(!$("period").value) return err("e4", "被保険者期間を選択してください。");
+    if(useKenpo){
+      var rk = dec("rk"), rn = dec("rn");
+      if(num("std") === null || rk === null) return err("e4", "標準報酬月額と健康保険料率を入力してください。");
+      if(!$("f-rn").hidden && rn === null) return err("e4", "40〜64歳は介護保険料率も入力してください。");
+      if(rk > 30 || (rn !== null && rn > 10)) return err("e4", "保険料率の値を確認してください。");
+    }
+    err("e4", "");
+    ctx.period = $("period").value; ctx.apply = $("apply").value;
+    ctx.ninkeiName = $("ninkei-name").value.trim();
+    if(useKenpo){
+      var base = num("std"), cap = num("cap");
+      if(cap !== null && cap > 0) base = Math.min(base, cap);
+      var rate = dec("rk") + ($("f-rn").hidden ? 0 : (dec("rn") || 0));
+      ctx.ninkeiMonthly = kenpoMonthly(base, rate);
+      ctx.ninkeiBasis = "協会けんぽ：標準報酬月額" + yenS(base) + "（上限適用後）× 保険料率" + (Math.round(rate * 100) / 100) + "％";
+    }else{
+      ctx.ninkeiMonthly = num("m1");
+      ctx.ninkeiBasis = ctx.insurer === "kyoukai" ? "入力された月額保険料（通知額・見込額）" : "入力された月額保険料" + (ctx.ninkeiName ? "（" + ctx.ninkeiName + "）" : "");
+    }
+    $("f-fam").hidden = false; $("f-remit").hidden = true;
+    go("s5");
+  });
+  $("b5").addEventListener("click", function(){ go("s4"); });
+  $("n5").addEventListener("click", function(){
+    if(!$("rel").value || !$("live").value || !$("famins").value || num("inc") === null) return err("e5", "続柄・同居／別居・家族の健康保険・年間収入見込みを入力してください。");
+    err("e5", "");
+    ctx.rel = $("rel").value; ctx.live = $("live").value; ctx.famIns = $("famins").value;
+    ctx.income = num("inc"); ctx.famIncome = num("fam"); ctx.remit = num("remit");
+    ctx.disabled = $("c-dis").checked; ctx.benefit = $("c-ben").checked;
+    render();
+  });
+  $("b6").addEventListener("click", function(){ go("s5"); });
+
+  function badge(st){ var c = st === "加入可能" ? "ok" : st === "対象外" ? "ng" : "chk"; return '<span class="badge ' + c + '">' + st + "</span>"; }
+  function cls(st){ return st === "加入可能" ? "ok" : st === "対象外" ? "ng" : "chk"; }
+
+  function render(){
+    // STEP 2：加入資格の判定 → STEP 3：費用（判定とは別関数）
+    var base = { route: ctx.route, routeReason: ctx.routeReason, age: ctx.age };
+    var jK = judgeKokuho({ route: base.route, routeReason: base.routeReason, age: ctx.age, flags: ctx.kflags });
+    var jN = judgeNinkei({ route: base.route, routeReason: base.routeReason, insurer: ctx.insurer, period: ctx.period, loss: ctx.loss, retire: ctx.retire, apply: ctx.apply });
+    var jF = judgeFuyo({ route: base.route, routeReason: base.routeReason, age: ctx.age, rel: ctx.rel, live: ctx.live, income: ctx.income, disabled: ctx.disabled, benefit: ctx.benefit, remit: ctx.remit, famIncome: ctx.famIncome, famIns: ctx.famIns });
+
+    var items = [
+      { key: "k", name: "国民健康保険（国保）", judge: jK, cost: costKokuho(ctx.k1, ctx.k2),
+        basis: ctx.k1 === null ? "" : "入力された年間保険料（" + esc(ctx.muni) + "）÷12か月",
+        todo: ["お住まいの市区町村の国保担当課で、保険料・軽減・加入手続きを確認する。"] },
+      { key: "n", name: "任意継続（" + NAMES[ctx.insurer] + "）", judge: jN, cost: costNinkei(ctx.ninkeiMonthly), basis: ctx.ninkeiMonthly === null ? "" : ctx.ninkeiBasis,
+        todo: ["加入していた保険者に、任意継続の条件・申請期限・保険料を確認する。"] },
+      { key: "f", name: "家族の健康保険の被扶養者", judge: jF, cost: costFuyo(), basis: "認定された場合の本人負担（原則0円）",
+        todo: ["家族の勤務先（健康保険者）に、被扶養者の認定条件と必要書類を確認する。"] }
+    ];
+
+    // 最安（加入可能かつ金額あり、2制度以上）
+    var ch = pickCheapest(items), cheapHtml = "";
+    if(ch.shown){
+      cheapHtml = '<div class="card cheap"><div class="lbl">加入可能な制度の中で、2年合計が最も安い制度</div><div class="big">' +
+        ch.winners.map(function(w){ return esc(w.name); }).join("／") + '</div><div class="hint">' + (ch.winners.length > 1 ? "同額です。" : "") +
+        "加入資格のある制度だけで比較しています。2年目は仮定を含む試算で、確定額ではありません。</div></div>";
+    }else if(ctx.route === "confirm"){
+      cheapHtml = '<div class="box warn"><b>最安の表示はしていません</b><br>後期高齢者医療制度への加入状況が未確認のため、すべての制度が「要確認」です。まず市区町村または広域連合に確認してください。</div>';
+    }else{
+      cheapHtml = '<div class="box"><b>最安の表示はしていません</b><br>費用を比べられる「加入可能」な制度が2つ未満のためです（現在 ' + ch.eligible + "つ）。各制度の判定理由を確認してください。</div>";
+    }
+    $("cheap").innerHTML = cheapHtml;
+
+    var html = items.map(function(it){
+      var st = it.judge.status, h = '<section class="card res ' + cls(st) + '"><div class="rhead"><h3>' + it.name + "</h3>" + badge(st) + "</div>";
+      h += '<ul class="reasons">' + it.judge.reasons.map(function(r){ return "<li>" + esc(r) + "</li>"; }).join("") + "</ul>";
+      if(st === "対象外"){
+        h += '<p class="hint">対象外のため、費用比較には含めていません。</p>';
+      }else if(!it.cost){
+        h += '<p class="hint">金額が未入力のため、費用は表示していません（費用比較にも含めません）。</p>';
+      }else{
+        var c = it.cost;
+        h += '<table class="tbl"><tbody><tr><td>月額目安</td><td>' + yenS(c.monthly) + "</td></tr><tr><td>1年間の合計</td><td>" + yenS(c.year1) + "</td></tr><tr><td>2年間の合計</td><td>" + yenS(c.year2) + "</td></tr></tbody></table>";
+        if(st === "要確認") h += '<p class="refnote">⚠ 参考値です。加入資格が確定していないため、確定した比較には含めていません。</p>';
+        if(it.key === "f") h += '<p class="refnote">最終認定前は確定額ではありません。</p>';
+      }
+      h += "<details><summary>計算の前提・確認が必要なこと</summary><ul>";
+      if(it.cost && st !== "対象外"){ if(it.basis) h += "<li>計算根拠：" + it.basis + "</li>"; h += "<li>" + esc(it.cost.assumption) + "</li>"; }
+      it.judge.checks.forEach(function(n){ h += "<li>" + esc(n) + "</li>"; });
+      h += '</ul><p class="todo">▶ 次にすること：' + it.todo.map(esc).join("") + "</p></details></section>";
+      return h;
+    }).join("");
+    $("results").innerHTML = html;
+    go("s6");
+  }
+
+  $("clear").addEventListener("click", function(){
+    document.querySelectorAll("input, select").forEach(function(el){
+      if(el.type === "checkbox") el.checked = false; else el.value = "";
+      delete el.dataset.edited;
+    });
+    $("method").value = "notice";
+    ["f-denroll","f-remit","f-method","g-kenpo"].forEach(function(id){ $(id).hidden = true; });
+    $("f-fam").hidden = false; $("g-notice").hidden = false;
+    ctx = {};
+    ["e1","e2","e4","e5"].forEach(function(id){ err(id, ""); });
+    go("s0");
+  });
+})();
+</script>
+</body>
+</html>
